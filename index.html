@@ -4,66 +4,39 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Aurélien Lannoye — Portfolio</title>
-  <meta name="description" content="Portfolio fullscreen, prêt pour intégrer un mini-jeu Canvas.">
+  <meta name="description" content="Portfolio fullscreen. Version cliquable (Game mode à venir).">
   <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
+  <!-- Barre fixe : à gauche le toggle, à droite les boutons ? -->
   <header class="topbar">
-    <div class="brand">Aurélien Lannoye — <b>Game Dev</b></div>
-    <nav class="nav">
-      <a href="#home" class="pill">Accueil</a>
-      <a href="#links" class="pill">Sections</a>
-      <a href="#about" class="pill">À propos</a>
-      <a href="#cv" class="pill">CV</a>
-      <a href="#contact" class="pill">Contact</a>
+    <div class="mode-toggle" id="modeToggle" aria-label="Mode d'interaction">
+      <button type="button" data-mode="game" class="chip active">Game</button>
+      <button type="button" data-mode="mouse" class="chip">Mouse</button>
+    </div>
+
+    <nav class="q-actions" aria-label="Sections">
+      <!-- carrés cliquables style “?” (tu peux changer les href) -->
+      <a class="qbtn" href="#about" title="À propos" aria-label="À propos">?</a>
+      <a class="qbtn" href="https://github.com/CryptoGot?tab=repositories" target="_blank" title="Projets" aria-label="Projets">?</a>
+      <a class="qbtn" href="#cv" title="CV" aria-label="CV">?</a>
+      <a class="qbtn" href="#contact" title="Contact" aria-label="Contact">?</a>
     </nav>
   </header>
 
-  <main>
-    <!-- Écran plein (sans jeu pour l’instant) -->
-    <section id="home" class="hero">
-      <h1>Portfolio <span class="accent">plein écran</span> (version cliquable)</h1>
-      <p>On construit proprement, step by step. Ensuite on branchera le mini-platformer Canvas.</p>
-      <div class="cta">
-        <a class="btn primary" href="#links">Voir les sections</a>
-        <a class="btn" href="#cv">Télécharger le CV</a>
-      </div>
-    </section>
+  <!-- HÉRO : titre centré façon panneau -->
+  <main class="hero" id="home" role="main">
+    <div class="banner">
+      <span class="pins" aria-hidden="true"></span>
+      <h1 class="title">Aurélien Lannoye</h1>
+    </div>
 
-    <section id="links" class="section">
-      <h2>Sections rapides</h2>
-      <div class="grid">
-        <a class="block" href="#about"><span class="q">?</span><h3>À propos</h3></a>
-        <a class="block" href="https://github.com/CryptoGot?tab=repositories" target="_blank"><span class="q">?</span><h3>Projets</h3></a>
-        <a class="block" href="#cv"><span class="q">?</span><h3>CV</h3></a>
-        <a class="block" href="#contact"><span class="q">?</span><h3>Contact</h3></a>
-      </div>
-    </section>
-
-    <section id="about" class="section card">
-      <h2>À propos</h2>
-      <p>Je crée des jeux orientés émotion (solitude, perte, résilience). Unity (C#), Unreal Engine 5 (C++/Blueprints), gameplay & AI.</p>
-    </section>
-
-    <section id="cv" class="section card">
-      <h2>CV</h2>
-      <p>
-        <a class="btn" href="docs/CV_2025-10-05_Aurelien_Lannoye.pdf" download>📄 CV (FR)</a>
-        <a class="btn" href="docs/CV_2025-10-05_Aurelien_Lannoye-AnglaisCorrigé.pdf" download>📄 CV (EN)</a>
-      </p>
-    </section>
-
-    <section id="contact" class="section card">
-      <h2>Contact</h2>
-      <p>
-        <a class="btn" href="mailto:a.lannoye@students.ephec.be">a.lannoye@students.ephec.be</a>
-        <a class="btn" href="https://github.com/CryptoGot" target="_blank">GitHub/CryptoGot</a>
-        <a class="btn" href="#" title="LinkedIn">LinkedIn (ajouter l’URL)</a>
-      </p>
-    </section>
+    <!-- ancres de sections (contenu minimal pour l’instant) -->
+    <section id="about" class="section"><h2>À propos</h2></section>
+    <section id="cv" class="section"><h2>CV</h2></section>
+    <section id="contact" class="section"><h2>Contact</h2></section>
   </main>
 
-  <footer class="foot">© 2025 Aurélien Lannoye — Base clean. Prochaine étape : intégrer le jeu.</footer>
   <script src="js/main.js"></script>
 </body>
 </html>
