@@ -3,14 +3,14 @@
 body{margin:0; font-family:Inter,system-ui,Segoe UI,Roboto,Arial,sans-serif; color:#111}
 
 /* ===== ENTÊTE (CIEL via image d'assets) ===== */
+/* HEADER / CIEL */
 .top-hero{
   position:relative;
-  min-height:100svh;                     /* occupe toute la hauteur d’écran */
+  min-height:100svh;
   display:flex; align-items:center; justify-content:center;
   background: url("../assets/bg/sky.png") center / cover no-repeat;
-  overflow:hidden;                       /* pour éviter les débords */
+  overflow:hidden;
 }
-
 /* (optionnel) couche nuages qui se répète à l’horizontale
 .top-hero::before{
   content:""; position:absolute; inset:0; z-index:0;
@@ -51,37 +51,30 @@ body{margin:0; font-family:Inter,system-ui,Segoe UI,Roboto,Arial,sans-serif; col
 
 /* ===== SOL (tuile en repeat depuis /assets) ===== */
 .ground{
-  --h: 28svh;
+  --h: 28svh; /* hauteur du sol */
   position:absolute; left:0; right:0; bottom:0; height:var(--h);
   background: url("../assets/bg/blue-tile.png") repeat left bottom / 64px 64px;
   image-rendering: pixelated;
   z-index:1;
-
-  /* Trou plein-largeur de hauteur --pitH */
-  --pitH: 38svh; /* profondeur du trou */
-  -webkit-mask: linear-gradient(#000 0 calc(100% - var(--pitH)), transparent 0);
-          mask: linear-gradient(#000 0 calc(100% - var(--pitH)), transparent 0);
 }
 
-
-/* (contenu caché pour l’instant) */
-.section{ position:absolute; left:-9999px }
-
+/* TROU (montre le ciel derrière) */
 .pit{
-  position:absolute; bottom:0;            /* posé au niveau du sol */
-  transform:translateX(-50%);             /* centrer si tu mets left:50% */
-  background: inherit;                     /* récupère le même ciel que le header */
-  z-index:2;                               /* au-dessus de .ground => on voit le ciel */
-  /* option : petit liseré foncé pour les bords du trou */
-  box-shadow: inset 0 0 0 2px rgba(0,0,0,.15);
+  position:absolute; bottom:0;
+  background: inherit;     /* récupère le ciel du header */
+  z-index:2;               /* au-dessus du sol */
+  box-shadow: inset 0 0 0 2px rgba(0,0,0,.15); /* optionnel : bord */
+  pointer-events:none;
 }
 
-/* Variante : trou centré (largeur et hauteur réglables) */
+/* Variante centrée : ajuste largeur/hauteur ici */
 .pit--center{
   left:50%; transform:translateX(-50%);
-  width: 40vw; height: 22svh;     /* ← ajuste ces valeurs */
+  width: 40vw;           /* largeur du trou */
+  height: 22svh;         /* profondeur du trou */
   border-top-left-radius:12px; border-top-right-radius:12px;
 }
+
 
 
 
