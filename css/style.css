@@ -90,3 +90,15 @@ body{
 /* sections placeholder */
 .section{position:absolute; left:-9999px} /* on cache le contenu réel pour l’instant */
 
+/* Calque de background à tuiles */
+.bg{
+  position:absolute; inset:0; z-index:-1;
+  background-image: url("../assets/bg/blue-tile.png");
+  background-repeat: repeat;          /* répète en X et Y */
+  background-position: left top;      /* point de départ */
+  background-size: 64px 64px;         /* taille exacte du tile */
+  image-rendering: pixelated;         /* net en pixel-art */
+}
+
+
+
