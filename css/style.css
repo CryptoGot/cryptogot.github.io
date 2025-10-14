@@ -50,13 +50,29 @@ body{margin:0; font-family:Inter,system-ui,Segoe UI,Roboto,Arial,sans-serif; col
 .title{ margin:0; font-size:clamp(28px,7vw,60px); line-height:1; text-transform:uppercase; letter-spacing:.04em }
 
 /* ===== SOL (tuile en repeat depuis /assets) ===== */
+/* Sol en bas du header */
 .ground{
-  --h: 28svh; /* hauteur du sol */
-  position:absolute; left:0; right:0; bottom:0; height:var(--h);
+  position:absolute; left:0; right:0; bottom:0;
+  height:28svh;                                    /* hauteur du sol */
   background: url("../assets/bg/blue-tile.png") repeat left bottom / 64px 64px;
   image-rendering: pixelated;
   z-index:1;
+
+  /* ======= TROU via CSS mask ======= */
+  /* --hw : largeur du trou  ; --hh : hauteur du trou  ; --hx : position en % */
+  --hw: 40vw;          /* ex: 100% pour plein-largeur */
+  --hh: 22svh;         /* profondeur du trou */
+  --hx: 50%;           /* centre du trou : 50% = centré */
+
+  /* 1er calque = trou ovale (transparent au centre) ; 2e calque = tout le sol opaque */
+  -webkit-mask: radial-gradient(closest-side at var(--hx) 100%, transparent 98%, #000 100%)
+                 bottom center / var(--hw) var(--hh) no-repeat,
+                 linear-gradient(#000,#000);
+          mask: radial-gradient(closest-side at var(--hx) 100%, transparent 98%, #000 100%)
+                 bottom center / var(--hw) var(--hh) no-repeat,
+                 linear-gradient(#000,#000);
 }
+
 
 /* TROU (montre le ciel derrière) */
 .pit{
@@ -74,6 +90,7 @@ body{margin:0; font-family:Inter,system-ui,Segoe UI,Roboto,Arial,sans-serif; col
   height: 30svh;         /* profondeur du trou */
   border-top-left-radius:12px; border-top-right-radius:12px;
 }
+
 
 
 
