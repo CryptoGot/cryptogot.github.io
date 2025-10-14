@@ -1,42 +1,92 @@
 :root{
-  --bg:#0c0d10; --bg2:#0a0b0e; --text:#e9e9f0; --muted:#a7adba;
-  --accent:#9b5de5; --line:#222733; --panel:#14161b;
+  --bg1:#b7d1ff;          /* ciel doux */
+  --bg2:#9ec3ff;
+  --ground:#ee8050;       /* vibe “briques” moderne */
+  --panel:#e86c3a;        /* panneau titre */
+  --panel-dark:#a5441e;
+  --ink:#0f172a;          /* texte */
+  --muted:#ffffffcc;
+  --accent:#ffd166;       /* jaune “?” */
+  --qbg:#2c3350;          /* fond bouton ? */
+  --qline:#596386;
 }
+
 *{box-sizing:border-box}
 html,body{height:100%}
 html{scroll-behavior:smooth}
-body{margin:0;background:linear-gradient(180deg,var(--bg),var(--bg2));color:var(--text);
-     font-family:Inter,system-ui,Segoe UI,Roboto,Arial,sans-serif}
+body{
+  margin:0;
+  color:var(--ink);
+  font-family:Inter, system-ui, Segoe UI, Roboto, Arial, sans-serif;
+  background: linear-gradient(180deg,var(--bg1),var(--bg2) 55%, var(--ground) 55%, var(--ground));
+}
 
-/* Header */
-.topbar{position:sticky;top:0;z-index:50;background:rgba(12,13,16,.6);
-        backdrop-filter:blur(10px);border-bottom:1px solid var(--line);
-        display:flex;gap:16px;align-items:center;padding:12px 16px}
-.brand{font-weight:700}
-.nav{margin-left:auto;display:flex;gap:12px}
-.pill{border:1px solid var(--line);border-radius:999px;padding:6px 10px;text-decoration:none;color:var(--text)}
-.pill:hover{border-color:#333}
+/* ===== Barre fixe ===== */
+.topbar{
+  position:fixed; inset:16px 16px auto 16px; height:56px;
+  display:flex; align-items:center; justify-content:space-between;
+  z-index:10;
+}
 
-/* Sections fullscreen */
-main{max-width:1200px;margin:0 auto;padding:0 16px}
-.section{min-height:100svh;display:grid;place-items:center;padding:80px 0}
-.hero{min-height:100svh;display:grid;place-items:center;text-align:center}
-.hero h1{font-size:clamp(28px,5vw,54px);line-height:1.05;margin:0 0 .6rem}
-.hero p{max-width:800px;margin:0 auto 1rem;color:var(--muted)}
-.accent{color:var(--accent)}
-.cta{display:flex;gap:10px;justify-content:center}
-.btn{display:inline-flex;gap:8px;align-items:center;padding:12px 16px;border-radius:12px;
-     border:1px solid var(--line);text-decoration:none;color:var(--text);background:#12141a}
-.btn.primary{background:linear-gradient(180deg,#2b1b44,#201735)}
-.btn:hover{border-color:#333}
+/* Toggle Game / Mouse (gauche) */
+.mode-toggle{display:flex; gap:8px}
+.chip{
+  height:40px; padding:0 14px; border-radius:12px; border:1px solid #ffffff66;
+  background:#ffffff22; color:#fff; font-weight:600; cursor:pointer;
+  backdrop-filter:saturate(120%) blur(6px);
+}
+.chip.active{background:#ffffff44}
 
-.grid{display:grid;grid-template-columns:repeat(2, minmax(240px,1fr));gap:16px}
-@media (max-width:780px){.grid{grid-template-columns:1fr}}
-.block{position:relative;display:grid;place-items:center;min-height:120px;border-radius:16px;
-       background:#232a3a;border:1px solid #46506a;text-decoration:none;color:var(--text)}
-.block:hover{transform:translateY(-2px);border-color:#596386}
-.block .q{position:absolute;top:10px;left:12px;font-weight:800;color:#ffd166}
-.block h3{margin:0}
+/* Boutons carrés “?” (droite) */
+.q-actions{display:flex; gap:10px}
+.qbtn{
+  --size:48px;
+  width:var(--size); height:var(--size);
+  display:grid; place-items:center;
+  text-decoration:none; color:var(--accent); font-weight:900; font-size:24px;
+  background:linear-gradient(180deg,var(--qbg), #1e243a);
+  border:2px solid var(--qline); border-radius:8px;
+  box-shadow:0 6px 0 #1a2032, 0 12px 24px rgba(0,0,0,.25);
+}
+.qbtn:hover{transform:translateY(-2px)}
+.qbtn:active{transform:translateY(2px); box-shadow:0 3px 0 #1a2032}
 
-.card{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:20px}
-.foot{border-top:1px solid var(--line);padding:16px;text-align:center;color:#9aa2b2}
+/* ===== HÉRO plein écran ===== */
+.hero{
+  min-height:100svh;
+  display:grid; place-items:center;
+  padding:0 16px 10vh;
+  position:relative;
+}
+.hero::after{            /* “sol” en briques stylisé */
+  content:""; position:absolute; left:0; right:0; bottom:0; height:18vh;
+  background:
+    linear-gradient(#00000014,#0000), 
+    repeating-linear-gradient(0deg, #0000 0 18px, #cf6b3d 18px 20px),
+    repeating-linear-gradient(90deg, #0000 0 44px, #cf6b3d 44px 46px);
+}
+
+/* Panneau titre */
+.banner{
+  position:relative; padding:26px 38px; border-radius:12px;
+  background:linear-gradient(180deg,var(--panel), var(--panel-dark));
+  border:2px solid #7c2d12; color:#fff; text-align:center;
+  box-shadow:0 12px 28px rgba(0,0,0,.25);
+}
+.banner .pins::before,
+.banner .pins::after{
+  content:""; position:absolute; width:10px; height:10px; background:#ffd9b3;
+  border:2px solid #7c2d12; border-radius:999px; top:8px;
+}
+.banner .pins::before{ left:8px }
+.banner .pins::after{ right:8px }
+
+.title{
+  margin:0; font-size:clamp(28px,7vw,60px); line-height:1;
+  text-transform:uppercase; letter-spacing:.04em;
+  text-shadow:0 2px 0 #7c2d12, 0 6px 18px rgba(0,0,0,.35);
+}
+
+/* sections placeholder */
+.section{position:absolute; left:-9999px} /* on cache le contenu réel pour l’instant */
+
