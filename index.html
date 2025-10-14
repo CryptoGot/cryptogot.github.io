@@ -4,11 +4,11 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Aurélien Lannoye — Portfolio</title>
-  <meta name="description" content="Portfolio fullscreen. Version cliquable (Game mode à venir).">
   <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
-  <!-- Barre fixe : à gauche le toggle, à droite les boutons ? -->
+
+  <!-- ENTÊTE (ciel) -->
   <header class="top-hero">
     <!-- contrôles en haut-gauche -->
     <div class="controls left">
@@ -17,24 +17,26 @@
         <button type="button" data-mode="mouse" class="chip">Mouse</button>
       </div>
     </div>
-  
+
     <!-- boutons ? en haut-droite -->
     <nav class="controls right q-actions" aria-label="Sections">
-      <a class="qbtn" href="#about" title="À propos" aria-label="À propos">?</a>
-      <a class="qbtn" href="https://github.com/CryptoGot?tab=repositories" target="_blank" title="Projets" aria-label="Projets">?</a>
-      <a class="qbtn" href="#cv" title="CV" aria-label="CV">?</a>
-      <a class="qbtn" href="#contact" title="Contact" aria-label="Contact">?</a>
+      <a class="qbtn" href="#about" title="À propos">?</a>
+      <a class="qbtn" href="https://github.com/CryptoGot?tab=repositories" target="_blank" title="Projets">?</a>
+      <a class="qbtn" href="#cv" title="CV">?</a>
+      <a class="qbtn" href="#contact" title="Contact">?</a>
     </nav>
 
-  <!-- HÉRO : titre centré façon panneau -->
-  <main class="hero" id="home" role="main">
-    <div class="bg" aria-hidden="true"></div>
-    <div class="banner">
+    <!-- titre -->
+    <div class="title-banner">
       <span class="pins" aria-hidden="true"></span>
       <h1 class="title">Aurélien Lannoye</h1>
     </div>
+  </header> <!-- ✅ on ferme bien le header -->
 
-    <!-- ancres de sections (contenu minimal pour l’instant) -->
+  <!-- SOL (motif répété à partir d'un tile) -->
+  <div class="ground" aria-hidden="true"></div>
+
+  <main>
     <section id="about" class="section"><h2>À propos</h2></section>
     <section id="cv" class="section"><h2>CV</h2></section>
     <section id="contact" class="section"><h2>Contact</h2></section>
