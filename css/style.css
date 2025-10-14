@@ -51,12 +51,18 @@ body{margin:0; font-family:Inter,system-ui,Segoe UI,Roboto,Arial,sans-serif; col
 
 /* ===== SOL (tuile en repeat depuis /assets) ===== */
 .ground{
-  --h: 28vh;                              /* hauteur du sol : change la valeur si besoin */
+  --h: 28svh;
   position:absolute; left:0; right:0; bottom:0; height:var(--h);
   background: url("../assets/bg/blue-tile.png") repeat left bottom / 64px 64px;
   image-rendering: pixelated;
-  z-index:1;                              /* sous le titre */
+  z-index:1;
+
+  /* Trou plein-largeur de hauteur --pitH */
+  --pitH: 38svh; /* profondeur du trou */
+  -webkit-mask: linear-gradient(#000 0 calc(100% - var(--pitH)), transparent 0);
+          mask: linear-gradient(#000 0 calc(100% - var(--pitH)), transparent 0);
 }
+
 
 /* (contenu caché pour l’instant) */
 .section{ position:absolute; left:-9999px }
@@ -69,6 +75,7 @@ body{margin:0; font-family:Inter,system-ui,Segoe UI,Roboto,Arial,sans-serif; col
   /* option : petit liseré foncé pour les bords du trou */
   box-shadow: inset 0 0 0 2px rgba(0,0,0,.15);
 }
+
 
 
 
