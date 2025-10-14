@@ -5,10 +5,10 @@ body{margin:0; font-family:Inter,system-ui,Segoe UI,Roboto,Arial,sans-serif; col
 /* ===== ENTÊTE (CIEL via image d'assets) ===== */
 .top-hero{
   position:relative;
-  min-height:55vh;
+  min-height:100svh;                     /* occupe toute la hauteur d’écran */
   display:flex; align-items:center; justify-content:center;
-  /* ciel : image pleine largeur */
   background: url("../assets/bg/sky.png") center / cover no-repeat;
+  overflow:hidden;                       /* pour éviter les débords */
 }
 
 /* (optionnel) couche nuages qui se répète à l’horizontale
@@ -46,19 +46,21 @@ body{margin:0; font-family:Inter,system-ui,Segoe UI,Roboto,Arial,sans-serif; col
   content:""; position:absolute; width:10px; height:10px; background:#ffd9b3;
   border:2px solid #7c2d12; border-radius:999px; top:8px
 }
-.title-banner .pins::before{ left:8px } .title-banner .pins::after{ right:8px }
+.title-banner{ position:relative; z-index:2; }
 .title{ margin:0; font-size:clamp(28px,7vw,60px); line-height:1; text-transform:uppercase; letter-spacing:.04em }
 
 /* ===== SOL (tuile en repeat depuis /assets) ===== */
 .ground{
-  height:25vh;
-  background: url("../assets/bg/blue-tile.png") repeat left top / 64px 64px; /* <- ta tuile 64x64 */
-  image-rendering: pixelated; /* net si pixel-art */
-  border-top: 1px solid rgba(0,0,0,.12)
+  --h: 28vh;                              /* hauteur du sol : change la valeur si besoin */
+  position:absolute; left:0; right:0; bottom:0; height:var(--h);
+  background: url("../assets/bg/blue-tile.png") repeat left bottom / 64px 64px;
+  image-rendering: pixelated;
+  z-index:1;                              /* sous le titre */
 }
 
 /* (contenu caché pour l’instant) */
 .section{ position:absolute; left:-9999px }
+
 
 
 
