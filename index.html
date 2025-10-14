@@ -9,20 +9,30 @@
 </head>
 <body>
   <!-- Barre fixe : à gauche le toggle, à droite les boutons ? -->
-  <header class="topbar">
-    <div class="mode-toggle" id="modeToggle" aria-label="Mode d'interaction">
-      <button type="button" data-mode="game" class="chip active">Game</button>
-      <button type="button" data-mode="mouse" class="chip">Mouse</button>
+  <header class="top-hero">
+    <!-- contrôles en haut-gauche -->
+    <div class="controls left">
+      <div class="mode-toggle" id="modeToggle" aria-label="Mode d'interaction">
+        <button type="button" data-mode="game" class="chip active">Game</button>
+        <button type="button" data-mode="mouse" class="chip">Mouse</button>
+      </div>
     </div>
-
-    <nav class="q-actions" aria-label="Sections">
-      <!-- carrés cliquables style “?” (tu peux changer les href) -->
+  
+    <!-- boutons ? en haut-droite -->
+    <nav class="controls right q-actions" aria-label="Sections">
       <a class="qbtn" href="#about" title="À propos" aria-label="À propos">?</a>
       <a class="qbtn" href="https://github.com/CryptoGot?tab=repositories" target="_blank" title="Projets" aria-label="Projets">?</a>
       <a class="qbtn" href="#cv" title="CV" aria-label="CV">?</a>
       <a class="qbtn" href="#contact" title="Contact" aria-label="Contact">?</a>
     </nav>
+  
+    <!-- Titre centré façon panneau -->
+    <div class="title-banner">
+      <span class="pins" aria-hidden="true"></span>
+      <h1 class="title">Aurélien Lannoye</h1>
+    </div>
   </header>
+  <div class="ground" aria-hidden="true"></div>
 
   <!-- HÉRO : titre centré façon panneau -->
   <main class="hero" id="home" role="main">
