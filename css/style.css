@@ -70,10 +70,11 @@ body{margin:0; font-family:Inter,system-ui,Segoe UI,Roboto,Arial,sans-serif; col
 /* Variante centrée : ajuste largeur/hauteur ici */
 .pit--center{
   left:50%; transform:translateX(-50%);
-  width: 40vw;           /* largeur du trou */
-  height: 22svh;         /* profondeur du trou */
+  width: 20vw;           /* largeur du trou */
+  height: 30svh;         /* profondeur du trou */
   border-top-left-radius:12px; border-top-right-radius:12px;
 }
+
 
 
 
