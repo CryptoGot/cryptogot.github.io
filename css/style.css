@@ -76,6 +76,14 @@ body{margin:0; font-family:Inter,system-ui,Segoe UI,Roboto,Arial,sans-serif; col
   box-shadow: inset 0 0 0 2px rgba(0,0,0,.15);
 }
 
+/* Variante : trou centré (largeur et hauteur réglables) */
+.pit--center{
+  left:50%; transform:translateX(-50%);
+  width: 40vw; height: 22svh;     /* ← ajuste ces valeurs */
+  border-top-left-radius:12px; border-top-right-radius:12px;
+}
+
+
 
 
 
