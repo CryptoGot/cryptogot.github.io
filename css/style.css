@@ -42,10 +42,11 @@ body{margin:0; font-family:Inter,system-ui,Segoe UI,Roboto,Arial,sans-serif; col
   background:#c85d32; border:2px solid #7c2d12; color:#fff; text-align:center;
   box-shadow:0 12px 28px rgba(0,0,0,.25); z-index:1
 }
-.title-banner .pins::before, .title-banner .pins::after{
+/*.title-banner .pins::before, .title-banner .pins::after{
   content:""; position:absolute; width:10px; height:10px; background:#ffd9b3;
   border:2px solid #7c2d12; border-radius:999px; top:8px
 }
+*/
 .title-banner{ position:relative; z-index:2; }
 .title{ margin:0; font-size:clamp(28px,7vw,60px); line-height:1; text-transform:uppercase; letter-spacing:.04em }
 
@@ -64,5 +65,6 @@ body{margin:0; font-family:Inter,system-ui,Segoe UI,Roboto,Arial,sans-serif; col
                  bottom center / var(--hw) var(--hh) no-repeat,
                  linear-gradient(#000,#000);
 }
+
 
 
