@@ -61,6 +61,15 @@ body{margin:0; font-family:Inter,system-ui,Segoe UI,Roboto,Arial,sans-serif; col
 /* (contenu caché pour l’instant) */
 .section{ position:absolute; left:-9999px }
 
+.pit{
+  position:absolute; bottom:0;            /* posé au niveau du sol */
+  transform:translateX(-50%);             /* centrer si tu mets left:50% */
+  background: inherit;                     /* récupère le même ciel que le header */
+  z-index:2;                               /* au-dessus de .ground => on voit le ciel */
+  /* option : petit liseré foncé pour les bords du trou */
+  box-shadow: inset 0 0 0 2px rgba(0,0,0,.15);
+}
+
 
 
 
