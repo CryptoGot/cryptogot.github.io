@@ -1,127 +1,273 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="fr">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Aurélien Lannoye - Game Developer & Designer</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Aurélien Lannoye – Portfolio (mini‑jeu)</title>
+  <meta name="description" content="Portfolio interactif en mini‑jeu. Unity, Unreal Engine, gameplay/AI, narration. Projets, CV et contact."/>
+  <meta property="og:title" content="Aurélien Lannoye – Game Dev & Designer"/>
+  <meta property="og:description" content="Portfolio interactif en mini‑jeu. Projets Unity/UE5 et contact."/>
   <style>
-    body {
-      margin: 0;
-      font-family: 'Segoe UI', sans-serif;
-      background-color: #0d0d0d;
-      color: #e0e0e0;
-      line-height: 1.6;
+    :root{
+      --bg:#0d0d0d;--panel:#141414;--text:#eaeaea;--muted:#9aa0a6;--accent:#9b5de5;--accent2:#00bbf9;--accent3:#f15bb5;
     }
-    header {
-      text-align: center;
-      padding: 4rem 1rem;
-      background: linear-gradient(135deg, #181818, #111);
-      border-bottom: 1px solid #333;
-    }
-    header h1 {
-      font-size: 2.5rem;
-      color: #9b5de5;
-      margin: 0;
-    }
-    header p {
-      font-size: 1.1rem;
-      color: #ccc;
-    }
-    section {
-      max-width: 900px;
-      margin: 3rem auto;
-      padding: 0 1rem;
-    }
-    h2 {
-      color: #f15bb5;
-      border-bottom: 1px solid #333;
-      padding-bottom: 0.3rem;
-    }
-    .project {
-      background: #1a1a1a;
-      border: 1px solid #333;
-      border-radius: 10px;
-      padding: 1rem 1.5rem;
-      margin-bottom: 1.5rem;
-    }
-    .project h3 {
-      color: #9b5de5;
-      margin: 0 0 0.5rem 0;
-    }
-    .links a {
-      color: #00bbf9;
-      margin-right: 1rem;
-      text-decoration: none;
-    }
-    footer {
-      text-align: center;
-      padding: 2rem;
-      border-top: 1px solid #333;
-      font-size: 0.9rem;
-      color: #777;
-    }
+    html,body{height:100%}
+    body{margin:0;background:radial-gradient(1200px 600px at 70% -10%,#1b1b1b,#0d0d0d);color:var(--text);font-family:system-ui,-apple-system,Segoe UI,Roboto,Inter,Arial,sans-serif;}
+
+    /* Layout */
+    header{position:sticky;top:0;background:linear-gradient(180deg,#101010 0%,#0d0d0d00 100%);backdrop-filter:saturate(120%) blur(4px);z-index:10;border-bottom:1px solid #202020}
+    .bar{max-width:1100px;margin:auto;padding:12px 16px;display:flex;gap:16px;align-items:center}
+    .title{font-weight:700;letter-spacing:.2px}
+    nav{margin-left:auto;display:flex;gap:14px}
+    nav a{color:var(--text);text-decoration:none;opacity:.9}
+    nav a:hover{color:var(--accent)}
+
+    .wrap{max-width:1100px;margin:0 auto;padding:16px;display:grid;grid-template-columns:1fr 340px;gap:16px}
+    @media (max-width: 980px){.wrap{grid-template-columns:1fr}}
+
+    /* Canvas */
+    .gameCard{background:var(--panel);border:1px solid #262626;border-radius:16px;overflow:hidden;box-shadow:0 10px 30px rgba(0,0,0,.35)}
+    .gameHead{display:flex;align-items:center;justify-content:space-between;padding:10px 14px;border-bottom:1px solid #202020}
+    .gameHead b{color:var(--accent)}
+    #game{display:block;width:100%;height:auto;background:#121212}
+    .hud{position:absolute;inset:0;pointer-events:none;display:flex;align-items:flex-start;justify-content:space-between}
+    .hint{margin:12px;background:rgba(0,0,0,.55);padding:10px 12px;border:1px solid #2a2a2a;border-radius:10px;font-size:14px}
+    .hint kbd{background:#000;border:1px solid #333;border-bottom-color:#222;padding:1px 6px;border-radius:6px;margin:0 2px}
+
+    /* Info panel */
+    .side{background:var(--panel);border:1px solid #262626;border-radius:16px;padding:16px;position:relative}
+    .side h2{margin:4px 0 8px;font-size:18px;color:var(--accent3)}
+    .side p{color:var(--muted);margin:6px 0 12px}
+    .badges{display:flex;flex-wrap:wrap;gap:8px}
+    .badge{border:1px solid #2b2b2b;background:#0f0f0f;border-radius:999px;padding:6px 10px;font-size:12px}
+    .lst{margin:10px 0 0;padding:0;list-style:none;display:grid;gap:8px}
+    .lst a{display:block;padding:10px 12px;background:#101010;border:1px solid #252525;border-radius:10px;text-decoration:none;color:var(--text)}
+    .lst a:hover{border-color:#333;color:var(--accent2)}
+
+    footer{max-width:1100px;margin:24px auto 60px;color:#8c8c8c;padding:0 16px}
+    .sr-only{position:absolute;left:-9999px}
+
+    /* Mobile stick */
+    .pad{position:absolute;bottom:16px;left:16px;display:none;gap:10px}
+    .btn{width:46px;height:46px;border-radius:50%;background:#0f0f0f88;border:1px solid #2a2a2a;color:#cfcfcf;display:flex;align-items:center;justify-content:center}
+    @media (pointer:coarse){.pad{display:flex}}
   </style>
 </head>
 <body>
+  <a class="sr-only" href="#about">Aller au contenu</a>
   <header>
-    <h1>Aurélien Lannoye</h1>
-    <p>Game Developer & Designer — crafting meaningful, emotional, and experimental experiences.</p>
+    <div class="bar">
+      <div class="title">Aurélien Lannoye — <span style="color:var(--accent)">Game Dev & Designer</span></div>
+      <nav>
+        <a href="#about">À propos</a>
+        <a href="#projects">Projets</a>
+        <a href="#contact">Contact</a>
+        <a href="#cv">CV</a>
+      </nav>
+    </div>
   </header>
 
-  <section>
-    <h2>🎮 Featured Projects</h2>
+  <div class="wrap">
+    <!-- GAME CARD -->
+    <section class="gameCard">
+      <div class="gameHead"><b>Mini‑jeu</b><span>Déplace‑toi et interagis pour ouvrir les projets</span></div>
+      <div style="position:relative">
+        <canvas id="game" width="960" height="540" aria-label="Portfolio jouable"></canvas>
+        <div class="hud">
+          <div class="hint">Utilise <kbd>Z</kbd><kbd>Q</kbd><kbd>S</kbd><kbd>D</kbd> ou flèches • <kbd>E</kbd> pour interagir</div>
+          <div class="hint" style="margin-left:auto">Pression <kbd>M</kbd> : mode minimal / performance</div>
+        </div>
+        <div class="pad" id="pad">
+          <button class="btn" data-dx="0" data-dy="-1">▲</button>
+          <div style="display:flex;gap:10px">
+            <button class="btn" data-dx="-1" data-dy="0">◀</button>
+            <button class="btn" data-dx="1" data-dy="0">▶</button>
+          </div>
+          <button class="btn" data-dx="0" data-dy="1">▼</button>
+          <button class="btn" id="act" title="Interagir">E</button>
+        </div>
+      </div>
+    </section>
 
-    <div class="project">
-      <h3>UnityLearn2D</h3>
-      <p>My first 2D learning project focused on Tilemaps, animations, collisions, and player control.</p>
-      <p class="links">
-        <a href="https://github.com/CryptoGot/UnityLearn2D" target="_blank">🔗 View on GitHub</a>
-      </p>
-    </div>
+    <!-- SIDE INFO -->
+    <aside class="side" id="about">
+      <h2>À propos</h2>
+      <p>Je crée des jeux qui cherchent l'émotion : solitude, perte, résilience. J'explore comment <b>design</b>, <b>code</b> et <b>atmosphère</b> se mêlent — sous <b>Unity</b> et <b>Unreal Engine</b>.</p>
+      <div class="badges">
+        <span class="badge">Unity (C#)</span>
+        <span class="badge">UE5 (C++ / Blueprints)</span>
+        <span class="badge">Gameplay & AI</span>
+        <span class="badge">Git / GitHub</span>
+        <span class="badge">Narrative Design</span>
+      </div>
 
-    <div class="project">
-      <h3>The Hunt</h3>
-      <p>Top-down prototype inspired by Fear & Hunger and Kenshi, exploring AI detection and combat systems.</p>
-      <p class="links">
-        <a href="https://github.com/CryptoGot/Jeu2" target="_blank">🔗 View on GitHub</a>
-      </p>
-    </div>
+      <h2 id="projects" style="margin-top:18px">Projets (liens rapides)</h2>
+      <ul class="lst" id="quickLinks"></ul>
 
-    <div class="project">
-      <h3>Melody Collector</h3>
-      <p>A 2D platformer where you collect musical notes to recreate a forgotten melody.</p>
-      <p class="links">
-        <a href="https://github.com/CryptoGot/Jeu2" target="_blank">🔗 View on GitHub</a>
-      </p>
-    </div>
+      <h2 id="cv" style="margin-top:18px">CV</h2>
+      <ul class="lst">
+        <li><a href="CV_2025-10-05_Aurelien_Lannoye.pdf" download>📄 Télécharger CV (FR)</a></li>
+        <li><a href="CV_2025-10-05_Aurelien_Lannoye-AnglaisCorrigé.pdf" download>📄 Download CV (EN)</a></li>
+      </ul>
 
-    <div class="project">
-      <h3>HexagonalGame</h3>
-      <p>A tactical hex-grid prototype where you gain power by defeating weaker enemies before facing a boss.</p>
-      <p class="links">
-        <a href="https://github.com/CryptoGot/Case" target="_blank">🔗 View on GitHub</a>
-      </p>
-    </div>
-
-    <div class="project">
-      <h3>UE5 TPS Prototype</h3>
-      <p>My first Unreal project featuring AI enemies, health systems, and third-person shooting mechanics.</p>
-      <p class="links">
-        <a href="https://github.com/CryptoGot/MyProject3" target="_blank">🔗 View on GitHub</a>
-      </p>
-    </div>
-
-    <div class="project">
-      <h3>Somnum</h3>
-      <p>A dreamlike co-op horror experience where children must escape their nightmares — mixing fear, melancholy, and surrealism.</p>
-      <p class="links">
-        <a href="https://store.steampowered.com/" target="_blank">💀 View on Steam</a>
-      </p>
-    </div>
-  </section>
+      <h2 id="contact" style="margin-top:18px">Contact</h2>
+      <ul class="lst">
+        <li><a href="mailto:a.lannoye@students.ephec.be">a.lannoye@students.ephec.be</a></li>
+        <li><a href="#" title="LinkedIn">LinkedIn (à ajouter)</a></li>
+        <li><a href="https://github.com/CryptoGot" target="_blank">GitHub/CryptoGot</a></li>
+      </ul>
+    </aside>
+  </div>
 
   <footer>
-    © 2025 Aurélien Lannoye — Built with 💜 and GitHub Pages
+    © 2025 Aurélien Lannoye — Portfolio hébergé sur GitHub Pages. Les démos lourdes sont liées (itch.io/Steam) pour rester légères ici.
   </footer>
+
+  <script>
+    /* ---- Données projets : titre, description courte, URL, couleur ---- */
+    const PROJECTS = [
+      { id:"unity2d", label:"UnityLearn2D", desc:"Tilemaps, animations, collisions.", url:"https://github.com/CryptoGot/UnityLearn2D", color:"#9b5de5" },
+      { id:"hunt", label:"The Hunt", desc:"Top‑down AI & combat.", url:"https://github.com/CryptoGot/Jeu2", color:"#00bbf9" },
+      { id:"melody", label:"Melody Collector", desc:"Recréer une mélodie.", url:"https://github.com/CryptoGot/Jeu2", color:"#f15bb5" },
+      { id:"hex", label:"HexagonalGame", desc:"Prototype tactique hex.", url:"https://github.com/CryptoGot/Case", color:"#ffd166" },
+      { id:"ue5", label:"UE5 TPS Prototype", desc:"AI, santé, TPS.", url:"https://github.com/CryptoGot/MyProject3", color:"#06d6a0" },
+      { id:"somnum", label:"Somnum (Steam)", desc:"Co‑op horreur onirique.", url:"https://store.steampowered.com/", color:"#ef476f" },
+    ];
+
+    // Liens rapides side panel
+    document.getElementById('quickLinks').innerHTML = PROJECTS.map(p=>`<li><a href="${p.url}" target="_blank">${p.label} — ${p.desc}</a></li>`).join('');
+
+    /* ---- Mini moteur Canvas sans lib ---- */
+    const cvs = document.getElementById('game');
+    const ctx = cvs.getContext('2d');
+    let minimal = false; // mode performance
+
+    // Monde simple: zones interactives + murs
+    const W=2000, H=1200;           // taille monde
+    const player = {x:300,y:300,w:22,h:22,v:2.4,dx:0,dy:0};
+    const camera = {x:0,y:0, w:cvs.width, h:cvs.height};
+
+    // Obstacles décoratifs
+    const walls = [
+      {x:0,y:0,w:W,h:40},{x:0,y:H-40,w:W,h:40},{x:0,y:0,w:40,h:H},{x:W-40,y:0,w:40,h:H}, // bordure
+      {x:520,y:260,w:360,h:24},{x:520,y:260,w:24,h:200},{x:520,y:436,w:360,h:24},{x:856,y:260,w:24,h:200}, // un enclos
+    ];
+
+    // Portails projets (ronds)
+    const spots = PROJECTS.map((p,i)=>({
+      id:p.id,label:p.label,url:p.url,desc:p.desc,color:p.color,
+      x: 220 + i*260 - Math.floor(i/3)*780,
+      y: 220 + Math.floor(i/3)*260,
+      r: 36
+    }));
+
+    // Contrôles clavier
+    const keys = new Set();
+    addEventListener('keydown',e=>{keys.add(e.key.toLowerCase()); if(e.key==='m'||e.key==='M'){minimal=!minimal}});
+    addEventListener('keyup',e=>keys.delete(e.key.toLowerCase()));
+
+    // Mobile pad
+    const pad = document.getElementById('pad');
+    pad.querySelectorAll('.btn[data-dx]').forEach(b=>{
+      let t; const press=()=>{player.dx+=+b.dataset.dx; player.dy+=+b.dataset.dy;};
+      const release=()=>{player.dx-=+b.dataset.dx; player.dy-=+b.dataset.dy;};
+      b.addEventListener('pointerdown',e=>{e.preventDefault();press();});
+      b.addEventListener('pointerup',release); b.addEventListener('pointerleave',release);
+    });
+    document.getElementById('act').addEventListener('pointerdown',()=>interact());
+
+    function collide(a,b){return a.x < b.x+b.w && a.x+a.w > b.x && a.y < b.y+b.h && a.y+a.h > b.y}
+
+    function step(){
+      // input
+      const up = keys.has('arrowup')||keys.has('z');
+      const down = keys.has('arrowdown')||keys.has('s');
+      const left = keys.has('arrowleft')||keys.has('q');
+      const right= keys.has('arrowright')||keys.has('d');
+      player.dx = (right?1:0) - (left?1:0);
+      player.dy = (down?1:0) - (up?1:0);
+
+      // move + collision simple (séparé par axe)
+      const speed = player.v*(keys.has('shift')?1.5:1);
+      player.x += player.dx*speed; for(const w of walls){ if(collide(player,w)) player.x -= player.dx*speed; }
+      player.y += player.dy*speed; for(const w of walls){ if(collide(player,w)) player.y -= player.dy*speed; }
+
+      // clamp monde
+      player.x = Math.max(40, Math.min(W-40-player.w, player.x));
+      player.y = Math.max(40, Math.min(H-40-player.h, player.y));
+
+      // camera follow
+      camera.x = Math.floor(player.x - camera.w/2);
+      camera.y = Math.floor(player.y - camera.h/2);
+      camera.x = Math.max(0, Math.min(W-camera.w, camera.x));
+      camera.y = Math.max(0, Math.min(H-camera.h, camera.y));
+
+      draw();
+      requestAnimationFrame(step);
+    }
+
+    function draw(){
+      // BG
+      ctx.fillStyle = minimal? '#111' : ctx.createLinearGradient(0,0,0,H);
+      if(!minimal){ const g=ctx.fillStyle; g.addColorStop(0,'#101010'); g.addColorStop(1,'#0b0b0b'); }
+      ctx.fillRect(0,0,cvs.width,cvs.height);
+
+      ctx.save();
+      ctx.translate(-camera.x, -camera.y);
+
+      // Sol carrelé léger
+      if(!minimal){
+        ctx.strokeStyle = '#151515'; ctx.lineWidth=1;
+        for(let x=40;x<W;x+=40){ ctx.beginPath(); ctx.moveTo(x,40); ctx.lineTo(x,H-40); ctx.stroke(); }
+        for(let y=40;y<H;y+=40){ ctx.beginPath(); ctx.moveTo(40,y); ctx.lineTo(W-40,y); ctx.stroke(); }
+      }
+
+      // Murs
+      ctx.fillStyle = '#1e1e1e';
+      for(const w of walls){ ctx.fillRect(w.x,w.y,w.w,w.h); }
+
+      // Spots projets
+      for(const s of spots){
+        ctx.fillStyle = s.color; ctx.beginPath(); ctx.arc(s.x,s.y,s.r,0,Math.PI*2); ctx.fill();
+        ctx.fillStyle = '#111'; ctx.beginPath(); ctx.arc(s.x,s.y,s.r-8,0,Math.PI*2); ctx.fill();
+        ctx.strokeStyle = s.color; ctx.lineWidth=2; ctx.stroke();
+        // labels
+        ctx.fillStyle = '#cfcfcf'; ctx.font = '14px system-ui,Segoe UI,Arial'; ctx.textAlign='center';
+        ctx.fillText(s.label, s.x, s.y+s.r+16);
+      }
+
+      // Player
+      ctx.fillStyle = '#eaeaea'; ctx.fillRect(player.x,player.y,player.w,player.h);
+      ctx.fillStyle = '#9b5de5'; ctx.fillRect(player.x+4,player.y+4,player.w-8,player.h-8);
+
+      ctx.restore();
+
+      // Interaction hint
+      const near = nearestSpot();
+      if(near && distTo(near) < near.r+24){
+        drawBubble(`${near.label} — E pour ouvrir`);
+        if(keys.has('e')) interact();
+      }
+    }
+
+    function distTo(s){
+      const cx = player.x + player.w/2, cy = player.y + player.h/2;
+      return Math.hypot((s.x-cx),(s.y-cy));
+    }
+    function nearestSpot(){
+      let m=Infinity, pick=null; for(const s of spots){ const d=distTo(s); if(d<m){m=d; pick=s;} } return pick;
+    }
+    function interact(){
+      const s = nearestSpot(); if(s && distTo(s) < s.r+24){ window.open(s.url,'_blank'); }
+    }
+
+    // Auto‑resize canvas (letterbox)
+    function fit(){
+      const r = 960/540; const w = cvs.parentElement.clientWidth; const h = w/r; cvs.style.height = h+'px';
+    }
+    addEventListener('resize',fit); fit();
+
+    requestAnimationFrame(step);
+  </script>
 </body>
 </html>
