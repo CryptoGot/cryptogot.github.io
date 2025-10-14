@@ -1,34 +1,27 @@
 :root{
-  --bg1:#b7d1ff;          /* ciel doux */
-  --bg2:#9ec3ff;
-  --ground:#ee8050;       /* vibe “briques” moderne */
-  --panel:#e86c3a;        /* panneau titre */
-  --panel-dark:#a5441e;
-  --ink:#0f172a;          /* texte */
-  --muted:#ffffffcc;
-  --accent:#ffd166;       /* jaune “?” */
-  --qbg:#2c3350;          /* fond bouton ? */
-  --qline:#596386;
+  --bg1:#b7d1ff; --bg2:#9ec3ff;   /* ciel */
+  --panel:#e86c3a; --panel-dark:#a5441e;
+  --ink:#0f172a; --accent:#ffd166;
+  --qbg:#2c3350; --qline:#596386;
 }
 
-*{box-sizing:border-box}
-html,body{height:100%}
-html{scroll-behavior:smooth}
-body{
-  margin:0;
-  color:var(--ink);
-  font-family:Inter, system-ui, Segoe UI, Roboto, Arial, sans-serif;
-  background: linear-gradient(180deg,var(--bg1),var(--bg2) 55%, var(--ground) 55%, var(--ground));
+/* Corps : fond neutre (le ciel est maintenant dans l’entête) */
+body{ margin:0; color:var(--ink); font-family:Inter,system-ui,Segoe UI,Roboto,Arial,sans-serif; }
+
+/* ===== ENTÊTE (CIEL) ===== */
+.top-hero{
+  position:relative;
+  min-height:55vh;                 /* hauteur du bloc ciel */
+  display:flex; align-items:center; justify-content:center;
+  background: linear-gradient(180deg,var(--bg1),var(--bg2));
 }
 
-/* ===== Barre fixe ===== */
-.topbar{
-  position:fixed; inset:16px 16px auto 16px; height:56px;
-  display:flex; align-items:center; justify-content:space-between;
-  z-index:10;
-}
+/* contrôles dans les coins */
+.controls{ position:absolute; top:16px; display:flex; gap:10px; z-index:5; }
+.controls.left{ left:16px; }
+.controls.right{ right:16px; }
 
-/* Toggle Game / Mouse (gauche) */
+/* Toggle Game / Mouse */
 .mode-toggle{display:flex; gap:8px}
 .chip{
   height:40px; padding:0 14px; border-radius:12px; border:1px solid #ffffff66;
@@ -37,13 +30,12 @@ body{
 }
 .chip.active{background:#ffffff44}
 
-/* Boutons carrés “?” (droite) */
+/* Boutons carrés “?” */
 .q-actions{display:flex; gap:10px}
 .qbtn{
-  --size:48px;
-  width:var(--size); height:var(--size);
-  display:grid; place-items:center;
-  text-decoration:none; color:var(--accent); font-weight:900; font-size:24px;
+  --size:48px; width:var(--size); height:var(--size);
+  display:grid; place-items:center; text-decoration:none; color:var(--accent);
+  font-weight:900; font-size:24px;
   background:linear-gradient(180deg,var(--qbg), #1e243a);
   border:2px solid var(--qline); border-radius:8px;
   box-shadow:0 6px 0 #1a2032, 0 12px 24px rgba(0,0,0,.25);
@@ -51,35 +43,19 @@ body{
 .qbtn:hover{transform:translateY(-2px)}
 .qbtn:active{transform:translateY(2px); box-shadow:0 3px 0 #1a2032}
 
-/* ===== HÉRO plein écran ===== */
-.hero{
-  min-height:100svh;
-  display:grid; place-items:center;
-  padding:0 16px 10vh;
-  position:relative;
-}
-.hero::after{            /* “sol” en briques stylisé */
-  content:""; position:absolute; left:0; right:0; bottom:0; height:18vh;
-  background:
-    linear-gradient(#00000014,#0000), 
-    repeating-linear-gradient(0deg, #0000 0 18px, #cf6b3d 18px 20px),
-    repeating-linear-gradient(90deg, #0000 0 44px, #cf6b3d 44px 46px);
-}
-
 /* Panneau titre */
-.banner{
+.title-banner{
   position:relative; padding:26px 38px; border-radius:12px;
   background:linear-gradient(180deg,var(--panel), var(--panel-dark));
   border:2px solid #7c2d12; color:#fff; text-align:center;
   box-shadow:0 12px 28px rgba(0,0,0,.25);
 }
-.banner .pins::before,
-.banner .pins::after{
+.title-banner .pins::before,
+.title-banner .pins::after{
   content:""; position:absolute; width:10px; height:10px; background:#ffd9b3;
   border:2px solid #7c2d12; border-radius:999px; top:8px;
 }
-.banner .pins::before{ left:8px }
-.banner .pins::after{ right:8px }
+.title-banner .pins::before{ left:8px } .title-banner .pins::after{ right:8px }
 
 .title{
   margin:0; font-size:clamp(28px,7vw,60px); line-height:1;
@@ -87,18 +63,28 @@ body{
   text-shadow:0 2px 0 #7c2d12, 0 6px 18px rgba(0,0,0,.35);
 }
 
-/* sections placeholder */
-.section{position:absolute; left:-9999px} /* on cache le contenu réel pour l’instant */
-
-/* Calque de background à tuiles */
-.bg{
-  position:absolute; inset:0; z-index:-1;
-  background-image: url("../assets/bg/blue-tile.png");
-  background-repeat: repeat;          /* répète en X et Y */
-  background-position: left top;      /* point de départ */
-  background-size: 64px 64px;         /* taille exacte du tile */
-  image-rendering: pixelated;         /* net en pixel-art */
+/* ===== SOL (briques en repeat) ===== */
+.ground{
+  height:25vh;                      /* hauteur du sol */
+  background:
+    /* couche 1 : tuile répétée */
+    url("../assets/bg/blue-tile.png") repeat left top / 64px 64px;
+  image-rendering: pixelated;       /* net pour pixel-art */
+  box-shadow: inset 0 8px 16px rgba(0,0,0,.15);
+  border-top: 1px solid rgba(0,0,0,.12);
 }
 
+/* option : grille par-dessus le sol (désactive si tu n’en veux pas) */
+/*
+.ground::after{
+  content:""; position:relative; display:block; height:100%;
+  background:
+    repeating-linear-gradient(0deg, transparent 0 18px, rgba(0,0,0,.12) 18px 19px),
+    repeating-linear-gradient(90deg, transparent 0 44px, rgba(0,0,0,.12) 44px 45px);
+}
+*/
+
+/* sections placeholder (comme avant) */
+.section{position:absolute; left:-9999px}
 
 
