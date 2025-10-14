@@ -1,90 +1,63 @@
-:root{
-  --bg1:#b7d1ff; --bg2:#9ec3ff;   /* ciel */
-  --panel:#e86c3a; --panel-dark:#a5441e;
-  --ink:#0f172a; --accent:#ffd166;
-  --qbg:#2c3350; --qline:#596386;
-}
+/* Réglages de base */
+*{box-sizing:border-box}
+body{margin:0; font-family:Inter,system-ui,Segoe UI,Roboto,Arial,sans-serif; color:#111}
 
-/* Corps : fond neutre (le ciel est maintenant dans l’entête) */
-body{ margin:0; color:var(--ink); font-family:Inter,system-ui,Segoe UI,Roboto,Arial,sans-serif; }
-
-/* ===== ENTÊTE (CIEL) ===== */
+/* ===== ENTÊTE (CIEL via image d'assets) ===== */
 .top-hero{
   position:relative;
-  min-height:55vh;                 /* hauteur du bloc ciel */
+  min-height:55vh;
   display:flex; align-items:center; justify-content:center;
-  background: linear-gradient(180deg,var(--bg1),var(--bg2));
+  /* ciel : image pleine largeur */
+  background: url("../assets/bg/sky.png") center / cover no-repeat;
 }
 
-/* contrôles dans les coins */
-.controls{ position:absolute; top:16px; display:flex; gap:10px; z-index:5; }
-.controls.left{ left:16px; }
-.controls.right{ right:16px; }
-
-/* Toggle Game / Mouse */
-.mode-toggle{display:flex; gap:8px}
-.chip{
-  height:40px; padding:0 14px; border-radius:12px; border:1px solid #ffffff66;
-  background:#ffffff22; color:#fff; font-weight:600; cursor:pointer;
-  backdrop-filter:saturate(120%) blur(6px);
-}
-.chip.active{background:#ffffff44}
-
-/* Boutons carrés “?” */
-.q-actions{display:flex; gap:10px}
-.qbtn{
-  --size:48px; width:var(--size); height:var(--size);
-  display:grid; place-items:center; text-decoration:none; color:var(--accent);
-  font-weight:900; font-size:24px;
-  background:linear-gradient(180deg,var(--qbg), #1e243a);
-  border:2px solid var(--qline); border-radius:8px;
-  box-shadow:0 6px 0 #1a2032, 0 12px 24px rgba(0,0,0,.25);
-}
-.qbtn:hover{transform:translateY(-2px)}
-.qbtn:active{transform:translateY(2px); box-shadow:0 3px 0 #1a2032}
-
-/* Panneau titre */
-.title-banner{
-  position:relative; padding:26px 38px; border-radius:12px;
-  background:linear-gradient(180deg,var(--panel), var(--panel-dark));
-  border:2px solid #7c2d12; color:#fff; text-align:center;
-  box-shadow:0 12px 28px rgba(0,0,0,.25);
-}
-.title-banner .pins::before,
-.title-banner .pins::after{
-  content:""; position:absolute; width:10px; height:10px; background:#ffd9b3;
-  border:2px solid #7c2d12; border-radius:999px; top:8px;
-}
-.title-banner .pins::before{ left:8px } .title-banner .pins::after{ right:8px }
-
-.title{
-  margin:0; font-size:clamp(28px,7vw,60px); line-height:1;
-  text-transform:uppercase; letter-spacing:.04em;
-  text-shadow:0 2px 0 #7c2d12, 0 6px 18px rgba(0,0,0,.35);
-}
-
-/* ===== SOL (briques en repeat) ===== */
-.ground{
-  height:25vh;                      /* hauteur du sol */
-  background:
-    /* couche 1 : tuile répétée */
-    url("../assets/bg/blue-tile.png") repeat left top / 64px 64px;
-  image-rendering: pixelated;       /* net pour pixel-art */
-  box-shadow: inset 0 8px 16px rgba(0,0,0,.15);
-  border-top: 1px solid rgba(0,0,0,.12);
-}
-
-/* option : grille par-dessus le sol (désactive si tu n’en veux pas) */
-/*
-.ground::after{
-  content:""; position:relative; display:block; height:100%;
-  background:
-    repeating-linear-gradient(0deg, transparent 0 18px, rgba(0,0,0,.12) 18px 19px),
-    repeating-linear-gradient(90deg, transparent 0 44px, rgba(0,0,0,.12) 44px 45px);
+/* (optionnel) couche nuages qui se répète à l’horizontale
+.top-hero::before{
+  content:""; position:absolute; inset:0; z-index:0;
+  background: url("../assets/bg/clouds.png") repeat-x center 18% / auto 160px;
 }
 */
 
-/* sections placeholder (comme avant) */
-.section{position:absolute; left:-9999px}
+.controls{ position:absolute; top:16px; display:flex; gap:10px; z-index:5 }
+.controls.left{ left:16px } .controls.right{ right:16px }
+
+.mode-toggle{display:flex; gap:8px}
+.chip{ height:40px; padding:0 14px; border-radius:12px; border:1px solid #ffffff66;
+       background:#ffffff22; color:#fff; font-weight:600; cursor:pointer; backdrop-filter:blur(6px) }
+.chip.active{ background:#ffffff44 }
+
+.q-actions{ display:flex; gap:10px }
+.qbtn{
+  --s:48px; width:var(--s); height:var(--s);
+  display:grid; place-items:center; text-decoration:none; color:#ffd166; font-weight:900; font-size:24px;
+  background:#20263b; border:2px solid #596386; border-radius:8px;
+  box-shadow:0 6px 0 #1a2032, 0 12px 24px rgba(0,0,0,.25)
+}
+.qbtn:hover{ transform:translateY(-2px) }
+.qbtn:active{ transform:translateY(2px); box-shadow:0 3px 0 #1a2032 }
+
+/* Panneau titre (tu peux aussi le remplacer par une image si tu veux) */
+.title-banner{
+  position:relative; padding:26px 38px; border-radius:12px;
+  background:#c85d32; border:2px solid #7c2d12; color:#fff; text-align:center;
+  box-shadow:0 12px 28px rgba(0,0,0,.25); z-index:1
+}
+.title-banner .pins::before, .title-banner .pins::after{
+  content:""; position:absolute; width:10px; height:10px; background:#ffd9b3;
+  border:2px solid #7c2d12; border-radius:999px; top:8px
+}
+.title-banner .pins::before{ left:8px } .title-banner .pins::after{ right:8px }
+.title{ margin:0; font-size:clamp(28px,7vw,60px); line-height:1; text-transform:uppercase; letter-spacing:.04em }
+
+/* ===== SOL (tuile en repeat depuis /assets) ===== */
+.ground{
+  height:25vh;
+  background: url("../assets/bg/blue-tile.png") repeat left top / 64px 64px; /* <- ta tuile 64x64 */
+  image-rendering: pixelated; /* net si pixel-art */
+  border-top: 1px solid rgba(0,0,0,.12)
+}
+
+/* (contenu caché pour l’instant) */
+.section{ position:absolute; left:-9999px }
 
 
