@@ -11,60 +11,659 @@ body{margin:0; font-family:Inter,system-ui,Segoe UI,Roboto,Arial,sans-serif; col
   background: url("../assets/bg/sky.png") center / cover no-repeat;
   overflow:hidden;
 }
-/* (optionnel) couche nuages qui se répète à l’horizontale
+
 .top-hero::before{
   content:""; position:absolute; inset:0; z-index:0;
-  background: url("../assets/bg/clouds.png") repeat-x center 18% / auto 160px;
+  background: url("../assets/bg/clouds.png") repeat-x center 18% / auto 100%;
 }
-*/
+
 
 .controls{ position:absolute; top:16px; display:flex; gap:10px; z-index:5 }
 .controls.left{ left:16px } .controls.right{ right:16px }
 
-.mode-toggle{display:flex; gap:8px}
-.chip{ height:40px; padding:0 14px; border-radius:12px; border:1px solid #ffffff66;
-       background:#ffffff22; color:#fff; font-weight:600; cursor:pointer; backdrop-filter:blur(6px) }
-.chip.active{ background:#ffffff44 }
+/* ===== Cloud buttons (Game / Mouse) ===== */
+.mode-toggle{ display:flex; gap:14px; padding-top: 50px;}
 
-.q-actions{ display:flex; gap:10px }
-.qbtn{
-  --s:48px; width:var(--s); height:var(--s);
-  display:grid; place-items:center; text-decoration:none; color:#ffd166; font-weight:900; font-size:24px;
-  background:#20263b; border:2px solid #596386; border-radius:8px;
-  box-shadow:0 6px 0 #1a2032, 0 12px 24px rgba(0,0,0,.25)
+.chip{
+  /* tailles responsive ; ajuste si besoin */
+  --w: clamp(200px, 12vw, 128px);
+  --h: clamp(100px, 5.2vw, 44px);
+
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: var(--w);
+  height: var(--h);
+  padding-inline: 12px;            /* pour laisser respirer le texte */
+  border: none;
+  background: url("../assets/bg/cloudBtn.png") center / 100% 100% no-repeat;
+  color: #1c2538;                  /* texte */
+  font-weight: 700;
+  font-size: clamp(12px, 1.6vw, 16px);
+  line-height: 1;
+  text-shadow: 0 2px 0 #ffffffaa;  /* petit relief clair */
+  cursor: pointer;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent; /* mobile: pas de flash bleu */
+  transition: transform .12s ease, filter .12s ease, box-shadow .12s ease;
 }
-.qbtn:hover{ transform:translateY(-2px) }
-.qbtn:active{ transform:translateY(2px); box-shadow:0 3px 0 #1a2032 }
+
+/* état “actif” (sélectionné par ton JS) */
+.chip.active{
+  filter: drop-shadow(0 6px 12px rgba(0,0,0,.25));
+}
+
+/* hover/active */
+.chip:hover{ transform: translateY(-2px) }
+.chip:active{ transform: translateY(2px) }
+
+/* accessibilité : anneau de focus visible au clavier */
+.chip:focus-visible{
+  outline: 2px solid #fff;
+  outline-offset: 2px;
+  box-shadow: 0 0 0 3px #1c5cff88; /* halo bleu doux */
+}
+
+/* option: version compacte sur petits écrans */
+@media (max-width: 520px){
+  .mode-toggle{ gap: 10px }
+  .chip{ --w: 92px; --h: 36px; font-size: 13px }
+}
+
+
+.q-actions{ display:flex; gap: clamp(12px, 20vw, 50px);
+    padding-top: 100px;
+    padding-right: 50px;
+}
+
+/* Bloc “?” façon question block */
+.qbtn{
+  --s:70px;
+    --pad: 8px;                 /* marge des coins */
+  --r: 2px;                   /* rayon du cercle sombre (bague) */
+  --r2: 2px;                  /* rayon du point clair au centre */
+  --screwDark: #000;       /* bord sombre */
+  --screwLight:#000; 
+    --body:#f3a562;        /* fond */
+  --border:#c85d32;      /* bord */
+  /* “?” */
+  --qSize:50px;          /* TAILLE du ? */
+  --qColor:#c85d32;      /* COULEUR du ? (face) */
+  --qOutline:#5c2a10;    /* contour “pixel” autour du ? */
+  --qDropX:2px;          /* OMBRE portée du ? (offset X/Y) */
+  --qDropY:2px;
+  --qDrop:rgba(0,0,0,1);/* couleur de l’ombre */
+
+  position:relative; display:inline-grid; place-items:center;
+  width:var(--s); height:var(--s); border-radius:8px;
+  background:var(--body); border:3px solid var(--border);
+  box-shadow:0 6px 0 #000, 0 12px 24px rgba(0,0,0,.35);
+  transform:translateY(0);
+}
+
+/* liseré intérieur clair */
+.qbtn::before{
+  content:"";
+  position:absolute; inset:3px;
+  border-radius:6px;
+  border:0px solid #ffd8a8;
+  opacity:.9; pointer-events:none;
+}
+
+/* 4 “vis” dans les coins (ronds clairs à bord sombre) */
+.qbtn::after{
+  content:"";
+  position:absolute; inset:0; pointer-events:none;
+
+  /* 8 couches = 2 par coin (anneau sombre + point clair) */
+  background:
+    /* coin haut-gauche */
+    radial-gradient(circle var(--r)  at var(--pad) var(--pad),                 var(--screwDark) 99%, transparent) ,
+    radial-gradient(circle var(--r2) at var(--pad) var(--pad),                 var(--screwLight) 99%, transparent),
+
+    /* coin haut-droit */
+    radial-gradient(circle var(--r)  at calc(100% - var(--pad)) var(--pad),   var(--screwDark) 99%, transparent) ,
+    radial-gradient(circle var(--r2) at calc(100% - var(--pad)) var(--pad),   var(--screwLight) 99%, transparent),
+
+    /* coin bas-gauche */
+    radial-gradient(circle var(--r)  at var(--pad) calc(100% - var(--pad)),   var(--screwDark) 99%, transparent) ,
+    radial-gradient(circle var(--r2) at var(--pad) calc(100% - var(--pad)),   var(--screwLight) 99%, transparent),
+
+    /* coin bas-droit */
+    radial-gradient(circle var(--r)  at calc(100% - var(--pad)) calc(100% - var(--pad)), var(--screwDark) 99%, transparent) ,
+    radial-gradient(circle var(--r2) at calc(100% - var(--pad)) calc(100% - var(--pad)), var(--screwLight) 99%, transparent);
+}
+
+/* le “?” pixelisé avec contour sombre */
+.qbtn .q{
+  font-family:"Press Start 2P", system-ui, monospace;
+  font-size:var(--qSize);
+  line-height:1; user-select:none;
+  color:var(--qColor);
+  /* contour “pixel” + ombre portée */
+  text-shadow:
+    /* contour 1px autour */
+    1px 0   var(--qOutline), -1px 0   var(--qOutline),
+    0   1px var(--qOutline),  0   -1px var(--qOutline),
+    1px 1px var(--qOutline), -1px 1px var(--qOutline),
+    1px -1px var(--qOutline),-1px -1px var(--qOutline),
+    /* ombre portée */
+    var(--qDropX) var(--qDropY) 0 var(--qDrop);
+}
+
+/* petites interactions type bloc */
+.qbtn:hover{ transform:translateY(-2px); box-shadow:0 8px 0 #c85d32, 0 16px 28px rgba(0,0,0,.45) }
+.qbtn:active{ transform:translateY(2px);  box-shadow:0 3px 0 #c85d32, 0 8px 14px rgba(0,0,0,.25) }
+
+/* plus petit sur mobile */
+@media (max-width: 900px){
+  .qbtn{ --s:48px }
+  .qbtn .q{ font-size:18px }
+}
+.qbtn:where(:link, :visited, :hover, :active) {
+  color: inherit;
+  text-decoration: none !important;
+}
 
 /* Panneau titre (tu peux aussi le remplacer par une image si tu veux) */
 .title-banner{
-  position:relative; padding:26px 38px; border-radius:12px;
+  position:relative; padding:26px 38px; border-radius:12px; transform: translateY(-30svh);
   background:#c85d32; border:2px solid #7c2d12; color:#fff; text-align:center;
   box-shadow:0 12px 28px rgba(0,0,0,.25); z-index:1
 }
-/*.title-banner .pins::before, .title-banner .pins::after{
-  content:""; position:absolute; width:10px; height:10px; background:#ffd9b3;
-  border:2px solid #7c2d12; border-radius:999px; top:8px
+.title-banner .pins::before,
+.title-banner .pins::after{
+  content:"";
+  position:absolute;
+  width:10px; height:10px;
+  background:#ffd9b3;
+  border:2px solid #7c2d12;
+  border-radius:999px;
+  top:8px;
 }
-*/
+.title-banner .pins::before{ left:8px; }
+.title-banner .pins::after { right:8px; }
+
+/* Points en bas (ajoute ceci) */
+.title-banner::before,
+.title-banner::after{
+  content:"";
+  position:absolute;
+  width:10px; height:10px;
+  background:#ffd9b3;
+  border:2px solid #7c2d12;
+  border-radius:999px;
+  bottom:8px;
+}
+.title-banner::before{ left:8px; }
+.title-banner::after { right:8px; }
+
 .title-banner{ position:relative; z-index:2; }
-.title{ margin:0; font-size:clamp(28px,7vw,60px); line-height:1; text-transform:uppercase; letter-spacing:.04em }
+.title{
+  margin:0;
+  font-family:"Anton", system-ui, sans-serif;  /* ← Anton, haute/étroite */
+  font-weight:400;
+  font-size:clamp(36px, 7vw, 60px);            /* un peu + grand */
+  line-height:1.08;                             /* compact vertical */
+  letter-spacing:.01em;                         /* très peu d’espacement */
+  text-transform:uppercase;
+  text-align: left;
+}
 
 /* ===== SOL (tuile en repeat depuis /assets) ===== */
 /* Sol en bas du header */
-.ground{
-  /* … ton background … */
-  --hw: 40vw;   /* largeur du trou (ex: 100% pour plein-largeur) */
-  --hh: 22svh;  /* profondeur du trou (doit être <= hauteur du sol) */
-  --hx: 50%;    /* position horizontale du trou (0% gauche, 50% centre, 100% droite) */
+/* ====== SOL en 2 parties + trou central ====== */
+:root{
+  --gH: 21svh;                               /* hauteur du sol */
+  --tile: url("../assets/bg/blue-tile.png"); /* tuile */
+  --tileSize: 64px;
+  --holeW: 12.5vw;                             /* largeur du trou au centre */
+}
 
-  -webkit-mask: radial-gradient(closest-side at var(--hx) 100%, transparent 98%, #000 100%)
-                 bottom center / var(--hw) var(--hh) no-repeat,
-                 linear-gradient(#000,#000);
-          mask: radial-gradient(closest-side at var(--hx) 100%, transparent 98%, #000 100%)
-                 bottom center / var(--hw) var(--hh) no-repeat,
-                 linear-gradient(#000,#000);
+/* conteneur du sol : 2 segments + gap milieu */
+.ground-bar{
+  position:absolute; left:0; right:0; bottom:0;
+  height:var(--gH);
+  display:grid;
+  grid-template-columns: 1fr var(--holeW) 1fr;  /* ← trou centré, simple et fiable */
+  z-index:1;
+  border: none !important;
+}
+
+/* segments de sol (gauche & droite) */
+.seg{
+  background: var(--tile) repeat left bottom / var(--tileSize) var(--tileSize);
+  image-rendering: pixelated;
+}
+
+/* gap = trou (on voit le ciel derrière) */
+.gap{ background: transparent; }
+
+/* petit trait de relief en haut du sol (optionnel) */
+.ground-bar::before{ content: none !important; }
+
+.title-3d{
+  position:relative;
+  color:#fff7ec;                    /* face claire */
+  letter-spacing:.06sem;
+  -webkit-text-stroke:1px #5c2615;  /* contour foncé */
+  text-transform:uppercase;
+}
+.title-3d::after{
+  content:attr(data-text);
+  position:absolute; inset:0;
+  color:#000;                    /* “épaisseur” beige */
+  -webkit-text-stroke:2px #000;  /* même contour */
+  transform:translate(6px,6px);     /* décalage 3D */
+  z-index:-1;                       /* derrière le texte */
+  filter:none;
+}
+
+:root{
+  --m-face:#ffe9d3;      /* beige clair */
+  --m-outline:#5a2b16;   /* contour sombre */
+  --m-shadow:#000000;    /* ombre 2D */
+  --m-stroke:3px;        /* épaisseur du contour (2–4px) */
+  --m-off:6px;           /* décalage de l’ombre (5–8px) */
+}
+
+/* on réutilise ta classe .title-3d, mais on la passe en “2D” */
+.title-3d{
+  color:var(--m-face); 
+  -webkit-text-stroke:var(--m-stroke) var(--m-outline);
+  text-shadow: var(--m-off) var(--m-off) 0 var(--m-shadow); /* ombre nette */
+  position:relative;
+}
+
+/* supprime l’ancienne extrusion 3D si elle existe */
+.title-3d::after{ content:none; }
+
+/* Trou visuel (reprend le ciel du header) */
+
+
+.title.taller{
+  display:inline-block;          /* la transform n’affecte que le bloc du texte */
+  transform: scaleY(1.5);       /* ← augmente/descends ce facteur (1.10–1.30) */
+  transform-origin: center bottom;
+  line-height: .95;              /* resserre un peu l’interligne de cette ligne */
+  letter-spacing: .005em;        /* très léger serrage horizontal */
+}
+
+/* Ajuste le contour/ombre pour que ça reste visuellement équilibré */
+.title-3d.taller{
+  --m-stroke: 2.6px;             /* contour un peu plus fin car on l’étire */
+  --m-off: 5px;                  /* ombre légèrement réduite */
+}
+
+.title.smaller{
+    padding-bottom: .8em;
+}
+
+:root{                               /* hauteur du sol */
+  --tiles: url("../assets/bg/plat.png"); /* tuile */
+  --tilesSize: 64px;                         /* largeur du trou au centre */
+}
+
+/* Plateformes génériques (même tuile que le sol) */
+.platform{
+  position:absolute;
+  background: var(--tiles) repeat left bottom / var(--tilesSize) var(--tilesSize);
+  image-rendering: pixelated;
+  z-index: 1;                 /* sous le panneau titre, au-dessus du ciel */
+  pointer-events: none;       /* décor seulement (clics passent) */
+  border: none; outline: none; box-shadow: none;
+}
+
+/* P2 : petite corniche sous les ? en haut à droite */
+.platform.p2{
+  width: 20vw;
+  height: 7svh;
+
+  right: 5vw;                                /* proche des ? */
+  bottom: calc(var(--gH) + 24svh);           /* plus haut que P1 */
+  border-top-left-radius: 8px;               /* petit arrondi optionnel */
+  border-top-right-radius: 8px;
+}
+
+/* Responsive : agrandis un peu les appuis sur mobile et évite l’overlap */
+@media (max-width: 900px){
+  .platform.p1{ width: 18vw; right: 24vw; height: 24svh; }
+  .platform.p2{ width: 26vw; right: 6vw;  bottom: calc(var(--gH) + 26svh); }
 }
 
 
+/* On déplace l’offset vertical sur le wrapper */
+.hero-center{
+    --ctaPush: 100px;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;                   /* espace panneau / bouton / flèche */
+  transform: translateY(-20svh);
+  z-index: 2;
+}
 
+/* le panneau n'a plus besoin de translateY */
+.title-banner{ transform: none; }
+
+/* Bouton sous le panneau */
+.who-btn{
+  --pad: 12px 18px;
+  --bg: #f3a562;
+  --bd: #c85d32;
+
+  display:inline-block;
+  padding: var(--pad);
+  border-radius: 10px;
+  background: var(--bg);
+  border: 3px solid var(--bd);
+  color: #1e2438;
+  font-weight: 800;
+  text-decoration: none;
+  letter-spacing: .02em;
+
+  box-shadow: 0 6px 0 #00000080, 0 14px 28px rgba(0,0,0,.25);
+  transform: translateY(var(--ctaPush));
+  transition: transform .12s ease, box-shadow .12s ease;
+}
+.who-btn:hover{
+  transform: translateY(calc(var(--ctaPush) - 2px));
+  box-shadow: 0 8px 0 #00000080, 0 16px 30px rgba(0,0,0,.28);
+}
+.who-btn:active{
+  transform: translateY(calc(var(--ctaPush) + 2px));
+  box-shadow: 0 3px 0 #00000080, 0 10px 20px rgba(0,0,0,.2);
+}
+/* Flèche qui rebondit vers le bas */
+.who-arrow{
+  width: 40px; height: 40px; position: relative; opacity:.9;
+  transform: translateY(calc(var(--ctaPush) + 10px));
+}
+.who-arrow::before{
+  content:""; position:absolute; inset:0;
+  border-right:4px solid #1e2438; border-bottom:4px solid #1e2438;
+  transform: rotate(45deg);
+  animation: bounceDown 1.2s ease-in-out infinite;
+}
+@keyframes bounceDown{
+  0%,100%{ transform: translateY(0) rotate(45deg); opacity:.95 }
+  50%    { transform: translateY(8px) rotate(45deg); opacity:.6 }
+}
+
+/* un peu plus compact sur mobile */
+@media (max-width:700px){
+  .hero-center{ gap:10px; transform: translateY(-18svh); }
+  .who-btn{ padding:10px 16px; font-size:14px }
+  .who-arrow{ width:22px; height:22px }
+}
+
+.game-layer{
+  position:absolute; inset:0;
+  width:100%; height:100%;
+  pointer-events:none;           /* laisse cliquer tes liens en dessous */
+  z-index:3;                     /* au-dessus du décor, sous les menus si besoin */
+}
+
+/* pour bien voir le perso sur mobile */
+@media (max-width: 700px){
+  .game-layer{ image-rendering: pixelated; }
+}
+
+/* Scroll doux global (si pas déjà fait) */
+html { scroll-behavior: smooth; }
+
+/* SECTION 2 : grotte */
+.about-cave{
+  min-height: 100svh;                /* prend tout l’écran */
+  position: relative;
+  display: grid; place-items: center;
+  padding: clamp(24px, 6vw, 64px);
+  color: #f3f6ff;
+  overflow: hidden;
+
+  /* ton image d'arrière-plan */
+  background: url("../assets/bg/caveBackground.png") center / cover no-repeat fixed;
+  /* fixe = léger effet parallax ; enlève "fixed" si tu n’en veux pas */
+}
+
+/* voile pour améliorer la lisibilité du texte */
+.about-cave::before{
+  content:"";
+  position:absolute; inset:0;
+  background: linear-gradient(180deg, #00000066, #00000099);
+}
+
+/* contenu centré */
+.about-wrap{
+  position: relative; z-index: 1;
+  max-width: 900px;
+  text-align: center;
+}
+
+.about-title{
+  font-family: "Anton", system-ui, sans-serif;
+  font-size: clamp(32px, 6vw, 64px);
+  letter-spacing: .02em;
+  margin: 0 0 .6em;
+  text-shadow: 0 4px 0 #000, 0 10px 24px rgba(0,0,0,.45);
+}
+
+.about-text{
+  font-size: clamp(16px, 2.2vw, 20px);
+  line-height: 1.7;
+  margin: 0 auto;
+  text-wrap: balance;
+  max-width: 70ch;
+  text-shadow: 0 2px 0 #000;
+}
+:root{
+  --caveGroundH: 7svh;                  /* hauteur du sol */
+  --caveTile: url("../assets/bg/cave-tile.png"); /* ← remplace par ta tuile */
+  --caveTileSize: 64px;                  /* taille d’une tuile */
+}
+
+.cave-ground{
+  position:absolute; left:0; right:0; bottom:0;
+  height: var(--caveGroundH);
+  background: var(--caveTile) repeat left bottom / var(--caveTileSize) var(--caveTileSize);
+  image-rendering: pixelated;           /* net si pixel-art */
+  z-index: 0;                           /* derrière le texte */
+  box-shadow: inset 0 10px 18px rgba(0,0,0,.25);  /* léger relief en haut */
+  border-top: 1px solid rgba(0,0,0,.15);          /* liseré discret (enlève si tu veux) */
+}
+
+@media (max-width: 700px){
+  :root{ --caveTileSize: 72px; }
+}
+
+.about-cave{ position: relative; min-height: 100svh; }
+.game-layer{
+  position:absolute; inset:0; pointer-events:none; /* décor, on capte le clavier globalement */
+}
+
+/* ----- Bouton retour en haut (style proche du who-btn) ----- */
+.back-btn{
+  --pad: 12px 18px;
+  --bg: #9fd1ff;       /* couleur différente pour le retour */
+  --bd: #2f5e91;
+
+  top:100px;
+  left:50%;
+  position:absolute;
+  display:inline-block;
+  margin-top: 18px;
+  padding: var(--pad);
+  border-radius: 10px;
+  background: var(--bg);
+  border: 3px solid var(--bd);
+  color: #102033;
+  font-weight: 800;
+  text-decoration: none;
+  letter-spacing: .02em;
+  box-shadow: 0 6px 0 #00000080, 0 14px 28px rgba(0,0,0,.25);
+  transform: translateY(0);
+  transform:translateX(-50%);
+  transition: transform .12s ease, box-shadow .12s ease;
+}
+.back-btn:hover{ transform:translateX(-50%) translateY(-2px); box-shadow:0 8px 0 #0008, 0 16px 30px #0005 }
+.back-btn:active{ transform:translateX(-50%) translateY(2px);  box-shadow:0 3px 0 #0008, 0 10px 20px #0003 }
+
+
+/* Flèche vers le haut */
+.back-arrow.up{
+  position:absolute; top:62px; left:50%; transform:translateX(-50%);
+  width:40px; height:40px; opacity:.9;
+}
+.back-arrow.up::before{
+  content:""; position:absolute; inset:0;
+  border-left:4px solid #fff; border-top:4px solid #fff;
+  transform:rotate(45deg); animation:bounceUp 1.2s ease-in-out infinite;
+}
+@keyframes bounceUp{
+  0%,100%{ transform:translateY(0) rotate(45deg); opacity:.95 }
+  50%    { transform:translateY(-8px) rotate(45deg); opacity:.6 }
+}
+
+/* (option) un poil plus petit sur mobile */
+@media (max-width:700px){
+  .back-btn{ padding:10px 16px; font-size:14px }
+  .back-arrow.up{ width:22px; height:22px }
+}
+
+/* bouton : on peut réutiliser ton style .qbtn, ici juste version plus petite */
+/* === Toggles fixés en haut de la section about === */
+.about-cave { position: relative; }
+
+.info-toggle{
+  position: absolute; top: 100px; z-index: 5;
+  max-width: min(44ch, 92vw);
+}
+.info-toggle.left  { left: 100px; }
+.info-toggle.right { right: 100px; text-align: right; }
+
+/* Bouton tête (pilule) */
+.info-head{
+  --bg: rgba(12,16,28,.85);
+  --bd: #2c395a;
+  --fg: #fff;
+
+  display: inline-flex; align-items: center; gap: 10px;
+  padding: 10px 14px;
+  border-radius: 999px;
+  border: 2px solid var(--bd);
+  background: var(--bg);
+  color: var(--fg);
+  font-weight: 800;
+  letter-spacing: .02em;
+  cursor: pointer;
+  text-shadow: 0 2px 0 #000;
+  box-shadow: 0 8px 18px rgba(0,0,0,.35);
+}
+.info-head:focus-visible{ outline: 2px solid #fff; outline-offset: 2px; }
+
+/* Petite flèche */
+.info-head .chev{
+  width: 10px; height: 10px; display: inline-block;
+  border-right: 3px solid var(--fg);
+  border-bottom: 3px solid var(--fg);
+  transform: rotate(45deg); transition: transform .25s ease;
+}
+/* quand ouvert → flèche vers le haut */
+.info-head[aria-expanded="true"] .chev{ transform: rotate(-135deg); }
+
+/* Panneau dépliant */
+.info-panel{
+  --pad: 14px;
+  margin-top: 10px;
+  background: rgba(10,12,20,.78);
+  border: 2px solid #2c395a;
+  border-radius: 12px;
+  box-shadow: 0 12px 28px rgba(0,0,0,.35), inset 0 0 0 1px rgba(255,255,255,.05);
+
+  overflow: hidden;
+  max-height: 0; opacity: 0; transform: translateY(-4px);
+  transition: max-height .45s ease, opacity .28s ease, transform .28s ease;
+}
+.info-panel:not([hidden]){ padding: var(--pad); }
+.info-panel.open{ max-height: 520px; opacity: 1; transform: translateY(0); }
+
+.info-title{
+  margin: 0 0 .5rem;
+  font-family: "Anton", system-ui, sans-serif;
+  font-size: clamp(20px, 3.2vw, 28px);
+  color: #ffd166;
+  text-shadow: 0 2px 0 #000;
+}
+.info-list{
+  margin: 0; padding-left: 1.1em;
+  display: grid; gap: .35rem;
+  font-size: clamp(14px, 2.1vw, 16px);
+  line-height: 1.6;
+}
+.info-list li::marker{ color:#ffd166 }
+
+/* Responsive: si ça chevauche tes autres boutons, on descend un peu */
+@media (max-width: 700px){
+  .info-toggle{ top: 14px; }
+}
+
+.info-toggle.right .info-panel{
+  text-align: left;          /* ← le texte à gauche */
+  margin-left: auto;         /* le panneau reste collé au bord droit */
+}
+
+.info-toggle.right .info-title{ text-align: left; }
+.info-toggle.right .info-list{ text-align: left; padding-left: 1.1rem; }
+
+/* conteneur pour les items qui pop (absolu dans le header) */
+.pop-items-layer{
+  position:absolute; inset:0; pointer-events:none; z-index:6; /* au-dessus des ? */
+}
+
+/* l’item (icône cliquable) */
+.pop-item{
+  position:absolute;
+  width: 56px; height: 56px;
+  display:grid; place-items:center;
+  background: #0c1224;
+  border: 3px solid #5aa2ff;
+  border-radius: 12px;
+  box-shadow: 0 8px 20px rgba(0,0,0,.45);
+  transform: translate(-50%, -100%); /* centré au-dessus de la box */
+  animation: popUp .35s ease-out forwards;
+  pointer-events:auto; /* clic possible */
+  cursor: pointer;
+}
+
+.pop-item:hover{ transform: translate(-50%, -100%) scale(1.05); }
+.pop-item:active{ transform: translate(-50%, -98%) scale(0.98); }
+
+/* petit label optionnel */
+.pop-item .label{
+  position:absolute; top: -22px; left: 50%; transform: translateX(-50%);
+  background:#000a; color:#fff; font-size:12px; padding:2px 6px; border-radius:6px;
+}
+
+/* animation sortie */
+@keyframes popUp{
+  0%   { opacity:0; translate: 0 6px; }
+  100% { opacity:1; translate: 0 -10px; }
+}
+
+/* “coup” visuel sur la box quand on clique */
+.qbtn.hit{ transform: translateY(4px); box-shadow:0 3px 0 #000, 0 8px 18px rgba(0,0,0,.30); }
+.qbtn.hit:after{
+  /* petit flash */
+  content:""; position:absolute; inset:0; border-radius:8px; box-shadow:0 0 0 3px #fff inset;
+  animation: flash .15s linear;
+}
+@keyframes flash{ from{opacity:.8} to{opacity:0} }
+
+/* icônes SVG (taille/align) */
+.pop-item svg{ width:28px; height:28px; display:block; }
+.pop-item.github svg{ fill:#fff; }
+.pop-item.mail   svg{ fill:#ffe082; }
+.pop-item.cv     svg{ fill:#7ef4ff; }
+.pop-item.linkedin svg{ fill:#58a6ff; }
+.pop-item.itch svg{ fill:#ff4d6d; }
