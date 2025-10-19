@@ -485,3 +485,51 @@ document.addEventListener('click', (e) => {
   setup('.info-toggle.left  .info-head');
   setup('.info-toggle.right .info-head');
 })();
+
+(function setupControlsHints(){
+  const hints = document.getElementById('controlsHints');
+  const chip  = document.getElementById('helpChip');
+  if (!hints || !chip) return;
+
+  let autoHideTimer = null;
+  let hasInteracted = false;
+
+  function showHints(ms=0){
+    clearTimeout(autoHideTimer);
+    hints.classList.add('show');
+    if (ms) autoHideTimer = setTimeout(hideHints, ms);
+  }
+  function hideHints(){
+    clearTimeout(autoHideTimer);
+    hints.classList.remove('show');
+  }
+
+  // Affiche au chargement puis cache après 6s
+  showHints(6000);
+
+  // Cache dès la première action de jeu (bouger ou sauter)
+  const hideOnKeys = (e)=>{
+    if (hasInteracted) return;
+    if (['ArrowLeft','ArrowRight','KeyA','KeyD','Space','KeyW','ArrowUp'].includes(e.code)){
+      hasInteracted = true;
+      hideHints();
+      window.removeEventListener('keydown', hideOnKeys);
+    }
+  };
+  window.addEventListener('keydown', hideOnKeys, { passive:true });
+
+  // Bouton ? pour (re)montrer
+  chip.addEventListener('click', (e)=>{
+    e.preventDefault();
+    if (hints.classList.contains('show')) hideHints();
+    else showHints();
+  });
+
+  // Touche H = toggle aide
+  window.addEventListener('keydown', (e)=>{
+    if (e.code === 'KeyH'){
+      if (hints.classList.contains('show')) hideHints();
+      else showHints();
+    }
+  });
+})();
