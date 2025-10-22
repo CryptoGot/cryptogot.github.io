@@ -4,135 +4,139 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Aurélien Lannoye — Portfolio</title>
+  <meta name="description" content="Portfolio d'Aurélien Lannoye : projets, compétences, et contact." />
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Anton&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/style.css">
-    <link href="https://fonts.googleapis.com/css2?family=Anton&display=swap" rel="stylesheet">
-
 </head>
 <body>
 
   <!-- ENTÊTE (ciel) -->
-  <header class="top-hero">
+  <header id="top" class="top-hero" role="banner">
     <!-- contrôles en haut-gauche -->
     <div class="controls left">
       <div class="mode-toggle" id="modeToggle" aria-label="Mode d'interaction">
-        <button type="button" data-mode="game" class="chip active">Game</button>
-        <button type="button" data-mode="mouse" class="chip">Mouse</button>
+        <button type="button" data-mode="game" class="chip active" aria-pressed="true">Game</button>
+        <button type="button" data-mode="mouse" class="chip" aria-pressed="false">Mouse</button>
       </div>
     </div>
 
     <!-- Hints / Controls -->
-    <button class="help-chip" id="helpChip" type="button" aria-label="Show controls">?</button>
+    <button class="help-chip" id="helpChip" type="button" aria-label="Afficher/masquer l'aide">?</button>
 
-    <div class="controls-hints" id="controlsHints" role="status" aria-live="polite">
-    <figure class="hint">
-        <img src="assets/ui/keys-arrows.png" alt="Move with arrow keys or A/D" width="180" height="80">
+    <div class="controls-hints" id="controlsHints" role="status" aria-live="polite" hidden>
+      <figure class="hint">
+        <img src="assets/ui/keys-arrows.png" alt="Déplacements : flèches gauche/droite ou A et D" width="180" height="80" loading="lazy">
         <figcaption>Move: ← → (or A / D)</figcaption>
-    </figure>
-    <figure class="hint">
-        <img src="assets/ui/key-space.png" alt="Jump with Space" width="180" height="80">
+      </figure>
+      <figure class="hint">
+        <img src="assets/ui/key-space.png" alt="Sauter avec Espace" width="180" height="80" loading="lazy">
         <figcaption>Jump: Space</figcaption>
-    </figure>
-    <p class="hint-note">Press <strong>H</strong> to toggle help</p>
+      </figure>
+      <p class="hint-note">Press <strong>H</strong> to toggle help</p>
     </div>
 
+    <!-- Actions rapides (haut-droite) -->
+    <nav class="controls right q-actions" aria-label="Liens rapides">
+      <!-- data-item = quel icône doit sortir ; data-href = où mène le clic -->
+      <button class="qbtn pop-box" type="button"
+              data-item="github"
+              data-href="https://github.com/CryptoGot?tab=repositories"
+              aria-label="GitHub"><span class="q" aria-hidden="true">?</span></button>
 
-    <!-- boutons ? en haut-droite -->
-    <nav class="controls right q-actions" aria-label="Sections">
-    <!-- data-item = quel icône doit sortir ; data-href = où mène le clic -->
-    <button class="qbtn pop-box" type="button"
-            data-item="github"
-            data-href="https://github.com/CryptoGot?tab=repositories"
-            aria-label="GitHub"><span class="q">?</span></button>
+      <button class="qbtn pop-box" type="button"
+              data-item="mail"
+              data-href="mailto:prenom.nom@email.com"
+              aria-label="Email"><span class="q" aria-hidden="true">?</span></button>
 
-    <button class="qbtn pop-box" type="button"
-            data-item="mail"
-            data-href="mailto:prenom.nom@email.com"
-            aria-label="Email"><span class="q">?</span></button>
+      <button class="qbtn pop-box" type="button"
+              data-item="cv"
+              data-href="docs/CV_2025-10-05_Aurelien_Lannoye-AnglaisCorrigé.pdf"
+              aria-label="CV (PDF)"><span class="q" aria-hidden="true">?</span></button>
 
-    <button class="qbtn pop-box" type="button"
-            data-item="cv"
-            data-href="/assets/cv/AurelienLannoye_CV.pdf"
-            aria-label="CV (PDF)"><span class="q">?</span></button>
-
-    <button class="qbtn pop-box" type="button"
-            data-item="linkedin"
-            data-href="https://www.linkedin.com/in/ton-profil/"
-            aria-label="LinkedIn"><span class="q">?</span></button>
+      <button class="qbtn pop-box" type="button"
+              data-item="linkedin"
+              data-href="https://www.linkedin.com/in/ton-profil/"
+              aria-label="LinkedIn"><span class="q" aria-hidden="true">?</span></button>
     </nav>
 
+    <!-- Titre -->
+    <div class="hero-center">
+      <div class="title-banner">
+        <span class="pins" aria-hidden="true"></span>
+        <h1 class="title title-3d smaller" id="port">PORTFOLIO</h1>
+        <h1 class="title title-3d taller" data-text="AURÉLIEN LANNOYE">AURÉLIEN LANNOYE.</h1>
+      </div>
 
-    <!-- titre -->
-<div class="hero-center">
-  <div class="title-banner">
-    <span class="pins" aria-hidden="true"></span>
-    <h1 class="title title-3d smaller" id="port">PORTFOLIO</h1>
-    <h1 class="title title-3d taller" data-text="AURÉLIEN LANNOYE">AURÉLIEN LANNOYE.</h1>
-  </div>
-
-  <a href="#about" class="who-btn">Who I am?</a>
-  <div class="who-arrow" aria-hidden="true"></div>
-</div>
+      <a href="#about" class="who-btn">Who I am?</a>
+      <div class="who-arrow" aria-hidden="true"></div>
+    </div>
 
     <div class="ground-bar" aria-hidden="true">
-    <div class="seg left collider"></div>
-    <div class="gap"></div>
-    <div class="seg right collider"></div>
+      <div class="seg left collider"></div>
+      <div class="gap"></div>
+      <div class="seg right collider"></div>
     </div>
 
     <div class="platform p2 collider" aria-hidden="true"></div>
+
+    <!-- Canvas jeu - dimensionné par CSS, mis à l'échelle par JS avec devicePixelRatio -->
     <canvas id="gameLayer" class="game-layer" aria-hidden="true"></canvas>
+  </header>
 
-  </header> <!-- ✅ on ferme bien le header -->
+  <main id="main" role="main">
+    <section id="about" class="section about-cave" aria-labelledby="about-title">
+      <div class="about-wrap">
+        <h2 id="about-title" class="about-title">Who I am</h2>
+        <p class="about-text">
+          I’m a third-year Computer Science student at EPHEC (Louvain-la-Neuve), passionate about game development. I’ve been teaching myself through online courses, tutorials, and lots of small prototypes, learning by building. I’m currently looking for a 3-month internship from February to May<br>(4 days/week) in a game-dev environment where I can learn fast and contribute.
+        </p>
+      </div>
 
-  <main>
-  <section id="about" class="section about-cave">
-    <div class="about-wrap">
-      <h2 class="about-title">Who I am</h2>
-      <p class="about-text">
-        I’m a third-year Computer Science student at EPHEC (Louvain-la-Neuve), passionate about game development. I’ve been teaching myself through online courses, tutorials, and lots of small prototypes, learning by building. I’m currently looking for a 3-month internship from February to May  <br>(4 days/week) in a game-dev environment where I can learn fast and contribute.
-      </p>
-    </div>
-    <a href="#top" class="back-btn">Back to start</a>
-    <div class="back-arrow up" aria-hidden="true"></div>
+      <a href="#top" class="back-btn">Back to start</a>
+      <div class="back-arrow up" aria-hidden="true"></div>
 
-    <div class="cave-ground collider" aria-hidden="true"></div>
-    <canvas id="gameLayerAbout" class="game-layer" aria-hidden="true"></canvas>
-    <div class="info-toggle left">
-  <button class="info-head" type="button" aria-expanded="false" aria-controls="panel-work">
-    <span>What I work with</span><i class="chev" aria-hidden="true"></i>
-  </button>
+      <div class="cave-ground collider" aria-hidden="true"></div>
+      <canvas id="gameLayerAbout" class="game-layer" aria-hidden="true"></canvas>
 
-  <section id="panel-work" class="info-panel" hidden>
-    <h3 class="info-title">What I work with</h3>
-    <ul class="info-list">
-      <li><strong>Unity (C#)</strong> — gameplay, prototypage, petits tools</li>
-      <li><strong>Unreal Engine</strong> — Blueprints, bases C++</li>
-      <li><strong>Git/GitHub</strong> — branches, PRs, issues</li>
-      <li><strong>VS / VS Code</strong> — debug de base</li>
-      <li><strong>Blender (basics)</strong> — import, collisions</li>
-    </ul>
-  </section>
-</div>
+      <!-- === TOP-LEFT: What I work with === -->
+      <div class="info-toggle left">
+        <button class="info-head" type="button" aria-expanded="false" aria-controls="panel-work">
+          <span>What I work with</span><i class="chev" aria-hidden="true"></i>
+        </button>
 
-<!-- === TOP-RIGHT: What I’m after === -->
-<div class="info-toggle right">
-  <button class="info-head" type="button" aria-expanded="false" aria-controls="panel-after">
-    <span>What I’m after</span><i class="chev" aria-hidden="true"></i>
-  </button>
+        <section id="panel-work" class="info-panel" hidden>
+          <h3 class="info-title">What I work with</h3>
+          <ul class="info-list">
+            <li><strong>Unity (C#)</strong> gameplay, prototypage, petits tools</li>
+            <li><strong>Unreal Engine</strong> Blueprints, bases C++</li>
+            <li><strong>Git/GitHub</strong> branches, PRs, issues</li>
+            <li><strong>VS / VS Code</strong> debug de base</li>
+            <li><strong>Blender (basics)</strong> import, collisions</li>
+          </ul>
+        </section>
+      </div>
 
-  <section id="panel-after" class="info-panel" hidden>
-    <h3 class="info-title">What I’m after</h3>
-    <ul class="info-list">
-      <li>Une équipe mentorante et des tâches gameplay/tech réelles</li>
-      <li>De l’espace pour shipper des features (même petites)</li>
-      <li>Ouvert à on-site, hybride ou remote en Belgique</li>
-      <li>Stage 3 mois (février → mai), 4 j/sem</li>
-    </ul>
-  </section>
-</div>
-  </section>
+      <!-- === TOP-RIGHT: What I’m after === -->
+      <div class="info-toggle right">
+        <button class="info-head" type="button" aria-expanded="false" aria-controls="panel-after">
+          <span>What I’m looking for</span><i class="chev" aria-hidden="true"></i>
+        </button>
+
+        <section id="panel-after" class="info-panel" hidden>
+          <h3 class="info-title">What I’m looking for</h3>
+          <ul class="info-list">
+            <li>A mentoring team with real gameplay and technical tasks</li>
+            <li>Room to ship small but meaningful features</li>
+            <li>Open to on-site, hybrid, or remote work in Belgium</li>
+            <li>3-month internship (February → May), 4 days/week</li>
+          </ul>
+        </section>
+      </div>
+    </section>
   </main>
 
-  <script src="js/main.js"></script>
+  <script src="js/main.js" defer></script>
 </body>
 </html>

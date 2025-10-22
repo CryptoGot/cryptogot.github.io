@@ -2,11 +2,11 @@
    Boot / Scroll / Assets
 ========================= */
 
-// pas de restauration de scroll au reload
+// Pas de restauration de scroll au reload
 if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
 window.addEventListener('load', () => window.scrollTo(0, 0), { once: true });
 
-// assets uniques
+// Assets uniques
 const SPR_IMG = new Image();  // perso
 SPR_IMG.src = 'assets/sprites/idle96.png';
 
@@ -14,20 +14,42 @@ const BOUNCER_IMG = new Image(); // ressort
 BOUNCER_IMG.src = 'assets/sprites/bouncer.png';
 
 /* =========================
+   Helpers
+========================= */
+const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+const isIOS = /iP(ad|hone|od)/.test(navigator.userAgent);
+
+function debounce(fn, wait = 120) {
+  let t; return (...args) => { clearTimeout(t); t = setTimeout(() => fn.apply(null, args), wait); };
+}
+
+/* =========================
    UI : Toggle & key handling
 ========================= */
 
 const toggle = document.getElementById('modeToggle');
-toggle.addEventListener('click', (e) => {
-  if (!e.target.matches('button[data-mode]')) return;
-  [...toggle.children].forEach(b => b.classList.toggle('active', b === e.target));
-  const mode = e.target.dataset.mode;
-  document.body.classList.toggle('mode-game',  mode === 'game');
-  document.body.classList.toggle('mode-mouse', mode === 'mouse');
-  if (window.gameLayer) (mode === 'game' ? window.gameLayer.enable() : window.gameLayer.disable());
-});
+if (toggle) {
+  toggle.addEventListener('click', (e) => {
+    const target = e.target.closest('button[data-mode]');
+    if (!target) return;
+    [...toggle.children].forEach(b => b.classList.toggle('active', b === target));
+    const mode = target.dataset.mode;
+    document.body.classList.toggle('mode-game',  mode === 'game');
+    document.body.classList.toggle('mode-mouse', mode === 'mouse');
+    if (window.gameLayer) (mode === 'game' ? window.gameLayer.enable() : window.gameLayer.disable());
+  });
 
-// bloque le scroll avec espace/flèches si on ne tape pas dans un input
+  // Activation clavier (Enter/Espace) pour l'accessibilité
+  toggle.addEventListener('keydown', (e) => {
+    if (e.code === 'Enter' || e.code === 'Space') {
+      const active = toggle.querySelector('button.active');
+      const next = active?.nextElementSibling || toggle.querySelector('button[data-mode]');
+      next?.click(); e.preventDefault();
+    }
+  });
+}
+
+// Bloque le scroll avec espace/flèches si on ne tape pas dans un input
 window.addEventListener('keydown', (e) => {
   const tag = (e.target.tagName || '').toUpperCase();
   const typing = tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT' || e.target.isContentEditable;
@@ -50,11 +72,19 @@ function setupQuestionBoxes() {
   }
 
   const ICONS = {
-    github: `<svg viewBox="0 0 24 24"><path d="M12 .5a12 12 0 0 0-3.79 23.39c.6.11.82-.26.82-.58v-2.03c-3.34.73-4.04-1.61-4.04-1.61-.55-1.4-1.34-1.78-1.34-1.78-1.09-.75.08-.74.08-.74 1.2.08 1.83 1.23 1.83 1.23 1.07 1.83 2.8 1.3 3.48.99.11-.78.42-1.3.76-1.6-2.67-.3-5.47-1.34-5.47-5.95 0-1.31.47-2.38 1.23-3.22-.12-.3-.53-1.52.12-3.16 0 0 1-.32 3.3 1.23a11.4 11.4 0 0 1 6 0c2.3-1.55 3.3-1.23 3.3-1.23.65 1.64.24 2.86.12 3.16.76.84 1.23 1.9 1.23 3.22 0 4.62-2.8 5.64-5.48 5.94.43.37.82 1.1.82 2.23v3.31c0 .32.21.7.83.58A12 12 0 0 0 12 .5z"/></svg>`,
-    mail:   `<svg viewBox="0 0 24 24"><path d="M2 6.5A2.5 2.5 0 0 1 4.5 4h15A2.5 2.5 0 0 1 22 6.5v11A2.5 2.5 0 0 1 19.5 20h-15A2.5 2.5 0 0 1 2 17.5v-11Zm2.2-.3 7.3 5.46c.3.23.7.23 1 0l7.3-5.46a1 1 0 0 0-.8-.2H5a1 1 0 0 0-.8.2Zm16.1 2.48-6.9 5.17a2.5 2.5 0 0 1-3.2 0L3.3 8.68V17.5c0 .28.22.5.5.5h16.4c.28 0 .5-.22.5-.5V8.68Z"/></svg>`,
-    cv:     `<svg viewBox="0 0 24 24"><path d="M6 2h7l5 5v13a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V4c0-1.1.9-2 2-2Zm7 1.5V8h4.5L13 3.5ZM8 11h8v1.8H8V11Zm0 3.2h8V16H8v-1.8Zm0 3.2h5V20H8v-2.6Z"/></svg>`,
-    linkedin:`<svg viewBox="0 0 24 24"><path d="M6.94 8.5H3.56V20h3.38V8.5ZM5.25 3.5a2 2 0 1 0 0 4.01 2 2 0 0 0 0-4ZM20.44 20h-3.37v-6.2c0-1.48-.53-2.48-1.86-2.48-1.02 0-1.63.69-1.89 1.36-.1.25-.13.6-.13.95V20h-3.37s.04-10.98 0-12.12h3.37v1.72c.45-.7 1.25-1.7 3.05-1.7 2.23 0 3.9 1.46 3.9 4.6V20Z"/></svg>`
+    github: `<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 .5a12 12 0 0 0-3.79 23.39c.6.11.82-.26.82-.58v-2.03c-3.34.73-4.04-1.61-4.04-1.61-.55-1.4-1.34-1.78-1.34-1.78-1.09-.75.08-.74.08-.74 1.2.08 1.83 1.23 1.83 1.23 1.07 1.83 2.8 1.3 3.48.99.11-.78.42-1.3.76-1.6-2.67-.3-5.47-1.34-5.47-5.95 0-1.31.47-2.38 1.23-3.22-.12-.3-.53-1.52.12-3.16 0 0 1-.32 3.3 1.23a11.4 11.4 0 0 1 6 0c2.3-1.55 3.3-1.23 3.3-1.23.65 1.64.24 2.86.12 3.16.76.84 1.23 1.9 1.23 3.22 0 4.62-2.8 5.64-5.48 5.94.43.37.82 1.1.82 2.23v3.31c0 .32.21.7.83.58A12 12 0 0 0 12 .5z"/></svg>`,
+    mail:   `<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2 6.5A2.5 2.5 0 0 1 4.5 4h15A2.5 2.5 0 0 1 22 6.5v11A2.5 2.5 0 0 1 19.5 20h-15A2.5 2.5 0 0 1 2 17.5v-11Zm2.2-.3 7.3 5.46c.3.23.7.23 1 0l7.3-5.46a1 1 0 0 0-.8-.2H5a1 1 0 0 0-.8.2Zm16.1 2.48-6.9 5.17a2.5 2.5 0 0 1-3.2 0L3.3 8.68V17.5c0 .28.22.5.5.5h16.4c.28 0 .5-.22.5-.5V8.68Z"/></svg>`,
+    cv:     `<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 2h7l5 5v13a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V4c0-1.1.9-2 2-2Zm7 1.5V8h4.5L13 3.5ZM8 11h8v1.8H8V11Zm0 3.2h8V16H8v-1.8Zm0 3.2h5V20H8v-2.6Z"/></svg>`,
+    linkedin:`<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6.94 8.5H3.56V20h3.38V8.5ZM5.25 3.5a2 2 0 1 0 0 4.01 2 2 0 0 0 0-4ZM20.44 20h-3.37v-6.2c0-1.48-.53-2.48-1.86-2.48-1.02 0-1.63.69-1.89 1.36-.1.25-.13.6-.13.95V20h-3.37s.04-10.98 0-12.12h3.37v1.72c.45-.7 1.25-1.7 3.05-1.7 2.23 0 3.9 1.46 3.9 4.6V20Z"/></svg>`
   };
+
+  function openExternal(href) {
+    if (!href) return;
+    const isMail = href.startsWith('mailto:');
+    if (isMail) { window.location.href = href; return; }
+    const win = window.open(href, '_blank', 'noopener,noreferrer');
+    if (win) win.opener = null;
+  }
 
   function spawnFromBtn(btn){
     if (!btn) return;
@@ -73,12 +103,11 @@ function setupQuestionBoxes() {
     el.style.left = `${x}px`;
     el.style.top  = `${y}px`;
     el.innerHTML = `${ICONS[type] || ''}`;
-    el.addEventListener('click', (ev)=>{
-      ev.stopPropagation();
-      const isMail = href.startsWith('mailto:');
-      window.open(href, isMail ? '_self' : '_blank', 'noopener');
-      el.remove(); btn._spawn = null;
-    });
+    el.setAttribute('role','button');
+    el.setAttribute('tabindex','0');
+    el.addEventListener('click', (ev)=>{ ev.stopPropagation(); openExternal(href); el.remove(); btn._spawn = null; });
+    el.addEventListener('keydown', (ev)=>{ if(ev.code==='Enter' || ev.code==='Space'){ ev.preventDefault(); openExternal(href); el.remove(); btn._spawn = null; }});
+
     document.addEventListener('click', closeOnce, { once:true });
     function closeOnce(){ el.remove(); btn._spawn = null; }
 
@@ -87,7 +116,7 @@ function setupQuestionBoxes() {
     btn.classList.add('hit'); setTimeout(()=>btn.classList.remove('hit'), 150);
   }
 
-  // clic sur une case “?”
+  // Clic sur une case “?”
   header.addEventListener('click', (e)=>{
     const btn = e.target.closest('.pop-box.qbtn');
     if (!btn) return;
@@ -95,7 +124,14 @@ function setupQuestionBoxes() {
     spawnFromBtn(btn);
   });
 
-  // API pour la couche jeu (spawn sur “coup de tête”)
+  // Activation clavier des boutons ?
+  header.addEventListener('keydown', (e)=>{
+    const btn = e.target.closest('.pop-box.qbtn');
+    if (!btn) return;
+    if (e.code === 'Enter' || e.code === 'Space') { e.preventDefault(); spawnFromBtn(btn); }
+  });
+
+  // API pour la couche jeu
   return {
     header,
     buttons: [...header.querySelectorAll('.pop-box.qbtn')],
@@ -106,7 +142,7 @@ function setupQuestionBoxes() {
 const QBOX = setupQuestionBoxes();
 
 /* =========================
-   Fabrique d'une couche jeu
+   Fabrique d'une couche jeu (canvas responsive/retina)
 ========================= */
 
 function createGameLayer(rootSelector, canvasId, opts = {}) {
@@ -116,18 +152,19 @@ function createGameLayer(rootSelector, canvasId, opts = {}) {
 
   const SPAWN_X = opts.spawnX ?? 64;
 
-  const SPR = { w:96, h:96, cols:11, rows:1, count:11, fps:8, scale:0.7 };
+  const SPR = { w:96, h:96, cols:11, rows:1, count:11, fps: prefersReducedMotion ? 6 : 8, scale:0.7 };
   const anim = { t:0, frame:0, name:'idle' };
   const ctx = canvas.getContext('2d');
   let enabled = true;
+  let running = true; // pause quand onglet caché
 
-  // joueur
+  // Joueur
   const player = { x:SPAWN_X, y:120, w:36, h:48, vx:0, vy:0, speed:20000, jump:1200, onGround:false, facing:1 };
 
-  // physique
+  // Physique
   const G=2200, MAX_FALL=1600, FRICTION=0.86;
 
-  // inputs
+  // Inputs
   const keys = { left:false, right:false, up:false, interact:false };
   let interactPressed = false;
   const kd = (e)=>{ if (e.repeat) return;
@@ -142,25 +179,30 @@ function createGameLayer(rootSelector, canvasId, opts = {}) {
     if (e.code==='ArrowUp'||e.code==='Space'||e.code==='KeyW') keys.up = false;
     if (e.code==='KeyE') keys.interact = false;
   };
-  window.addEventListener('keydown', kd);
-  window.addEventListener('keyup', ku);
+  window.addEventListener('keydown', kd, { passive:false });
+  window.addEventListener('keyup', ku, { passive:true });
 
-  // canvas sizing
-  function resize(){
+  // Canvas sizing (retina + safe areas iOS)
+  function sizeCanvas(){
     const r = root.getBoundingClientRect();
     const dpr = Math.max(1, Math.floor(window.devicePixelRatio||1));
-    canvas.width  = Math.floor(r.width  * dpr);
-    canvas.height = Math.floor(r.height * dpr);
-    canvas.style.width  = r.width  + 'px';
-    canvas.style.height = r.height + 'px';
+    const safeTop = isIOS ? (parseFloat(getComputedStyle(document.documentElement).getPropertyValue('padding-top')) || 0) : 0;
+    const width  = Math.max(1, Math.floor(r.width));
+    const height = Math.max(1, Math.floor(r.height - safeTop));
+    canvas.width  = Math.floor(width  * dpr);
+    canvas.height = Math.floor(height * dpr);
+    canvas.style.width  = width  + 'px';
+    canvas.style.height = height + 'px';
     ctx.setTransform(dpr,0,0,dpr,0,0);
     ctx.imageSmoothingEnabled = false;
   }
-  window.addEventListener('resize', resize);
-  window.addEventListener('orientationchange', ()=>setTimeout(resize, 200));
-  resize();
 
-  // colliders
+  const resize = debounce(sizeCanvas, 80);
+  window.addEventListener('resize', resize, { passive:true });
+  window.addEventListener('orientationchange', () => setTimeout(sizeCanvas, 200), { passive:true });
+  sizeCanvas();
+
+  // Colliders
   function colliders(){
     const r0 = root.getBoundingClientRect();
     const out = [];
@@ -171,7 +213,7 @@ function createGameLayer(rootSelector, canvasId, opts = {}) {
     return out;
   }
 
-  // resolve AABB (player)
+  // Resolve AABB (player)
   function resolve(px,py,vx,vy,w,h, cols){
     let onGround=false, x=px, y=py;
     x+=vx;
@@ -191,7 +233,7 @@ function createGameLayer(rootSelector, canvasId, opts = {}) {
     return {x,y,vx,vy,onGround};
   }
 
-  // items (dont bouncer)
+  // Items (dont bouncer)
   const items = (opts.items || []).map(i => ({
     kind: i.kind || 'prop',
     img:  i.img  || null,
@@ -218,7 +260,7 @@ function createGameLayer(rootSelector, canvasId, opts = {}) {
     return { y, vy:newVy, onGround };
   }
 
-  // pick/drop (E)
+  // Pick/drop (E)
   const PICK_RADIUS = 64, CARRY_OFFSET_Y = 6;
   function tryPickupOrDrop(){
     if (carried){
@@ -244,7 +286,7 @@ function createGameLayer(rootSelector, canvasId, opts = {}) {
     }
   }
 
-  // spawn
+  // Spawn
   function placeStart(){
     const cols = colliders();
     if (cols.length){
@@ -257,55 +299,56 @@ function createGameLayer(rootSelector, canvasId, opts = {}) {
   }
   placeStart();
 
-  // handoff callbacks
+  // Handoffs
   let onFallOut = null, onExitTop = null;
   let fallArmed=false, touchedGroundOnce=false;
   setTimeout(()=> fallArmed = true, 500);
 
-  // anti-spam spawn sur les “?” (par bouton)
+  // Anti-spam spawn sur les “?” (par bouton)
   const bumpCooldownMs = 220;
   const lastBumpAt = new Map();
 
-  // loop
+  // Boucle
   let last = performance.now();
   function loop(now){
+    if (!running) { requestAnimationFrame(loop); return; }
     const dt = Math.min(0.033, (now-last)/1000); last = now;
 
     if (!enabled){ ctx.clearRect(0,0,canvas.width,canvas.height); requestAnimationFrame(loop); return; }
 
     if (interactPressed){ tryPickupOrDrop(); interactPressed=false; }
 
-    // input
+    // Input
     let ax = 0;
     if (keys.left)  { ax -= 1; player.facing = -1; }
     if (keys.right) { ax += 1; player.facing =  1; }
     player.vx = ax ? (ax*player.speed*dt) + player.vx*0.6 : player.vx*FRICTION;
 
-    // gravité + saut
+    // Gravité + saut
     player.vy += G*dt; if (player.vy > MAX_FALL) player.vy = MAX_FALL;
     if (keys.up && player.onGround){ player.vy = -player.jump; player.onGround=false; }
 
-    // collisions
+    // Collisions
     const cols = colliders();
     const res  = resolve(player.x, player.y, player.vx*dt, player.vy*dt, player.w, player.h, cols);
-    const prevY = player.y; // utile pour tester la direction avant mise à jour
+    const prevY = player.y;
     player.x=res.x; player.y=res.y; player.onGround=res.onGround;
     player.vx=res.vx/dt; player.vy=res.vy/dt;
 
     if (player.onGround) touchedGroundOnce = true;
 
-    // sortie bas
+    // Sortie bas
     const rootRect = root.getBoundingClientRect();
     if (fallArmed && touchedGroundOnce && (player.y + player.h) > rootRect.height + 4 && typeof onFallOut === 'function'){
       onFallOut({ x: player.x + player.w/2, facing: player.facing });
       fallArmed = false; setTimeout(()=> fallArmed = true, 300);
     }
-    // sortie haut (pour la grotte)
+    // Sortie haut
     if ((player.y + player.h) < -8 && typeof onExitTop === 'function'){
       onExitTop({ x: player.x + player.w/2, facing: player.facing });
     }
 
-    // rebond sur bouncers
+    // Rebond sur bouncers
     if (player.vy > 0){
       const left=player.x, right=player.x+player.w, bottom=player.y+player.h;
       for(const it of items){
@@ -317,18 +360,18 @@ function createGameLayer(rootSelector, canvasId, opts = {}) {
       }
     }
 
-    // cogner les “?” par dessous (uniquement dans le header)
+    // Cogner les “?” par dessous (uniquement dans le header)
     if (QBOX && root.matches('.top-hero') && prevY > player.y && player.vy < 0){
       const rH = root.getBoundingClientRect();
       const headLeft  = player.x;
       const headRight = player.x + player.w;
-      const headY     = player.y; // haut du joueur
+      const headY     = player.y;
 
       QBOX.buttons.forEach(btn=>{
         const br = btn.getBoundingClientRect();
         const bx = br.left - rH.left, by = br.top - rH.top, bw = br.width, bh = br.height;
         const overlapX = headRight > bx && headLeft < bx + bw;
-        const touchingBottom = (headY <= by + bh) && (headY >= by + bh - 10); // proximité sous la box
+        const touchingBottom = (headY <= by + bh) && (headY >= by + bh - 10);
         if (overlapX && touchingBottom){
           const lastT = lastBumpAt.get(btn) || 0;
           if (now - lastT > bumpCooldownMs){
@@ -342,34 +385,34 @@ function createGameLayer(rootSelector, canvasId, opts = {}) {
       });
     }
 
-    // anim
+    // Anim
     anim.t += dt; const spf = 1/SPR.fps;
     while (anim.t >= spf){ anim.t -= spf; anim.frame = (anim.frame+1)%SPR.count; }
 
-    // items (gravité)
+    // Items (gravité)
     for(const it of items){
       if (it.carrying || !it.gravity || it.atRest) continue;
       it.vy += G*dt; if (it.vy > MAX_FALL) it.vy = MAX_FALL;
       const rI = resolveItemVertical(it, it.vy*dt, cols);
       it.y = rI.y; it.vy = rI.vy/dt; if (rI.onGround){ it.atRest=true; it.vy=0; }
     }
-    // item porté au-dessus de la tête
+    // Item porté au-dessus de la tête
     if (carried){
       carried.x = Math.round(player.x + player.w/2 - carried.w/2);
       carried.y = Math.round(player.y - carried.h - 6);
     }
 
-    // draw
+    // Draw
     ctx.clearRect(0,0,canvas.width,canvas.height);
 
-    // items
+    // Items
     for(const it of items){
       const x=Math.round(it.x), y=Math.round(it.y);
       if (it.img?.complete) ctx.drawImage(it.img, x,y,it.w,it.h);
       else { ctx.fillStyle='#67b7ff'; ctx.fillRect(x,y,it.w,it.h); ctx.strokeStyle='#0e2a3a'; ctx.lineWidth=2; ctx.strokeRect(x+1,y+1,it.w-2,it.h-2); }
     }
 
-    // perso
+    // Perso
     const f=anim.frame, sx=(f%SPR.cols)*SPR.w, sy=Math.floor(f/SPR.cols)*SPR.h;
     const dw=SPR.w*SPR.scale, dh=SPR.h*SPR.scale;
     const feetX=player.x+player.w/2, feetY=player.y+player.h;
@@ -385,6 +428,11 @@ function createGameLayer(rootSelector, canvasId, opts = {}) {
     requestAnimationFrame(loop);
   }
   requestAnimationFrame(loop);
+
+  // Pause/reprise si onglet caché (perf/batterie)
+  document.addEventListener('visibilitychange', () => {
+    running = !document.hidden; 
+  });
 
   return {
     enable(){ enabled=true; canvas.style.display='block'; touchedGroundOnce=false; fallArmed=false; setTimeout(()=>fallArmed=true,500); },
@@ -417,31 +465,31 @@ const aboutLayer  = createGameLayer('#about.about-cave', 'gameLayerAbout', {
   ]
 });
 
-// état initial
+// État initial
 aboutLayer?.disable();
 window.gameLayer = headerLayer;
 
-// handoff bas (header -> about)
+// Handoff bas (header -> about)
 headerLayer?.setOnFallOut((state)=>{
   headerLayer.disable();
   aboutLayer.enable();
   aboutLayer.setState({ x: state.x, facing: state.facing });
-  document.getElementById('about')?.scrollIntoView({ behavior:'smooth' });
+  document.getElementById('about')?.scrollIntoView({ behavior: prefersReducedMotion ? 'auto' : 'smooth' });
   window.gameLayer = aboutLayer;
 });
 
-// sortie haut (about -> header)
+// Sortie haut (about -> header)
 aboutLayer?.setOnExitTop(()=>{
   aboutLayer.disable();
   headerLayer.enable();
   headerLayer.setState({ x: 64, facing: 1 });
-  document.querySelector('.top-hero')?.scrollIntoView({ behavior:'smooth' });
+  document.querySelector('.top-hero')?.scrollIntoView({ behavior: prefersReducedMotion ? 'auto' : 'smooth' });
   document.body.classList.add('mode-game');
   document.body.classList.remove('mode-mouse');
   window.gameLayer = headerLayer;
 });
 
-// clic “Who I am ?”
+// Clic “Who I am ?”
 document.addEventListener('click', (e) => {
   const link = e.target.closest('a.who-btn');
   if (!link) return;
@@ -449,13 +497,13 @@ document.addEventListener('click', (e) => {
   headerLayer?.disable();
   aboutLayer?.enable();
   aboutLayer?.setState({ x: 64, facing: 1 });
-  document.getElementById('about')?.scrollIntoView({ behavior:'smooth' });
+  document.getElementById('about')?.scrollIntoView({ behavior: prefersReducedMotion ? 'auto' : 'smooth' });
   document.body.classList.remove('mode-game');
   document.body.classList.add('mode-mouse');
   window.gameLayer = aboutLayer;
 });
 
-// clic “Back to start”
+// Clic “Back to start”
 document.addEventListener('click', (e) => {
   const link = e.target.closest('a.back-btn');
   if (!link) return;
@@ -463,7 +511,7 @@ document.addEventListener('click', (e) => {
   aboutLayer?.disable();
   headerLayer?.enable();
   headerLayer?.setState({ x: 64, facing: 1 });
-  document.querySelector('.top-hero')?.scrollIntoView({ behavior:'smooth' });
+  document.querySelector('.top-hero')?.scrollIntoView({ behavior: prefersReducedMotion ? 'auto' : 'smooth' });
   document.body.classList.add('mode-game');
   document.body.classList.remove('mode-mouse');
   window.gameLayer = headerLayer;
@@ -481,11 +529,15 @@ document.addEventListener('click', (e) => {
     function open(){ panel.hidden=false; requestAnimationFrame(()=>panel.classList.add('open')); head.setAttribute('aria-expanded','true'); }
     function close(){ panel.classList.remove('open'); head.setAttribute('aria-expanded','false'); setTimeout(()=>{ if(!panel.classList.contains('open')) panel.hidden=true; },320); }
     head.addEventListener('click', ()=> (head.getAttribute('aria-expanded')==='true') ? close() : open());
+    head.addEventListener('keydown', (e)=>{ if(e.code==='Enter' || e.code==='Space'){ e.preventDefault(); head.click(); }});
   }
   setup('.info-toggle.left  .info-head');
   setup('.info-toggle.right .info-head');
 })();
 
+/* =========================
+   Controls Hints
+========================= */
 (function setupControlsHints(){
   const hints = document.getElementById('controlsHints');
   const chip  = document.getElementById('helpChip');
@@ -496,16 +548,19 @@ document.addEventListener('click', (e) => {
 
   function showHints(ms=0){
     clearTimeout(autoHideTimer);
+    hints.hidden = false;
     hints.classList.add('show');
     if (ms) autoHideTimer = setTimeout(hideHints, ms);
   }
   function hideHints(){
     clearTimeout(autoHideTimer);
     hints.classList.remove('show');
+    // Retarde le hidden pour permettre une transition CSS
+    setTimeout(()=>{ if(!hints.classList.contains('show')) hints.hidden = true; }, 220);
   }
 
-  // Affiche au chargement puis cache après 6s
-  showHints(6000);
+  // Affiche au chargement puis cache après 6s (sauf si R.M.)
+  if (!prefersReducedMotion) showHints(6000);
 
   // Cache dès la première action de jeu (bouger ou sauter)
   const hideOnKeys = (e)=>{
