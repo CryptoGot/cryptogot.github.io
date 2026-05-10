@@ -138,7 +138,7 @@
 ===================================================== */
 .hero-title{
   position: absolute;
-  top: clamp(8px, 1.4vh, 14px);
+  top: clamp(70px, 9vh, 100px);   /* sous la nav bar (56px) avec marge */
   left: 50%;
   transform: translateX(-50%);
   z-index: 6;
@@ -149,7 +149,7 @@
 }
 @media (max-width: 700px){
   .hero-title{
-    top: clamp(8px, 1vh, 12px);
+    top: clamp(60px, 8vh, 80px);
   }
 }
 .title-banner.compact{
