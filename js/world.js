@@ -460,21 +460,23 @@
         }
       }
 
-      // 3) décorations : uniquement le décor principal de l'environnement
-      // (arbre, bâtiment, cactus, montagne) + eau pour le marais.
-      // Pas de rochers/buissons/fleurs : ils faisaient trop de petits carrés.
-      const decoCount = 10 + Math.floor(rand() * 4);
+      // 3) décorations : densité variable selon l'environnement.
+      // Pour le marais on veut peu de mares mais grandes (cf. DECO_SCALE).
+      // Pour les autres envs on garde une densité plus élevée d'arbres/bâtiments.
+      const decoCount = (env === 'marais')
+        ? 2 + Math.floor(rand() * 2)               // 2 à 3 mares max
+        : 10 + Math.floor(rand() * 4);             // 10 à 13 arbres/bâtiments
       let attempts = 0;
       let placed = 0;
       while (placed < decoCount && attempts < 100){
         attempts++;
         const dx = Math.floor(rand() * MAP_W);
         const dy = startY + 1 + Math.floor(rand() * (ZONE_H - 2));
-        if (Math.abs(dx - Math.round(pathX(dy))) <= 2) continue;
+        // Pour le marais on veut bien espacer les mares du chemin
+        const margin = (env === 'marais') ? 3 : 2;
+        if (Math.abs(dx - Math.round(pathX(dy))) <= margin) continue;
         const idx = dy * MAP_W + dx;
         if (map[idx] >= 3) continue;
-        // décor principal de l'environnement
-        // (pour marais : mare avec nénuphars dessinée dans drawDecor)
         map[idx] = 3;
         collisionMap[idx] = 1;
         placed++;
@@ -1196,11 +1198,14 @@
   }
 
   /* ============== RENDU DÉCOR (sprites isolés sur le sol coloré) ============== */
-  // Echelle d'agrandissement par type de décor (tile id) : valeurs > 1 rendent
+  // Échelle d'agrandissement par type de décor (tile id) : valeurs > 1 rendent
   // l'élément plus grand que sa case.
   // 3 = arbre/batiment/cactus/montagne, 4 = rocher/buisson, 5 = fleur,
   // 6 = eau, 7 = pancarte
   const DECO_SCALE = { 3: 2.0, 4: 1.4, 5: 1.0, 6: 1.2, 7: 1.6 };
+  // Override par environnement pour le décor principal (id=3) :
+  // les mares du marais doivent être beaucoup plus grandes.
+  const DECO_ENV_SCALE = { marais: 3.5 };
 
   function drawDecorations(offsetX, offsetY, sc){
     const drawnTile = TILE * sc;
@@ -1230,7 +1235,8 @@
       const ts = tilesets[env];
       const sx = id * TILE;
 
-      const k = DECO_SCALE[id] || 1;
+      // override par env si défini (mares du marais plus grandes)
+      const k = (id === 3 && DECO_ENV_SCALE[env]) ? DECO_ENV_SCALE[env] : (DECO_SCALE[id] || 1);
       const dw = drawnTile * k;
       const dh = drawnTile * k;
       // ancrer le sprite par le bas centre (les arbres/maisons "poussent" du sol)
