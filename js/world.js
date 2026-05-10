@@ -76,14 +76,14 @@
   // Couleurs flat par zone (style cell-shading / dessin animé)
   // g1 = couleur principale, g2 = nuance secondaire, accent = highlight, deco couleur du décor
   const PAL = {
-    foret:    { g1:'#3a7a3a', g2:'#2d5e2d', accent:'#5fa84f', deco:'#1e3010', trunk:'#3a2515', flower:'#ffe066' },
-    ville:    { g1:'#a8acb4', g2:'#82868c', accent:'#c4c8d0', deco:'#3a3e44', trunk:'#3a3e44', flower:'#dadada' },
-    plaine:   { g1:'#a8e068', g2:'#7eb84a', accent:'#cbf088', deco:'#3a6a1a', trunk:'#5a3a20', flower:'#fff060' },
-    marais:   { g1:'#6a6038', g2:'#4a4028', accent:'#8a8050', deco:'#3a3018', trunk:'#2a1e10', flower:'#9aa8b0' },
-    montagne: { g1:'#9090a0', g2:'#6a6a7a', accent:'#c0c0d0', deco:'#4a4a5a', trunk:'#3a2a2a', flower:'#fff'    },
-    desert:   { g1:'#e8c878', g2:'#c8a44e', accent:'#f4dc9c', deco:'#3a7020', trunk:'#5a8a40', flower:'#ff8050' },
-    plage:    { g1:'#f4e0a0', g2:'#d8c478', accent:'#fff0c8', deco:'#3a8a30', trunk:'#5a3a20', flower:'#ff8080' },
-    neige:    { g1:'#f0f4f8', g2:'#cdd6e0', accent:'#dfe7f0', deco:'#1e3010', trunk:'#3a2a1a', flower:'#dfe7f0' }
+    foret:    { g1:'#3a7a3a', g2:'#2d5e2d', g3:'#1e3010', accent:'#5fa84f', deco:'#1e3010', trunk:'#3a2515', flower:'#ffe066', water:null         },
+    ville:    { g1:'#a8acb4', g2:'#82868c', g3:'#5a5e64', accent:'#c4c8d0', deco:'#3a3e44', trunk:'#3a3e44', flower:'#dadada', water:null         },
+    plaine:   { g1:'#a8e068', g2:'#7eb84a', g3:'#5a8a30', accent:'#cbf088', deco:'#3a6a1a', trunk:'#5a3a20', flower:'#fff060', water:null         },
+    marais:   { g1:'#6a6038', g2:'#4a4028', g3:'#3a2e1a', accent:'#8a8050', deco:'#3a3018', trunk:'#2a1e10', flower:'#9aa8b0', water:'#3a4a4a'    },
+    montagne: { g1:'#9090a0', g2:'#6a6a7a', g3:'#4a4a5a', accent:'#c0c0d0', deco:'#4a4a5a', trunk:'#3a2a2a', flower:'#cfd0d8', water:null         },
+    desert:   { g1:'#e8c878', g2:'#c8a44e', g3:'#a07c30', accent:'#f4dc9c', deco:'#3a7020', trunk:'#5a8a40', flower:'#ff8050', water:null         },
+    plage:    { g1:'#f4e0a0', g2:'#d8c478', g3:'#b89058', accent:'#fff0c8', deco:'#3a8a30', trunk:'#5a3a20', flower:'#ff8080', water:'#3a8aaa'    },
+    neige:    { g1:'#f0f4f8', g2:'#cdd6e0', g3:'#a8b8c8', accent:'#dfe7f0', deco:'#1e3010', trunk:'#3a2a1a', flower:'#dfe7f0', water:null         }
   };
   const BG_COLOR = '#cccccc'; // fond global gris (zones non couvertes)
   const PATH_COLOR = '#b08050'; // marron clair pour le chemin
@@ -300,14 +300,27 @@
 
   function drawWater(tc, t, pal){
     const x = t * TILE;
-    tc.fillStyle = pal.water;
+    tc.clearRect(x, 0, TILE, TILE);
+    const water = pal.water || '#3a8aaa';
+    tc.fillStyle = water;
     tc.fillRect(x, 0, TILE, TILE);
-    // vagues
-    tc.fillStyle = 'rgba(255,255,255,.25)';
+    // vagues : couleur eau plus claire (pas de blanc transparent)
+    // on calcule une teinte plus claire à partir de pal.water
+    tc.fillStyle = lighten(water, 0.18);
     tc.fillRect(x+4, 8, 6, 1);
     tc.fillRect(x+18, 14, 8, 1);
     tc.fillRect(x+10, 22, 6, 1);
     tc.fillRect(x+22, 26, 6, 1);
+  }
+
+  // Helper : éclaircit une couleur hex de "amount" (0..1)
+  function lighten(hex, amount){
+    const m = hex.match(/^#([0-9a-f]{2})([0-9a-f]{2})([0-9a-f]{2})$/i);
+    if (!m) return hex;
+    const r = Math.min(255, Math.round(parseInt(m[1], 16) + (255 - parseInt(m[1], 16)) * amount));
+    const g = Math.min(255, Math.round(parseInt(m[2], 16) + (255 - parseInt(m[2], 16)) * amount));
+    const b = Math.min(255, Math.round(parseInt(m[3], 16) + (255 - parseInt(m[3], 16)) * amount));
+    return '#' + r.toString(16).padStart(2,'0') + g.toString(16).padStart(2,'0') + b.toString(16).padStart(2,'0');
   }
 
   function drawSign(tc, t, pal){
@@ -1001,35 +1014,55 @@
       const yBotScreen = yBotWorld * sc + offsetY;
       if (yBotScreen < -100 || yTopScreen > viewH + 100) continue;
 
-      // Construire le polygone : top edge wavy → right side → bottom edge wavy → left side
+      // === Cas spécial PLAGE : mer sur les bords gauche et droit ===
+      // On peint d'abord deux bandes de mer puis on dessine la plage au-dessus
+      // (avec largeur réduite pour laisser la mer visible)
+      if (env === 'plage' && pal.water){
+        ctx.fillStyle = pal.water;
+        ctx.fillRect(offsetX, yTopScreen,
+                     drawnW, yBotScreen - yTopScreen);
+        // vaguelettes pour donner du relief sur la mer
+        const waveColor = lighten(pal.water, 0.18);
+        ctx.fillStyle = waveColor;
+        const waveStep = 18;
+        for (let yy = yTopScreen; yy < yBotScreen; yy += waveStep){
+          for (let xx = offsetX + 6; xx < offsetX + drawnW; xx += 30){
+            const ox = ((yy / waveStep) | 0) % 2 === 0 ? 0 : 14;
+            ctx.fillRect(xx + ox, yy + 4, 8, 2);
+          }
+        }
+      }
+
+      // Pour la plage : l'île de sable n'occupe pas toute la largeur.
+      // 4 tuiles d'eau de chaque côté (visible pour la mer).
+      const SHORE_INSET = (env === 'plage') ? 4 * drawnTile : 0;
+      const xLeft  = offsetX + SHORE_INSET;
+      const xRight = offsetX + drawnW - SHORE_INSET;
+      const insetW = xRight - xLeft;
+
+      // Construire le polygone
       ctx.beginPath();
-      // Top edge (uniquement entre zones, pas sur la première)
       if (z === 0){
-        // top : ligne droite tout en haut
-        ctx.moveTo(offsetX, yTopScreen);
-        ctx.lineTo(offsetX + drawnW, yTopScreen);
+        ctx.moveTo(xLeft, yTopScreen);
+        ctx.lineTo(xRight, yTopScreen);
       } else {
-        // top : ondulation entre zone z-1 et z
-        ctx.moveTo(offsetX, yTopScreen);
+        ctx.moveTo(xLeft, yTopScreen);
         for (let i = 1; i <= NPTS; i++){
           const t = i / NPTS;
           const wave = Math.sin(t * Math.PI * 3 + z * 1.7) * WAVE_AMP * drawnTile;
-          ctx.lineTo(offsetX + t * drawnW, yTopScreen + wave);
+          ctx.lineTo(xLeft + t * insetW, yTopScreen + wave);
         }
       }
-      // Right side : ligne droite
-      ctx.lineTo(offsetX + drawnW, yBotScreen);
-      // Bottom edge (uniquement si pas la dernière zone, sinon ligne droite)
+      ctx.lineTo(xRight, yBotScreen);
       if (z === NUM_ZONES - 1){
-        ctx.lineTo(offsetX, yBotScreen);
+        ctx.lineTo(xLeft, yBotScreen);
       } else {
         for (let i = NPTS - 1; i >= 0; i--){
           const t = i / NPTS;
           const wave = Math.sin(t * Math.PI * 3 + (z + 1) * 1.7) * WAVE_AMP * drawnTile;
-          ctx.lineTo(offsetX + t * drawnW, yBotScreen + wave);
+          ctx.lineTo(xLeft + t * insetW, yBotScreen + wave);
         }
       }
-      // Left side
       ctx.closePath();
 
       // Remplissage couleur principale
