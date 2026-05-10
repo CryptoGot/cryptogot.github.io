@@ -83,7 +83,7 @@
     montagne: { g1:'#9090a0', g2:'#6a6a7a', accent:'#c0c0d0', deco:'#4a4a5a', trunk:'#3a2a2a', flower:'#fff'    },
     desert:   { g1:'#e8c878', g2:'#c8a44e', accent:'#f4dc9c', deco:'#3a7020', trunk:'#5a8a40', flower:'#ff8050' },
     plage:    { g1:'#f4e0a0', g2:'#d8c478', accent:'#fff0c8', deco:'#3a8a30', trunk:'#5a3a20', flower:'#ff8080' },
-    neige:    { g1:'#f0f4f8', g2:'#cdd6e0', accent:'#ffffff', deco:'#1e3010', trunk:'#3a2a1a', flower:'#fff'    }
+    neige:    { g1:'#f0f4f8', g2:'#cdd6e0', accent:'#dfe7f0', deco:'#1e3010', trunk:'#3a2a1a', flower:'#dfe7f0' }
   };
   const BG_COLOR = '#cccccc'; // fond global gris (zones non couvertes)
   const PATH_COLOR = '#b08050'; // marron clair pour le chemin
@@ -196,11 +196,11 @@
       tc.fillRect(x+18, 10, 2, 2);
 
       if (env === 'neige'){
-        // neige sur l'arbre
-        tc.fillStyle = '#fff';
-        tc.fillRect(x+10, 4, 4, 2);
-        tc.fillRect(x+14, 6, 6, 2);
-        tc.fillRect(x+16, 10, 4, 2);
+        // neige sur l'arbre (couleur très légèrement teintée pour ne pas
+        // creer de gros points blancs disgracieux)
+        tc.fillStyle = '#e8eef4';
+        tc.fillRect(x+12, 5, 4, 2);
+        tc.fillRect(x+15, 8, 4, 2);
       }
     } else if (env === 'ville'){
       // BÂTIMENT
@@ -233,8 +233,8 @@
         tc.fillStyle = pal.leaf;
       }
     } else if (env === 'montagne'){
-      // PIC ROCHEUX
-      tc.fillStyle = pal.g3;
+      // PIC ROCHEUX (sans sommet blanc, juste la roche grise)
+      tc.fillStyle = pal.g2;
       const peak = [
         [14, 4, 4, 4],
         [12, 8, 8, 4],
@@ -246,30 +246,20 @@
       for (const [bx, by, bw, bh] of peak){
         tc.fillRect(x+bx, by, bw, bh);
       }
-      // sommet enneigé
-      tc.fillStyle = '#fff';
-      tc.fillRect(x+14, 4, 4, 2);
-      tc.fillRect(x+12, 6, 8, 2);
-      // ombre droite
+      // ombre droite (relief)
       tc.fillStyle = '#000';
       tc.globalAlpha = .25;
       tc.fillRect(x+18, 8, 4, 20);
       tc.globalAlpha = 1;
     } else if (env === 'desert'){
-      // CACTUS
-      tc.fillStyle = pal.leaf;
+      // CACTUS (vert sombre, sans épines blanches)
+      tc.fillStyle = pal.deco;
       tc.fillRect(x+13, 6, 6, 22);
       tc.fillRect(x+8,  14, 5, 8);
       tc.fillRect(x+19, 16, 5, 6);
-      tc.fillStyle = pal.accent;
       // ombre interne
+      tc.fillStyle = pal.trunk;
       tc.fillRect(x+13, 6, 1, 22);
-      tc.fillStyle = '#fff';
-      // épines (points)
-      for (let i = 0; i < 4; i++){
-        tc.fillRect(x+15, 9 + i*5, 1, 1);
-        tc.fillRect(x+10, 17 + i*2, 1, 1);
-      }
     }
   }
 
