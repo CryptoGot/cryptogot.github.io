@@ -221,17 +221,43 @@
       tc.fillStyle = '#ffd24a';
       tc.fillRect(x+19, 22, 1, 2); // poignée
     } else if (env === 'marais'){
-      // ROSEAUX
-      tc.fillStyle = pal.water;
-      tc.fillRect(x, 14, TILE, TILE-14);
-      tc.fillStyle = pal.leaf;
-      // 5 tiges
-      for (let i = 0; i < 5; i++){
-        tc.fillRect(x + 4 + i*5, 6 + (i%2)*2, 2, 18);
-        tc.fillStyle = pal.flower;
-        tc.fillRect(x + 4 + i*5 - 1, 4 + (i%2)*2, 4, 3);
-        tc.fillStyle = pal.leaf;
-      }
+      // MARE D'EAU SOMBRE avec nénuphars
+      const water  = pal.water || '#3a4a4a';
+      const lily   = '#3a7028';   // nénuphar vert sombre
+      const lilyHi = '#5fa84f';   // highlight
+      const lilyFlw = '#f4d8a8';  // petite fleur du nénuphar (blanc cassé)
+      // ombre extérieure de la mare
+      tc.fillStyle = 'rgba(0,0,0,.35)';
+      tc.fillRect(x+4, 26, 24, 4);
+      // surface d'eau (forme ovale en pixels)
+      tc.fillStyle = water;
+      tc.fillRect(x+8, 10, 16, 2);
+      tc.fillRect(x+6, 12, 20, 2);
+      tc.fillRect(x+4, 14, 24, 8);
+      tc.fillRect(x+6, 22, 20, 2);
+      tc.fillRect(x+8, 24, 16, 2);
+      // reflet de lumière sur le haut
+      tc.fillStyle = lighten(water, 0.22);
+      tc.fillRect(x+10, 11, 8, 1);
+      tc.fillRect(x+8, 13, 12, 1);
+      tc.fillRect(x+18, 18, 4, 1);
+      // ombre du bord interne (plus foncée)
+      tc.fillStyle = darken(water, 0.18);
+      tc.fillRect(x+8, 25, 16, 1);
+      // nénuphar 1 (gauche)
+      tc.fillStyle = lily;
+      tc.fillRect(x+7, 16, 6, 3);
+      tc.fillStyle = lilyHi;
+      tc.fillRect(x+8, 16, 2, 1);
+      tc.fillStyle = lilyFlw;
+      tc.fillRect(x+9, 17, 1, 1);
+      // nénuphar 2 (droit)
+      tc.fillStyle = lily;
+      tc.fillRect(x+18, 18, 6, 3);
+      tc.fillStyle = lilyHi;
+      tc.fillRect(x+19, 18, 2, 1);
+      tc.fillStyle = lilyFlw;
+      tc.fillRect(x+20, 19, 1, 1);
     } else if (env === 'montagne'){
       // PIC ROCHEUX (sans sommet blanc, juste la roche grise)
       tc.fillStyle = pal.g2;
@@ -320,6 +346,15 @@
     const r = Math.min(255, Math.round(parseInt(m[1], 16) + (255 - parseInt(m[1], 16)) * amount));
     const g = Math.min(255, Math.round(parseInt(m[2], 16) + (255 - parseInt(m[2], 16)) * amount));
     const b = Math.min(255, Math.round(parseInt(m[3], 16) + (255 - parseInt(m[3], 16)) * amount));
+    return '#' + r.toString(16).padStart(2,'0') + g.toString(16).padStart(2,'0') + b.toString(16).padStart(2,'0');
+  }
+  // Helper : assombrit une couleur hex
+  function darken(hex, amount){
+    const m = hex.match(/^#([0-9a-f]{2})([0-9a-f]{2})([0-9a-f]{2})$/i);
+    if (!m) return hex;
+    const r = Math.max(0, Math.round(parseInt(m[1], 16) * (1 - amount)));
+    const g = Math.max(0, Math.round(parseInt(m[2], 16) * (1 - amount)));
+    const b = Math.max(0, Math.round(parseInt(m[3], 16) * (1 - amount)));
     return '#' + r.toString(16).padStart(2,'0') + g.toString(16).padStart(2,'0') + b.toString(16).padStart(2,'0');
   }
 
@@ -438,11 +473,9 @@
         if (Math.abs(dx - Math.round(pathX(dy))) <= 2) continue;
         const idx = dy * MAP_W + dx;
         if (map[idx] >= 3) continue;
-        const r = rand();
-        let tileId;
-        if (env === 'marais' && r < 0.35) tileId = 6;      // eau pour marais
-        else                              tileId = 3;      // décor principal
-        map[idx] = tileId;
+        // décor principal de l'environnement
+        // (pour marais : mare avec nénuphars dessinée dans drawDecor)
+        map[idx] = 3;
         collisionMap[idx] = 1;
         placed++;
       }
@@ -883,6 +916,8 @@
       if (progressLabel){
         progressLabel.textContent = `${zIdx + 1}/${NUM_ZONES}  ${info?.titre || ''}`.trim();
       }
+      // marque la dernière zone pour cacher la flèche "continue vers le bas"
+      document.body.classList.toggle('in-last-zone', zIdx === NUM_ZONES - 1);
     }
   }
 

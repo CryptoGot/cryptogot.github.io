@@ -803,13 +803,13 @@ body.in-world .world-hud{
 
 .world-controls-hint{
   position: fixed;
-  bottom: clamp(12px, 3vw, 24px);
+  top: 110px;          /* sous la nav + le world-hud */
   left: 50%;
   transform: translateX(-50%);
   z-index: 50;
-  background: rgba(0,0,0,.7);
+  background: rgba(0,0,0,.78);
   color: #fff;
-  padding: 8px 16px;
+  padding: 8px 18px;
   border-radius: 999px;
   border: 2px solid #ffd24a;
   font-size: clamp(11px, 1.6vw, 14px);
@@ -817,10 +817,53 @@ body.in-world .world-hud{
   pointer-events: none;
   opacity: 0;
   transition: opacity .3s ease;
+  max-width: calc(100vw - 32px);
 }
 .world-controls-hint p{ margin: 0; }
 body.in-world .world-controls-hint{ opacity: 1; }
 body.in-world .world-controls-hint.fade-out{ opacity: 0; }
+
+/* Indicateur permanent en bas du viewport : flèche + texte "continue vers le bas".
+   Disparaît quand on est dans la dernière zone. */
+.world-down-hint{
+  position: fixed;
+  bottom: clamp(14px, 3vw, 28px);
+  right: clamp(14px, 3vw, 28px);
+  z-index: 50;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity .3s ease;
+}
+body.in-world .world-down-hint{ opacity: 1; }
+body.in-world.in-last-zone .world-down-hint{ opacity: 0; }
+
+.world-down-arrow{
+  font-size: clamp(28px, 4vw, 40px);
+  color: #ffd24a;
+  font-weight: 900;
+  line-height: 1;
+  text-shadow: 0 3px 0 #5b3812, 0 0 12px rgba(0,0,0,.5);
+  animation: downBounce 1s ease-in-out infinite;
+}
+.world-down-text{
+  background: rgba(0,0,0,.78);
+  color: #ffd24a;
+  border: 2px solid #ffd24a;
+  border-radius: 999px;
+  padding: 4px 10px;
+  font-family: "Anton", system-ui, sans-serif;
+  font-size: clamp(10px, 1.3vw, 13px);
+  letter-spacing: .04em;
+  white-space: nowrap;
+}
+@keyframes downBounce{
+  0%, 100% { transform: translateY(0); }
+  50%      { transform: translateY(8px); }
+}
 
 /* Labels HTML par-dessus les pancartes du canvas (texte propre) */
 .sign-labels-layer{
