@@ -422,24 +422,24 @@
         }
       }
 
-      // 3) décorations (arbres/bâtiments/cactus)
-      const decoCount = 14 + Math.floor(rand() * 6);
+      // 3) décorations (arbres/bâtiments/cactus/rochers/eau)
+      // On enleve les fleurs (id 5) qui faisaient des petits points blancs
+      // disgracieux dispersés dans le décor.
+      const decoCount = 12 + Math.floor(rand() * 5);
       let attempts = 0;
       let placed = 0;
       while (placed < decoCount && attempts < 100){
         attempts++;
         const dx = Math.floor(rand() * MAP_W);
         const dy = startY + 1 + Math.floor(rand() * (ZONE_H - 2));
-        // pas sur le chemin (avec 2 tile de marge)
         if (Math.abs(dx - Math.round(pathX(dy))) <= 2) continue;
         const idx = dy * MAP_W + dx;
         if (map[idx] >= 3) continue;
         const r = rand();
         let tileId;
-        if (env === 'marais' && r < 0.5) tileId = 6;
-        else if (r < 0.55) tileId = 3;
-        else if (r < 0.85) tileId = 4;
-        else                tileId = 5;
+        if (env === 'marais' && r < 0.4) tileId = 6;       // eau pour marais
+        else if (r < 0.7) tileId = 3;                       // arbre/batiment principal
+        else              tileId = 4;                       // rocher/buisson
         map[idx] = tileId;
         if (tileId === 3 || tileId === 4 || tileId === 6) collisionMap[idx] = 1;
         placed++;
