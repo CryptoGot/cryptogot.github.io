@@ -126,13 +126,14 @@ body{ margin:0; font-family:Inter,system-ui,Segoe UI,Roboto,Arial,sans-serif; co
 }
 .qbtn .q{
   font-family:"Press Start 2P", system-ui, monospace;
-  font-size:var(--qSize);
+  /* taille du ? proportionnelle à la case (~55% de la case) */
+  font-size: clamp(14px, 3.6vw, 32px);
   line-height:1; user-select:none; color:var(--qColor);
+  display: inline-block;
+  text-align: center;
   text-shadow:
-    1px 0   var(--qOutline), -1px 0   var(--qOutline),
-    0   1px var(--qOutline),  0   -1px var(--qOutline),
-    1px 1px var(--qOutline), -1px 1px var(--qOutline),
-    1px -1px var(--qOutline),-1px -1px var(--qOutline),
+    1px 0 var(--qOutline), -1px 0 var(--qOutline),
+    0 1px var(--qOutline),  0 -1px var(--qOutline),
     var(--qDropX) var(--qDropY) 0 var(--qDrop);
 }
 .qbtn:hover{ transform:translateY(-2px); box-shadow:0 8px 0 #c85d32, 0 16px 28px rgba(0,0,0,.45) }
@@ -202,14 +203,7 @@ body{ margin:0; font-family:Inter,system-ui,Segoe UI,Roboto,Arial,sans-serif; co
   pointer-events: none; border: none; outline:none; box-shadow:none;
 }
 .platform.p2{
-  width: clamp(140px, 20vw, 360px);
-  height: 7svh;
-  right: clamp(12px, 5vw, 5vw);
-  bottom: calc(var(--gH) + 24svh);
-  border-top-left-radius: 8px; border-top-right-radius: 8px;
-}
-@media (max-width:900px){
-  .platform.p2{ width: clamp(160px, 26vw, 300px); right: 6vw; bottom: calc(var(--gH) + 26svh); }
+  display: none; /* ancienne plateforme à droite, remplacée par p3 au centre */
 }
 
 /* =====================================================

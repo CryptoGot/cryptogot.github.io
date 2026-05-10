@@ -480,12 +480,12 @@ window.addEventListener('scroll', () => {
   }
 }, { passive: true });
 
-// Clic "Qui suis-je ?" : ouvre le modal
+// Clic "Voir mes projets" : déclenche la chute vers le world top-down
 document.addEventListener('click', (e) => {
   const btn = e.target.closest('#whoBtn');
   if (!btn) return;
   e.preventDefault();
-  showWhoModal();
+  triggerFallToWorld();
 });
 
 /* =========================
@@ -561,6 +561,53 @@ document.addEventListener('click', (e) => {
 })();
 
 /* =========================
+   Détection de proximité perso ↔ coffres pour le prompt "E"
+========================= */
+(function setupChestProximity(){
+  const NEAR_DIST = 90; // pixels écran
+  let lastNearby = null;
+
+  function tick(){
+    const heroEl = document.querySelector('.top-hero');
+    const layer = window.gameLayer;
+    if (heroEl && layer && typeof layer.getState === 'function'){
+      const heroRect = heroEl.getBoundingClientRect();
+      const state = layer.getState();
+      // centre du joueur en coordonnées écran
+      const px = heroRect.left + state.x + 18;
+      const py = heroRect.top  + state.y + 24;
+
+      let nearest = null;
+      let bestD = NEAR_DIST;
+      document.querySelectorAll('.treasure-chest').forEach(chest => {
+        const r = chest.getBoundingClientRect();
+        const cx = r.left + r.width  / 2;
+        const cy = r.top  + r.height / 2;
+        const d  = Math.hypot(cx - px, cy - py);
+        const close = d < NEAR_DIST;
+        chest.classList.toggle('near', close);
+        if (close && d < bestD){ bestD = d; nearest = chest; }
+      });
+      lastNearby = nearest;
+      window._nearbyChest = nearest;
+    }
+    requestAnimationFrame(tick);
+  }
+  requestAnimationFrame(tick);
+
+  // Touche E ouvre le coffre proche (uniquement quand on est dans le top-hero)
+  window.addEventListener('keydown', (e) => {
+    if (e.code !== 'KeyE') return;
+    const tag = (e.target.tagName || '').toUpperCase();
+    if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT' || e.target.isContentEditable) return;
+    if (window._nearbyChest){
+      e.preventDefault();
+      window._nearbyChest.click();
+    }
+  }, { passive: false });
+})();
+
+/* =========================
    Setup des 3 coffres : Forces, Projet pro, Faiblesses
 ========================= */
 (function setupChests(){
@@ -615,19 +662,7 @@ function showChestModal(kind){
   openModal(modal);
 }
 
-function showWhoModal(){
-  if (!window.PORTFOLIO) return;
-  const modal = document.getElementById('modalWho');
-  const body  = document.getElementById('modalWhoBody');
-  if (!modal || !body) return;
-  body.innerHTML = `
-    <p>Je m'appelle <strong>Aurélien Lannoye</strong>, j'ai 22 ans et je suis étudiant en Bac 3 Technologies de l'Informatique à l'EPHEC (Louvain-la-Neuve).</p>
-    <p>Mon projet professionnel : devenir <strong>game developer indépendant</strong> et continuer à créer mes propres jeux et SaaS, de la conception à la publication.</p>
-    <p>Deux de mes jeux sont déjà publiés sur Steam (Somnum et Escape The Brainrots), mon TFE GamAI est en ligne, et je passe la plupart de mon temps libre à apprendre Unity, Unreal, Blender, et tout ce qui peut servir à créer des univers.</p>
-    <p>Tombe dans le trou central pour explorer mes activités d'acquisition de compétences, organisées en <strong>huit thèmes</strong>.</p>
-  `;
-  openModal(modal);
-}
+/* (showWhoModal supprimé : la présentation est désormais dans le coffre Projet pro) */
 
 function escapeHtml(s){
   return String(s).replace(/[&<>"']/g, c => ({

@@ -10,74 +10,120 @@
 }
 
 /* =====================================================
-   TITRE COMPACT (top-hero, plus petit, en haut centre)
+   TITRE COMPACT (top-hero, tout en haut centre, au-dessus
+   des chips Jeu/Souris et des cases ?)
 ===================================================== */
 .hero-title{
   position: absolute;
-  top: clamp(110px, 12vh, 130px);
+  top: clamp(8px, 1.4vh, 14px);
   left: 50%;
   transform: translateX(-50%);
-  z-index: 2;
+  z-index: 6;
   display: flex;
   justify-content: center;
   max-width: calc(100vw - 32px);
+  pointer-events: none;
 }
 @media (max-width: 700px){
   .hero-title{
-    top: clamp(150px, 18vh, 180px);
+    top: clamp(8px, 1vh, 12px);
   }
 }
 .title-banner.compact{
-  padding: clamp(10px, 1.6vw, 16px) clamp(16px, 2.6vw, 28px);
+  padding: clamp(6px, 1vw, 10px) clamp(14px, 2.4vw, 24px);
   text-align: center;
   display: inline-block;
   background: #c85d32;
+  pointer-events: auto;
 }
 .title.compact-portfolio{
-  font-size: clamp(18px, 3.2vw, 30px);
+  font-size: clamp(14px, 2.2vw, 22px);
   margin: 0;
   display: block;
   text-align: center;
   line-height: 1;
-  --m-stroke: 2px;
-  --m-off: 3px;
+  --m-stroke: 1.5px;
+  --m-off: 2px;
   letter-spacing: .04em;
-  padding: 0 0 .15em;
+  padding: 0 0 .12em;
 }
 .title.compact-name{
-  font-size: clamp(20px, 3.6vw, 36px);
+  font-size: clamp(16px, 2.6vw, 26px);
   margin: 0;
   display: block;
   text-align: center;
   line-height: 1;
   transform: none;
-  --m-stroke: 2.4px;
-  --m-off: 4px;
+  --m-stroke: 1.8px;
+  --m-off: 3px;
   letter-spacing: .03em;
 }
 
+/* CTA "Voir mes projets" : juste au-dessus du trou central, avec flèche dedans */
 .hero-cta{
   position: absolute;
-  top: 50%;
+  bottom: calc(var(--gH) + 10px);
   left: 50%;
-  transform: translate(-50%, -50%);
+  transform: translateX(-50%);
   z-index: 3;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 10px;
+  gap: 4px;
+  pointer-events: none;
 }
 .hero-cta .who-btn{
   position: static;
   transform: none;
+  pointer-events: auto;
+  padding: 10px 20px;
+  font-size: clamp(13px, 1.8vw, 17px);
 }
-.hero-cta .who-arrow{
+.hero-cta .who-arrow.arrow-jump{
   position: static;
   transform: none;
+  width: clamp(28px, 4vw, 38px);
+  height: clamp(36px, 5vw, 50px);
+  display: grid;
+  place-items: center;
+  filter: drop-shadow(0 3px 0 rgba(0,0,0,.35));
+  animation: arrowJump 1.4s ease-in-out infinite;
+}
+.hero-cta .who-arrow.arrow-jump svg{
+  width: 100%;
+  height: 100%;
+}
+.hero-cta .who-arrow.arrow-jump::before{
+  display: none;
+}
+@keyframes arrowJump{
+  0%, 100% { transform: translateY(0); }
+  50%      { transform: translateY(8px); }
 }
 
-/* L'ancien hero-center est neutralisé (titre compact en haut désormais) */
+/* L'ancien hero-center est neutralisé */
 .hero-center{ display: none; }
+
+/* =====================================================
+   PLATEFORME CENTRALE (p3) au-dessus du trou
+===================================================== */
+.platform.p3{
+  width: clamp(120px, 14vw, 220px);
+  height: 6svh;
+  left: 50%;
+  transform: translateX(-50%);
+  bottom: calc(var(--gH) + 32svh);
+  border-radius: 0;
+  background: var(--tiles) repeat left bottom / var(--tilesSize) var(--tilesSize);
+  image-rendering: pixelated;
+  z-index: 1;
+}
+@media (max-width: 700px){
+  .platform.p3{
+    width: clamp(100px, 30vw, 180px);
+    bottom: calc(var(--gH) + 30svh);
+  }
+}
 
 /* =====================================================
    COFFRES (3 sur le sol : Forces, Projet pro, Faiblesses)
@@ -101,16 +147,19 @@
 .treasure-chest:active{ transform: translateY(2px); }
 .treasure-chest.bumped{ animation: chestBump .3s ease; }
 
-/* Positions des 3 coffres */
+/* Positions des 3 coffres : forces gauche, projet centre sur p3, faiblesses droite */
 .chest-forces{
   left: clamp(30px, 8vw, 120px);
   bottom: calc(var(--gH) - 4px);
 }
 .chest-projet{
-  /* sur la plateforme p2 */
-  right: clamp(40px, 10vw, 160px);
-  bottom: calc(var(--gH) + 24svh + 7svh + 6px);
+  /* sur la plateforme centrale p3, juste au-dessus du trou */
+  left: 50%;
+  transform: translateX(-50%);
+  bottom: calc(var(--gH) + 32svh + 6svh + 4px);
 }
+.chest-projet:hover{ transform: translateX(-50%) translateY(-2px); }
+.chest-projet:active{ transform: translateX(-50%) translateY(2px); }
 .chest-faiblesses{
   right: clamp(30px, 8vw, 120px);
   bottom: calc(var(--gH) - 4px);
@@ -119,8 +168,43 @@
 @media (max-width: 700px){
   .chest-forces{ left: clamp(12px, 4vw, 40px); }
   .chest-faiblesses{ right: clamp(12px, 4vw, 40px); }
-  .chest-projet{ right: clamp(12px, 4vw, 40px); }
+  .chest-projet{ bottom: calc(var(--gH) + 30svh + 6svh + 4px); }
 }
+
+/* Prompt "E" affiché quand le perso est à proximité d'un coffre */
+.chest-key-prompt{
+  position: absolute;
+  top: -22px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: #fff8e8;
+  color: #5b3812;
+  border: 2px solid #5b3812;
+  border-radius: 50%;
+  width: 24px;
+  height: 24px;
+  font-family: "Press Start 2P", monospace;
+  font-size: 11px;
+  font-weight: 900;
+  display: grid;
+  place-items: center;
+  box-shadow: 0 3px 0 #5b3812;
+  opacity: 0;
+  transition: opacity .12s ease, transform .12s ease;
+  pointer-events: none;
+}
+.treasure-chest.near .chest-key-prompt{
+  opacity: 1;
+  transform: translateX(-50%) translateY(-3px);
+  animation: keyPromptBob .8s ease-in-out infinite;
+}
+@keyframes keyPromptBob{
+  0%, 100% { transform: translateX(-50%) translateY(-3px); }
+  50%      { transform: translateX(-50%) translateY(-7px); }
+}
+/* le hint de label reste visible séparément, on le cache quand "E" est montré */
+.treasure-chest.near .chest-hint{ opacity: 0; }
+.chest-hint{ transition: opacity .15s ease; }
 
 @keyframes chestBump{
   0%{ transform: translateY(0); }

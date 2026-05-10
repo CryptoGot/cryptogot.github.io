@@ -72,12 +72,6 @@
       </div>
     </div>
 
-    <!-- "Qui suis-je ?" : ouvre un modal -->
-    <div class="hero-cta">
-      <button id="whoBtn" class="who-btn" type="button">Qui suis-je ?</button>
-      <div class="who-arrow" aria-hidden="true"></div>
-    </div>
-
     <!-- Sol et plateformes -->
     <div class="ground-bar" aria-hidden="true">
       <div class="seg left collider"></div>
@@ -85,9 +79,10 @@
       <div class="seg right collider"></div>
     </div>
 
-    <div class="platform p2 collider" aria-hidden="true"></div>
+    <!-- Plateforme centrale (au-dessus du trou) avec coffre projet pro -->
+    <div class="platform p3 collider" aria-hidden="true"></div>
 
-    <!-- 3 COFFRES : Forces (vert), Projet pro (doré), Faiblesses (orange) -->
+    <!-- 3 COFFRES : Forces (vert) à gauche, Projet pro (doré) au centre sur p3, Faiblesses (orange) à droite -->
     <button class="treasure-chest chest-forces" id="chestForces" type="button"
             aria-label="Ouvrir le coffre Mes forces">
       <span class="chest-base"></span>
@@ -95,6 +90,7 @@
       <span class="chest-lock"></span>
       <span class="chest-glow" aria-hidden="true"></span>
       <span class="chest-hint">Mes forces</span>
+      <span class="chest-key-prompt" aria-hidden="true">E</span>
     </button>
 
     <button class="treasure-chest chest-projet" id="chestProjet" type="button"
@@ -104,6 +100,7 @@
       <span class="chest-lock"></span>
       <span class="chest-glow" aria-hidden="true"></span>
       <span class="chest-hint">Projet pro</span>
+      <span class="chest-key-prompt" aria-hidden="true">E</span>
     </button>
 
     <button class="treasure-chest chest-faiblesses" id="chestFaiblesses" type="button"
@@ -113,7 +110,18 @@
       <span class="chest-lock"></span>
       <span class="chest-glow" aria-hidden="true"></span>
       <span class="chest-hint">Mes faiblesses</span>
+      <span class="chest-key-prompt" aria-hidden="true">E</span>
     </button>
+
+    <!-- CTA "Voir mes projets" : pointe vers le trou, mène au top-down -->
+    <div class="hero-cta">
+      <button id="whoBtn" class="who-btn" type="button">Voir mes projets</button>
+      <div class="who-arrow arrow-jump" aria-hidden="true">
+        <svg viewBox="0 0 32 40" width="32" height="40" focusable="false">
+          <path d="M16 4 L16 28 M6 22 L16 32 L26 22" stroke="#1e2438" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+        </svg>
+      </div>
+    </div>
 
     <!-- Canvas du jeu -->
     <canvas id="gameLayer" class="game-layer" aria-hidden="true"></canvas>
@@ -142,18 +150,6 @@
       <canvas id="worldCanvas" class="world-canvas" aria-hidden="true"></canvas>
     </section>
   </main>
-
-  <!-- ========================================================
-       MODAL "Qui suis-je ?" (présentation perso)
-  ======================================================== -->
-  <div class="modal" id="modalWho" hidden role="dialog" aria-modal="true" aria-labelledby="modalWhoTitre">
-    <div class="modal-backdrop" data-modal-close></div>
-    <div class="modal-content">
-      <button class="modal-close" type="button" data-modal-close aria-label="Fermer">×</button>
-      <h2 id="modalWhoTitre" class="modal-title">Qui suis-je ?</h2>
-      <div class="modal-body" id="modalWhoBody"></div>
-    </div>
-  </div>
 
   <!-- ========================================================
        MODAL générique pour les coffres (Forces, Faiblesses, Projet pro)
