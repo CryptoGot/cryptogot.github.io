@@ -73,17 +73,22 @@
   window.addEventListener('resize', () => { resize(); }, { passive: true });
 
   /* ============== PALETTES ENVIRONNEMENTS ============== */
-  // Chaque palette est tirée pour pixel-art lisible et cohérent
+  // Couleurs flat par zone (style cell-shading / dessin animé)
+  // g1 = couleur principale, g2 = nuance secondaire, accent = highlight, deco couleur du décor
   const PAL = {
-    foret:    { g1:'#2d4a26', g2:'#3a5e30', g3:'#1e2f1a', accent:'#5a8a48',  trunk:'#3a2515', leaf:'#1a3010', flower:'#ffe066', water:null,        path:'#7a5c30', pathEdge:'#5a3e1a' },
-    ville:    { g1:'#82868c', g2:'#969aa2', g3:'#62666c', accent:'#a8acb4',  trunk:'#3a3e44', leaf:'#5a5e64', flower:'#dadada', water:null,        path:'#605860', pathEdge:'#403840' },
-    plaine:   { g1:'#7eb84a', g2:'#92ce5e', g3:'#5e9230', accent:'#bce06a',  trunk:'#5a3a20', leaf:'#3a6a1a', flower:'#fff060', water:null,        path:'#c8a060', pathEdge:'#9a7038' },
-    marais:   { g1:'#5a4a30', g2:'#6c5a3a', g3:'#3a2e1a', accent:'#7a6840',  trunk:'#2a1e10', leaf:'#3a5230', flower:'#7090a0', water:'#3a5a5a',   path:'#8a7050', pathEdge:'#5a4030' },
-    montagne: { g1:'#7a7a8a', g2:'#9090a0', g3:'#5a5a6a', accent:'#c0c0d0',  trunk:'#3a2a2a', leaf:'#fff',    flower:'#fff',    water:null,        path:'#605860', pathEdge:'#403840' },
-    desert:   { g1:'#d2a854', g2:'#e0bc70', g3:'#a07c30', accent:'#f0d090',  trunk:'#4a8a30', leaf:'#3a7020', flower:'#ff8050', water:null,        path:'#a07c30', pathEdge:'#806030' },
-    plage:    { g1:'#e8d080', g2:'#f4e0a0', g3:'#b89058', accent:'#fff4c8',  trunk:'#5a3a20', leaf:'#3a8a30', flower:'#ff8080', water:'#3a8aaa',   path:'#c8a060', pathEdge:'#9a7038' },
-    neige:    { g1:'#e8eef4', g2:'#fff',    g3:'#a8b8c8', accent:'#fff',     trunk:'#3a2a1a', leaf:'#1a3010', flower:'#fff',    water:null,        path:'#b8c0c8', pathEdge:'#788090' }
+    foret:    { g1:'#3a7a3a', g2:'#2d5e2d', accent:'#5fa84f', deco:'#1e3010', trunk:'#3a2515', flower:'#ffe066' },
+    ville:    { g1:'#a8acb4', g2:'#82868c', accent:'#c4c8d0', deco:'#3a3e44', trunk:'#3a3e44', flower:'#dadada' },
+    plaine:   { g1:'#a8e068', g2:'#7eb84a', accent:'#cbf088', deco:'#3a6a1a', trunk:'#5a3a20', flower:'#fff060' },
+    marais:   { g1:'#6a6038', g2:'#4a4028', accent:'#8a8050', deco:'#3a3018', trunk:'#2a1e10', flower:'#9aa8b0' },
+    montagne: { g1:'#9090a0', g2:'#6a6a7a', accent:'#c0c0d0', deco:'#4a4a5a', trunk:'#3a2a2a', flower:'#fff'    },
+    desert:   { g1:'#e8c878', g2:'#c8a44e', accent:'#f4dc9c', deco:'#3a7020', trunk:'#5a8a40', flower:'#ff8050' },
+    plage:    { g1:'#f4e0a0', g2:'#d8c478', accent:'#fff0c8', deco:'#3a8a30', trunk:'#5a3a20', flower:'#ff8080' },
+    neige:    { g1:'#f0f4f8', g2:'#cdd6e0', accent:'#ffffff', deco:'#1e3010', trunk:'#3a2a1a', flower:'#fff'    }
   };
+  const BG_COLOR = '#cccccc'; // fond global gris (zones non couvertes)
+  const PATH_COLOR = '#b08050'; // marron clair pour le chemin
+  const PATH_OUTLINE = '#000';
+  const ZONE_OUTLINE = '#000';
 
   /* ============== GÉNÉRATION DES TILESETS PIXEL ART ============== */
   // Chaque tileset = canvas 16xTILE × TILE avec 16 tuiles indexées
@@ -161,9 +166,8 @@
 
   function drawDecor(tc, t, env, pal){
     const x = t * TILE;
-    // base sol en dessous du décor
-    tc.fillStyle = pal.g1;
-    tc.fillRect(x, 0, TILE, TILE);
+    // FOND TRANSPARENT (le sol de zone est déjà dessiné par drawBiomes)
+    tc.clearRect(x, 0, TILE, TILE);
 
     if (env === 'foret' || env === 'plaine' || env === 'plage' || env === 'neige'){
       // ARBRE
@@ -271,8 +275,7 @@
 
   function drawRock(tc, t, pal){
     const x = t * TILE;
-    tc.fillStyle = pal.g1;
-    tc.fillRect(x, 0, TILE, TILE);
+    tc.clearRect(x, 0, TILE, TILE);
     // ombre
     tc.fillStyle = 'rgba(0,0,0,.3)';
     tc.fillRect(x+8, 22, 16, 4);
@@ -289,8 +292,7 @@
 
   function drawFlower(tc, t, pal){
     const x = t * TILE;
-    tc.fillStyle = pal.g1;
-    tc.fillRect(x, 0, TILE, TILE);
+    tc.clearRect(x, 0, TILE, TILE);
     // herbe + fleur
     tc.fillStyle = pal.g2;
     for (let i = 0; i < 6; i++){
@@ -320,16 +322,7 @@
 
   function drawSign(tc, t, pal){
     const x = t * TILE;
-    // base : sol courant (pas de noir !)
-    tc.fillStyle = pal.g1 || '#7eb84a';
-    tc.fillRect(x, 0, TILE, TILE);
-    // mouchetures pour matcher le sol
-    tc.fillStyle = pal.g2 || '#9ad26b';
-    for (let i = 0; i < 8; i++){
-      const px = x + ((i * 11 + 3) % 30);
-      const py = ((i * 7 + 5) % 30);
-      tc.fillRect(px, py, 2, 2);
-    }
+    tc.clearRect(x, 0, TILE, TILE);
     // ombre au pied du poteau
     tc.fillStyle = 'rgba(0,0,0,.3)';
     tc.fillRect(x+12, 26, 8, 3);
@@ -371,40 +364,38 @@
     };
   }
 
+  // Anchor X par zone : alternance droite / gauche / centre / droite / gauche...
+  const X_DROITE = Math.floor(MAP_W * 0.78);
+  const X_GAUCHE = Math.floor(MAP_W * 0.22);
+  const X_CENTRE = Math.floor(MAP_W / 2);
+  const ANCHORS = [
+    X_DROITE,  // zone 0 : 3D Design
+    X_GAUCHE,  // zone 1 : App
+    X_CENTRE,  // zone 2 : GameDev
+    X_DROITE,  // zone 3 : Électro
+    X_GAUCHE,  // zone 4 : Hardware
+    X_CENTRE,  // zone 5 : IA
+    X_DROITE,  // zone 6 : Sécurité
+    X_GAUCHE   // zone 7 : Site
+  ];
+
+  // pathX(y) : interpole entre l'anchor de la zone courante et celui de la suivante
+  // pour avoir une transition smooth (smoothstep) entre les zones
+  function pathX(y){
+    const z = y / ZONE_H;
+    const zIdx = Math.floor(z);
+    const tInZone = Math.max(0, Math.min(1, z - zIdx));
+    const a = ANCHORS[Math.min(NUM_ZONES - 1, zIdx)];
+    const b = ANCHORS[Math.min(NUM_ZONES - 1, zIdx + 1)];
+    const t = tInZone * tInZone * (3 - 2 * tInZone);
+    return a + (b - a) * t;
+  }
+
+  // Génération de la map APRÈS la déclaration de ANCHORS/pathX (TDZ)
   generateMap();
 
   function generateMap(){
     const rand = mulberry32(424242);
-    const CENTER_X = Math.floor(MAP_W / 2);
-
-    // Anchor X par zone : alternance droite / gauche / centre / droite / gauche...
-    // Crée un VRAI zigzag entre les zones (zone 0 à droite, zone 1 à gauche, etc)
-    const X_DROITE = Math.floor(MAP_W * 0.78);
-    const X_GAUCHE = Math.floor(MAP_W * 0.22);
-    const X_CENTRE = CENTER_X;
-    const ANCHORS = [
-      X_DROITE,  // zone 0 : 3D Design — haut à droite
-      X_GAUCHE,  // zone 1 : App      — haut à gauche
-      X_CENTRE,  // zone 2 : GameDev  — centre
-      X_DROITE,  // zone 3 : Électro  — droite
-      X_GAUCHE,  // zone 4 : Hardware — gauche
-      X_CENTRE,  // zone 5 : IA       — centre
-      X_DROITE,  // zone 6 : Sécurité — droite
-      X_GAUCHE   // zone 7 : Site     — gauche
-    ];
-
-    // pathX(y) : interpole entre l'anchor de la zone courante et celui de la suivante
-    // pour avoir une transition smooth d'un point à l'autre
-    function pathX(y){
-      const z = y / ZONE_H;
-      const zIdx = Math.floor(z);
-      const tInZone = z - zIdx;
-      const a = ANCHORS[Math.min(NUM_ZONES - 1, zIdx)];
-      const b = ANCHORS[Math.min(NUM_ZONES - 1, zIdx + 1)];
-      // smoothstep pour un easing doux
-      const t = tInZone * tInZone * (3 - 2 * tInZone);
-      return Math.round(a + (b - a) * t);
-    }
 
     for (let z = 0; z < NUM_ZONES; z++){
       const zoneId = PARCOURS[z];
@@ -420,19 +411,14 @@
         }
       }
 
-      // 2) chemin SERPENTANT : pathX(y) est la position X du centre du chemin à chaque y
+      // 2) chemin SERPENTANT : on enregistre dans la map les tiles du chemin
+      // pour que la collision fonctionne (on ne peut pas marcher dans le décor),
+      // mais le rendu visuel du chemin se fait via Path2D (renderPath)
       for (let y = startY; y < endY; y++){
-        const cx = pathX(y);
+        const cx = Math.round(pathX(y));
         for (let dx = -1; dx <= 1; dx++){
           const xx = Math.max(1, Math.min(MAP_W - 2, cx + dx));
           map[y * MAP_W + xx] = 2;
-        }
-        // edge mix occasionnel
-        if (rand() < 0.4){
-          const xL = Math.max(0, cx - 2);
-          const xR = Math.min(MAP_W - 1, cx + 2);
-          if (map[y * MAP_W + xL] !== 2) map[y * MAP_W + xL] = 9;
-          if (map[y * MAP_W + xR] !== 2) map[y * MAP_W + xR] = 9;
         }
       }
 
@@ -445,7 +431,7 @@
         const dx = Math.floor(rand() * MAP_W);
         const dy = startY + 1 + Math.floor(rand() * (ZONE_H - 2));
         // pas sur le chemin (avec 2 tile de marge)
-        if (Math.abs(dx - pathX(dy)) <= 2) continue;
+        if (Math.abs(dx - Math.round(pathX(dy))) <= 2) continue;
         const idx = dy * MAP_W + dx;
         if (map[idx] >= 3) continue;
         const r = rand();
@@ -470,9 +456,9 @@
       // 5) pancartes : 1 par panneau du thème, placées sur le chemin
       const panneaux = window.PORTFOLIO[zoneId]?.panneaux || [];
       for (let p = 0; p < panneaux.length; p++){
-        const signY = startY + 5 + p * 6;
-        const cx = pathX(signY);
-        // pancarte juste à côté du chemin (1 case à droite ou gauche)
+        const signY = startY + Math.floor(ZONE_H / 3) + p * Math.floor(ZONE_H / 3);
+        const cx = Math.round(pathX(signY));
+        // pancarte juste à côté du chemin (3 cases à droite ou gauche)
         const signX = (p % 2 === 0) ? cx + 3 : cx - 3;
         const safeX = Math.max(1, Math.min(MAP_W - 2, signX));
         const sIdx = signY * MAP_W + safeX;
@@ -818,19 +804,182 @@
   }
 
   function render(){
-    // ciel/fond
-    ctx.fillStyle = '#0a0e1c';
+    // 1) Fond global gris (zones non couvertes)
+    ctx.fillStyle = BG_COLOR;
     ctx.fillRect(0, 0, viewW, viewH);
 
     const sc = renderScale;
     const drawnW = WORLD_PX_W * sc;
     const drawnTile = TILE * sc;
 
-    // décalage X pour centrer la map (renderScaled) dans le viewport
     const offsetX = (viewW - drawnW) / 2;
     const offsetY = -camera.y * sc;
 
-    // tuiles visibles (en world units)
+    // 2) Dessiner les zones (couleurs flat avec contours noirs)
+    drawBiomes(offsetX, offsetY, sc);
+
+    // 3) Dessiner le chemin courbe par-dessus les zones
+    drawPath(offsetX, offsetY, sc);
+
+    // 4) Dessiner les décorations (arbres, rochers, fleurs, eau, pancartes)
+    drawDecorations(offsetX, offsetY, sc);
+
+    // 5) Joueur
+    drawPlayer(offsetX, offsetY, sc);
+  }
+
+  /* ============== RENDU ZONES (FLAT COLOR + OUTLINES) ============== */
+  function drawBiomes(offsetX, offsetY, sc){
+    const drawnTile = TILE * sc;
+    const drawnW    = WORLD_PX_W * sc;
+
+    // Pour chaque zone, dessiner un polygone qui occupe presque toute la largeur,
+    // avec bords supérieur et inférieur ondulés (effet "île organique").
+    // Bordure noire entre zones, pour un look style cell-shading / dessin animé.
+    const NPTS = 22;          // nombre de points pour l'ondulation horizontale
+    const WAVE_AMP = 0.5;     // amplitude de l'ondulation (en tiles)
+    const ZONE_INSET = 0.4;   // marge horizontale (en tiles, pour bord interne)
+
+    for (let z = 0; z < NUM_ZONES; z++){
+      const env = ENV_BY_ZONE[PARCOURS[z]];
+      const pal = PAL[env];
+      const yTopWorld = z * ZONE_H * TILE;
+      const yBotWorld = (z + 1) * ZONE_H * TILE;
+
+      // Skip si la zone est hors viewport
+      const yTopScreen = yTopWorld * sc + offsetY;
+      const yBotScreen = yBotWorld * sc + offsetY;
+      if (yBotScreen < -100 || yTopScreen > viewH + 100) continue;
+
+      // Construire le polygone : top edge wavy → right side → bottom edge wavy → left side
+      ctx.beginPath();
+      // Top edge (uniquement entre zones, pas sur la première)
+      if (z === 0){
+        // top : ligne droite tout en haut
+        ctx.moveTo(offsetX, yTopScreen);
+        ctx.lineTo(offsetX + drawnW, yTopScreen);
+      } else {
+        // top : ondulation entre zone z-1 et z
+        ctx.moveTo(offsetX, yTopScreen);
+        for (let i = 1; i <= NPTS; i++){
+          const t = i / NPTS;
+          const wave = Math.sin(t * Math.PI * 3 + z * 1.7) * WAVE_AMP * drawnTile;
+          ctx.lineTo(offsetX + t * drawnW, yTopScreen + wave);
+        }
+      }
+      // Right side : ligne droite
+      ctx.lineTo(offsetX + drawnW, yBotScreen);
+      // Bottom edge (uniquement si pas la dernière zone, sinon ligne droite)
+      if (z === NUM_ZONES - 1){
+        ctx.lineTo(offsetX, yBotScreen);
+      } else {
+        for (let i = NPTS - 1; i >= 0; i--){
+          const t = i / NPTS;
+          const wave = Math.sin(t * Math.PI * 3 + (z + 1) * 1.7) * WAVE_AMP * drawnTile;
+          ctx.lineTo(offsetX + t * drawnW, yBotScreen + wave);
+        }
+      }
+      // Left side
+      ctx.closePath();
+
+      // Remplissage couleur principale
+      ctx.fillStyle = pal.g1;
+      ctx.fill();
+
+      // Patches de couleur secondaire (taches) pour donner du relief
+      drawPatches(offsetX, offsetY, sc, z, pal);
+
+      // Contour noir épais (style cell-shading)
+      ctx.strokeStyle = ZONE_OUTLINE;
+      ctx.lineWidth = Math.max(2, 2 * sc);
+      ctx.stroke();
+    }
+  }
+
+  /* ============== PATCHES (taches plus claires/foncées dans la zone) ============== */
+  function drawPatches(offsetX, offsetY, sc, zoneIdx, pal){
+    const drawnTile = TILE * sc;
+    const seed = zoneIdx * 73 + 11;
+    const r = mulberry32(seed);
+    const startY = zoneIdx * ZONE_H * TILE;
+    const yScreenStart = startY * sc + offsetY;
+    const ySize = ZONE_H * TILE * sc;
+
+    ctx.save();
+    // Clipper aux zones rect approximatif (pour ne pas déborder)
+    ctx.beginPath();
+    ctx.rect(offsetX - 4, yScreenStart - 4, WORLD_PX_W * sc + 8, ySize + 8);
+    ctx.clip();
+
+    // Quelques patches accent
+    ctx.fillStyle = pal.accent;
+    for (let i = 0; i < 3; i++){
+      const cx = offsetX + r() * WORLD_PX_W * sc;
+      const cy = yScreenStart + r() * ySize;
+      const rad = (2 + r() * 3) * drawnTile;
+      ctx.beginPath();
+      ctx.ellipse(cx, cy, rad * 1.3, rad * 0.8, 0, 0, Math.PI * 2);
+      ctx.fill();
+    }
+    // Quelques patches plus foncés
+    ctx.fillStyle = pal.g2;
+    for (let i = 0; i < 4; i++){
+      const cx = offsetX + r() * WORLD_PX_W * sc;
+      const cy = yScreenStart + r() * ySize;
+      const rad = (1.5 + r() * 2.5) * drawnTile;
+      ctx.beginPath();
+      ctx.ellipse(cx, cy, rad * 1.1, rad * 0.7, 0, 0, Math.PI * 2);
+      ctx.fill();
+    }
+    ctx.restore();
+  }
+
+  /* ============== RENDU CHEMIN (Path2D, courbes lisses) ============== */
+  function drawPath(offsetX, offsetY, sc){
+    const drawnTile = TILE * sc;
+    const visHeightWorld = viewH / sc;
+    // Limiter au range visible pour économiser
+    const yStart = Math.max(0, camera.y - TILE * 4);
+    const yEnd   = Math.min(WORLD_PX_H, camera.y + visHeightWorld + TILE * 4);
+
+    // On échantillonne pathX tous les "step" pixels world pour avoir un trace lisse
+    const step = TILE / 2; // 2 points par tile
+    const points = [];
+    for (let y = yStart; y <= yEnd; y += step){
+      const px = pathX(y / TILE) * TILE + TILE / 2;
+      points.push({
+        x: px * sc + offsetX,
+        y: y * sc + offsetY
+      });
+    }
+    if (points.length < 2) return;
+
+    // Outline noir épais d'abord
+    ctx.strokeStyle = PATH_OUTLINE;
+    ctx.lineWidth = (4 * drawnTile) + Math.max(2, 4 * sc);
+    ctx.lineCap = 'round';
+    ctx.lineJoin = 'round';
+    ctx.beginPath();
+    ctx.moveTo(points[0].x, points[0].y);
+    for (let i = 1; i < points.length; i++){
+      ctx.lineTo(points[i].x, points[i].y);
+    }
+    ctx.stroke();
+
+    // Marron par-dessus (légèrement plus fin)
+    ctx.strokeStyle = PATH_COLOR;
+    ctx.lineWidth = 4 * drawnTile;
+    ctx.beginPath();
+    ctx.moveTo(points[0].x, points[0].y);
+    for (let i = 1; i < points.length; i++){
+      ctx.lineTo(points[i].x, points[i].y);
+    }
+    ctx.stroke();
+  }
+
+  /* ============== RENDU DÉCOR (sprites isolés sur le sol coloré) ============== */
+  function drawDecorations(offsetX, offsetY, sc){
+    const drawnTile = TILE * sc;
     const visHeightWorld = viewH / sc;
     const firstRow = Math.max(0, Math.floor(camera.y / TILE) - 1);
     const lastRow  = Math.min(MAP_H - 1, Math.ceil((camera.y + visHeightWorld) / TILE) + 1);
@@ -838,6 +987,8 @@
     for (let y = firstRow; y <= lastRow; y++){
       for (let x = 0; x < MAP_W; x++){
         const id = map[y * MAP_W + x];
+        // Ne dessiner que les vraies décorations (pas le sol/path)
+        if (id < 3) continue;
         const zoneIdx = Math.floor(y / ZONE_H);
         const env = ENV_BY_ZONE[PARCOURS[Math.min(NUM_ZONES - 1, zoneIdx)]];
         const ts = tilesets[env];
@@ -847,16 +998,6 @@
                       offsetY + y * drawnTile,
                       drawnTile, drawnTile);
       }
-    }
-
-    // joueur
-    drawPlayer(offsetX, offsetY, sc);
-
-    // contour (mask vignette pour bord noir)
-    if (offsetX > 0){
-      ctx.fillStyle = '#0a0e1c';
-      ctx.fillRect(0, 0, offsetX, viewH);
-      ctx.fillRect(viewW - offsetX, 0, offsetX, viewH);
     }
   }
 
