@@ -497,8 +497,9 @@
     const COL = {
       skin    : '#e8c39a',
       hair    : '#2a1d10',
-      hpDark  : '#0e0e10',
-      hpLight : '#3a3a3e',
+      bob     : '#7a8b4f',   // vert kaki principal
+      bobSh   : '#5a6a30',   // vert kaki ombre/brim
+      bobLight: '#94a565',   // vert kaki highlight
       eyes    : '#1a1a1a',
       beard   : '#1f120a',
       shirt   : '#ece4c4',
@@ -516,16 +517,23 @@
     function drawDown(frame){
       const dir = 0;
       const isWalking = frame !== 0;
-      // cycle marche : 0 = idle, 1 = jambe gauche avancée, 2 = idle, 3 = jambe droite
       const lLegOffset = (frame === 1 ? 1 : (frame === 3 ? 0 : 0));
       const rLegOffset = (frame === 3 ? 1 : (frame === 1 ? 0 : 0));
       const armSwing   = isWalking ? (frame === 1 || frame === 2 ? -1 : 1) : 0;
 
-      // CHEVEUX (haut bouclé)
-      P(frame,dir, 4,1, 8,1, COL.hair);
-      P(frame,dir, 3,2,10,2, COL.hair);
-      P(frame,dir, 3,4,10,1, COL.hair);
-      P(frame,dir, 4,4, 1,1, COL.skin); // mèche front
+      // BOB VERT KAKI (couronne + rebord) par dessus la tête
+      // Couronne arrondie
+      P(frame,dir, 4,0, 8,1, COL.bob);
+      P(frame,dir, 3,1,10,1, COL.bob);
+      P(frame,dir, 3,2,10,1, COL.bob);
+      // highlight (effet lumière sur le dessus)
+      P(frame,dir, 5,1, 2,1, COL.bobLight);
+      // Rebord (brim) qui dépasse sur les côtés
+      P(frame,dir, 1,3,14,1, COL.bobSh);
+      P(frame,dir, 2,4,12,1, COL.bobSh);
+      // Quelques mèches de cheveux qui dépassent du bob (front et côtés)
+      P(frame,dir, 5,4, 1,1, COL.hair);
+      P(frame,dir, 10,4, 1,1, COL.hair);
       // VISAGE
       P(frame,dir, 5,5, 6,4, COL.skin);
       // SOURCILS
@@ -535,15 +543,8 @@
       P(frame,dir, 6,6, 1,1, COL.eyes);
       P(frame,dir, 9,6, 1,1, COL.eyes);
       // BOUC + MOUSTACHE
-      P(frame,dir, 6,8, 4,1, COL.beard);  // moustache
-      P(frame,dir, 7,9, 2,1, COL.beard);  // bouc central
-      // CASQUE AUDIO (cups noirs sur les côtés + bandeau)
-      P(frame,dir, 4,1, 8,1, COL.hpDark); // bandeau (au-dessus des cheveux)
-      P(frame,dir, 2,3, 2,5, COL.hpDark); // cup gauche
-      P(frame,dir, 12,3, 2,5, COL.hpDark);// cup droite
-      // léger highlight sur les cups
-      P(frame,dir, 2,3, 1,1, COL.hpLight);
-      P(frame,dir, 13,3, 1,1, COL.hpLight);
+      P(frame,dir, 6,8, 4,1, COL.beard);
+      P(frame,dir, 7,9, 2,1, COL.beard);
       // COU
       P(frame,dir, 7,10, 2,1, COL.skin);
       // T-SHIRT
@@ -570,13 +571,14 @@
       const dir = 2;
       const lLegOffset = (frame === 1 ? 1 : 0);
       const rLegOffset = (frame === 3 ? 1 : 0);
-      // ARRIÈRE DE LA TÊTE : juste cheveux
-      P(frame,dir, 3,2,10,7, COL.hair);
-      P(frame,dir, 4,1, 8,1, COL.hair);
-      // CASQUE (visible aussi de dos, cups)
-      P(frame,dir, 2,3, 2,5, COL.hpDark);
-      P(frame,dir, 12,3, 2,5, COL.hpDark);
-      P(frame,dir, 4,1, 8,1, COL.hpDark);
+      // ARRIÈRE DE LA TÊTE : cheveux derrière, sous le bob
+      P(frame,dir, 4,4,8,5, COL.hair);
+      // BOB VERT KAKI vu de dos (couronne + rebord)
+      P(frame,dir, 4,0, 8,1, COL.bob);
+      P(frame,dir, 3,1,10,1, COL.bob);
+      P(frame,dir, 3,2,10,1, COL.bob);
+      P(frame,dir, 1,3,14,1, COL.bobSh);
+      P(frame,dir, 2,4,12,1, COL.bobSh);
       // COU
       P(frame,dir, 7,10, 2,1, COL.skin);
       // DOS T-SHIRT
@@ -603,10 +605,16 @@
       const rLegOffset = (frame === 3 ? 1 : 0);
       const armSwing   = (frame === 1 || frame === 2 ? -1 : 1);
 
-      // CHEVEUX bouclé profil
-      P(frame,dir, 4,1, 7,1, COL.hair);
-      P(frame,dir, 3,2, 8,3, COL.hair);
-      // VISAGE de profil (peau)
+      // CHEVEUX bouclé (qui dépasse sous le bob)
+      P(frame,dir, 4,4, 7,1, COL.hair);
+      // BOB VERT KAKI de profil (couronne + rebord asymétrique)
+      P(frame,dir, 4,0, 7,1, COL.bob);
+      P(frame,dir, 3,1, 8,1, COL.bob);
+      P(frame,dir, 3,2, 8,1, COL.bob);
+      // brim devant (qui dépasse à gauche, où on voit le visage)
+      P(frame,dir, 1,3,11,1, COL.bobSh);
+      P(frame,dir, 2,4, 9,1, COL.bobSh);
+      // VISAGE de profil (peau, visible sous le brim)
       P(frame,dir, 5,5, 5,4, COL.skin);
       // ŒIL (un seul visible)
       P(frame,dir, 6,6, 1,1, COL.eyes);
@@ -614,9 +622,6 @@
       P(frame,dir, 6,5, 1,1, COL.hair);
       // BOUC
       P(frame,dir, 5,8, 3,1, COL.beard);
-      // CASQUE : un seul cup visible (côté gauche)
-      P(frame,dir, 2,3, 2,5, COL.hpDark);
-      P(frame,dir, 4,1, 7,1, COL.hpDark);
       // COU
       P(frame,dir, 6,10, 2,1, COL.skin);
       // T-SHIRT (de profil, légèrement plus étroit)
