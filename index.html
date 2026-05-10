@@ -63,36 +63,20 @@
               aria-label="LinkedIn"><span class="q" aria-hidden="true">?</span></button>
     </nav>
 
-    <!-- Titre -->
-    <div class="hero-center">
-      <div class="title-banner">
+    <!-- Titre (compact, en haut centre) -->
+    <div class="hero-title">
+      <div class="title-banner compact">
         <span class="pins" aria-hidden="true"></span>
-        <h1 class="title title-3d smaller" id="port">PORTFOLIO</h1>
-        <h1 class="title title-3d taller" data-text="AURÉLIEN LANNOYE">AURÉLIEN LANNOYE.</h1>
+        <h1 class="title title-3d compact-portfolio">PORTFOLIO</h1>
+        <h1 class="title title-3d compact-name" data-text="AURÉLIEN LANNOYE">AURÉLIEN LANNOYE</h1>
       </div>
-
-      <a href="#about" class="who-btn">Qui suis-je ?</a>
-      <div class="who-arrow" aria-hidden="true"></div>
     </div>
 
-    <!-- NOUVEAU : Forces et faiblesses (écriteaux cliquables, ouvrent un modal) -->
-    <button class="trait-sign trait-forces" id="btnForces" type="button"
-            aria-label="Ouvrir mes forces">
-      <span class="trait-sign-post"></span>
-      <span class="trait-sign-board">
-        <span class="trait-sign-icon">💪</span>
-        <span class="trait-sign-label">Mes forces</span>
-      </span>
-    </button>
-
-    <button class="trait-sign trait-faiblesses" id="btnFaiblesses" type="button"
-            aria-label="Ouvrir mes faiblesses">
-      <span class="trait-sign-post"></span>
-      <span class="trait-sign-board">
-        <span class="trait-sign-icon">🌱</span>
-        <span class="trait-sign-label">Mes faiblesses</span>
-      </span>
-    </button>
+    <!-- "Qui suis-je ?" : ouvre un modal -->
+    <div class="hero-cta">
+      <button id="whoBtn" class="who-btn" type="button">Qui suis-je ?</button>
+      <div class="who-arrow" aria-hidden="true"></div>
+    </div>
 
     <!-- Sol et plateformes -->
     <div class="ground-bar" aria-hidden="true">
@@ -103,51 +87,42 @@
 
     <div class="platform p2 collider" aria-hidden="true"></div>
 
-    <!-- NOUVEAU : Coffre du projet pro (sur la plateforme) -->
-    <button class="treasure-chest" id="treasureChest" type="button"
-            aria-label="Ouvrir le coffre, Projet pro et objectifs">
+    <!-- 3 COFFRES : Forces (vert), Projet pro (doré), Faiblesses (orange) -->
+    <button class="treasure-chest chest-forces" id="chestForces" type="button"
+            aria-label="Ouvrir le coffre Mes forces">
       <span class="chest-base"></span>
       <span class="chest-lid"></span>
       <span class="chest-lock"></span>
       <span class="chest-glow" aria-hidden="true"></span>
-      <span class="chest-hint">Tape dessus !</span>
+      <span class="chest-hint">Mes forces</span>
+    </button>
+
+    <button class="treasure-chest chest-projet" id="chestProjet" type="button"
+            aria-label="Ouvrir le coffre Projet pro et objectifs">
+      <span class="chest-base"></span>
+      <span class="chest-lid"></span>
+      <span class="chest-lock"></span>
+      <span class="chest-glow" aria-hidden="true"></span>
+      <span class="chest-hint">Projet pro</span>
+    </button>
+
+    <button class="treasure-chest chest-faiblesses" id="chestFaiblesses" type="button"
+            aria-label="Ouvrir le coffre Mes faiblesses">
+      <span class="chest-base"></span>
+      <span class="chest-lid"></span>
+      <span class="chest-lock"></span>
+      <span class="chest-glow" aria-hidden="true"></span>
+      <span class="chest-hint">Mes faiblesses</span>
     </button>
 
     <!-- Canvas du jeu -->
     <canvas id="gameLayer" class="game-layer" aria-hidden="true"></canvas>
   </header>
 
-  <!-- ========================================================
-       SECTION 2 : INTRO "Qui suis-je" (transition vers le monde)
-  ======================================================== -->
   <main id="main" role="main">
-    <section id="about" class="section about-cave" aria-labelledby="about-title">
-      <div class="about-wrap">
-        <h2 id="about-title" class="about-title">Qui suis-je ?</h2>
-        <p class="about-text">
-          Je m'appelle Aurélien Lannoye, j'ai 22 ans et je suis étudiant en Bac 3 Technologies de l'Informatique à l'EPHEC (Louvain-la-Neuve). Mon projet professionnel : devenir game developer indépendant et continuer à créer mes propres jeux et SaaS, de la conception à la publication.
-        </p>
-        <p class="about-text">
-          Deux de mes jeux sont déjà publiés sur Steam (Somnum et Escape The Brainrots), mon TFE GamAI est en ligne, et je passe la plupart de mon temps libre à apprendre Unity, Unreal, Blender, et tout ce qui peut servir à créer des univers.
-        </p>
-        <p class="about-text continue-prompt">
-          Tombe dans le trou pour explorer mes activités d'acquisition de compétences, organisées en huit thèmes.
-        </p>
-      </div>
-
-      <a href="#top" class="back-btn">Revenir au début</a>
-      <div class="back-arrow up" aria-hidden="true"></div>
-
-      <a href="#world" class="continue-btn">Vers le monde ↓</a>
-
-      <div class="cave-ground collider" aria-hidden="true">
-        <div class="cave-hole"></div>
-      </div>
-      <canvas id="gameLayerAbout" class="game-layer" aria-hidden="true"></canvas>
-    </section>
 
     <!-- ========================================================
-         SECTION 3 : MONDE TOP-DOWN (8 zones thématiques)
+         SECTION 2 : MONDE TOP-DOWN (8 zones thématiques)
     ======================================================== -->
     <section id="world" class="world-section" aria-labelledby="world-title">
       <h2 id="world-title" class="visually-hidden">Mon monde d'activités</h2>
@@ -169,26 +144,26 @@
   </main>
 
   <!-- ========================================================
-       MODAL projet pro / objectifs (ouvert depuis le coffre)
+       MODAL "Qui suis-je ?" (présentation perso)
   ======================================================== -->
-  <div class="modal" id="modalProjetPro" hidden role="dialog" aria-modal="true" aria-labelledby="modalProjetTitre">
+  <div class="modal" id="modalWho" hidden role="dialog" aria-modal="true" aria-labelledby="modalWhoTitre">
     <div class="modal-backdrop" data-modal-close></div>
     <div class="modal-content">
       <button class="modal-close" type="button" data-modal-close aria-label="Fermer">×</button>
-      <h2 id="modalProjetTitre" class="modal-title">Mon projet professionnel</h2>
-      <div class="modal-body" id="modalProjetBody"></div>
+      <h2 id="modalWhoTitre" class="modal-title">Qui suis-je ?</h2>
+      <div class="modal-body" id="modalWhoBody"></div>
     </div>
   </div>
 
   <!-- ========================================================
-       MODAL Forces / Faiblesses (ouvert depuis les écriteaux)
+       MODAL générique pour les coffres (Forces, Faiblesses, Projet pro)
   ======================================================== -->
-  <div class="modal" id="modalTraits" hidden role="dialog" aria-modal="true" aria-labelledby="modalTraitsTitre">
+  <div class="modal" id="modalChest" hidden role="dialog" aria-modal="true" aria-labelledby="modalChestTitre">
     <div class="modal-backdrop" data-modal-close></div>
     <div class="modal-content">
       <button class="modal-close" type="button" data-modal-close aria-label="Fermer">×</button>
-      <h2 id="modalTraitsTitre" class="modal-title"></h2>
-      <div class="modal-body" id="modalTraitsBody"></div>
+      <h2 id="modalChestTitre" class="modal-title"></h2>
+      <div class="modal-body" id="modalChestBody"></div>
     </div>
   </div>
 

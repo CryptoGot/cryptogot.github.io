@@ -63,10 +63,11 @@
     viewH = Math.max(1, Math.floor(rect.height));
     canvas.width  = viewW * dpr;
     canvas.height = viewH * dpr;
-    // si la map est plus large que le viewport, on rétrécit l'affichage
-    renderScale = Math.min(1, viewW / WORLD_PX_W);
+    // Le monde prend toute la largeur (scale up sur desktop, scale down sur mobile)
+    renderScale = Math.max(0.6, viewW / WORLD_PX_W);
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
     ctx.imageSmoothingEnabled = false;
+    updateSignsHud();
   }
   window.addEventListener('resize', () => { resize(); }, { passive: true });
 
@@ -122,8 +123,8 @@
     // ---- 6 : eau ou variante sol
     if (pal.water) drawWater(tc, 6, pal);
     else           drawGround(tc, 6, pal.g3, pal.g1);
-    // ---- 7 : pancarte (sign en bois, vue de haut)
-    drawSign(tc, 7);
+    // ---- 7 : pancarte (sign en bois, vue de haut, sans bg noir)
+    drawSign(tc, 7, pal);
     // ---- 8 : ground variant 3
     drawGround(tc, 8, pal.g3, pal.g2);
     // ---- 9 : edge sol/path (transition)
@@ -316,37 +317,39 @@
     tc.fillRect(x+22, 26, 6, 1);
   }
 
-  function drawSign(tc, t){
+  function drawSign(tc, t, pal){
     const x = t * TILE;
-    // base sol invisible
-    tc.fillStyle = 'rgba(0,0,0,0)';
-    tc.clearRect(x, 0, TILE, TILE);
-    // ombre
+    // base : sol courant (pas de noir !)
+    tc.fillStyle = pal.g1 || '#7eb84a';
+    tc.fillRect(x, 0, TILE, TILE);
+    // mouchetures pour matcher le sol
+    tc.fillStyle = pal.g2 || '#9ad26b';
+    for (let i = 0; i < 8; i++){
+      const px = x + ((i * 11 + 3) % 30);
+      const py = ((i * 7 + 5) % 30);
+      tc.fillRect(px, py, 2, 2);
+    }
+    // ombre au pied du poteau
     tc.fillStyle = 'rgba(0,0,0,.3)';
-    tc.fillRect(x+10, 24, 12, 4);
-    // poteau
+    tc.fillRect(x+12, 26, 8, 3);
+    // poteau (à la base du panneau)
     tc.fillStyle = '#5b3812';
-    tc.fillRect(x+15, 10, 2, 18);
-    // panneau bois
+    tc.fillRect(x+15, 18, 2, 10);
+    // bois (un mini panneau dessiné, le vrai label sera affiché en HTML par-dessus)
     tc.fillStyle = '#c98c3b';
-    tc.fillRect(x+6, 4, 20, 14);
+    tc.fillRect(x+4, 4, 24, 14);
     // bordure
     tc.fillStyle = '#5b3812';
-    tc.fillRect(x+6, 4, 20, 1);
-    tc.fillRect(x+6, 17, 20, 1);
-    tc.fillRect(x+6, 4, 1, 14);
-    tc.fillRect(x+25, 4, 1, 14);
-    // texte simulé (lignes blanches)
-    tc.fillStyle = '#fff8e8';
-    tc.fillRect(x+9, 8, 14, 1);
-    tc.fillRect(x+9, 11, 10, 1);
-    tc.fillRect(x+9, 14, 12, 1);
+    tc.fillRect(x+4, 4, 24, 1);
+    tc.fillRect(x+4, 17, 24, 1);
+    tc.fillRect(x+4, 4, 1, 14);
+    tc.fillRect(x+27, 4, 1, 14);
     // clous
     tc.fillStyle = '#3a2515';
-    tc.fillRect(x+8,  6, 1, 1);
-    tc.fillRect(x+24, 6, 1, 1);
-    tc.fillRect(x+8,  16, 1, 1);
-    tc.fillRect(x+24, 16, 1, 1);
+    tc.fillRect(x+6, 6, 1, 1);
+    tc.fillRect(x+26, 6, 1, 1);
+    tc.fillRect(x+6, 16, 1, 1);
+    tc.fillRect(x+26, 16, 1, 1);
   }
 
   /* ============== GÉNÉRATION DE LA CARTE ============== */
@@ -371,7 +374,17 @@
 
   function generateMap(){
     const rand = mulberry32(424242);
-    const PATH_X = Math.floor(MAP_W / 2);
+    const CENTER_X = Math.floor(MAP_W / 2);
+
+    // Pour chaque row de la map, calculer la position X du chemin (sinusoïdale)
+    // Permet un chemin légèrement courbé qui bouge gauche/droite
+    function pathX(y){
+      // amplitude varie selon zone
+      const amp = 2.5;
+      const freq = 0.18;
+      const offset = Math.sin(y * freq) * amp;
+      return Math.round(CENTER_X + offset);
+    }
 
     for (let z = 0; z < NUM_ZONES; z++){
       const zoneId = PARCOURS[z];
@@ -387,71 +400,86 @@
         }
       }
 
-      // 2) chemin central (3 tuiles de large)
+      // 2) chemin SERPENTANT : pathX(y) est la position X du centre du chemin à chaque y
       for (let y = startY; y < endY; y++){
+        const cx = pathX(y);
         for (let dx = -1; dx <= 1; dx++){
-          map[y * MAP_W + (PATH_X + dx)] = 2;
+          const xx = Math.max(1, Math.min(MAP_W - 2, cx + dx));
+          map[y * MAP_W + xx] = 2;
         }
-      }
-      // bord du chemin (mix)
-      for (let y = startY; y < endY; y++){
+        // edge mix occasionnel
         if (rand() < 0.4){
-          map[y * MAP_W + (PATH_X - 2)] = 9;
-          map[y * MAP_W + (PATH_X + 2)] = 9;
+          const xL = Math.max(0, cx - 2);
+          const xR = Math.min(MAP_W - 1, cx + 2);
+          if (map[y * MAP_W + xL] !== 2) map[y * MAP_W + xL] = 9;
+          if (map[y * MAP_W + xR] !== 2) map[y * MAP_W + xR] = 9;
         }
       }
 
       // 3) décorations (arbres/bâtiments/cactus)
-      const decoCount = 12 + Math.floor(rand() * 6);
+      const decoCount = 14 + Math.floor(rand() * 6);
       let attempts = 0;
       let placed = 0;
-      while (placed < decoCount && attempts < 80){
+      while (placed < decoCount && attempts < 100){
         attempts++;
         const dx = Math.floor(rand() * MAP_W);
         const dy = startY + 1 + Math.floor(rand() * (ZONE_H - 2));
-        // pas sur le chemin (et 1 tile de marge)
-        if (Math.abs(dx - PATH_X) <= 2) continue;
+        // pas sur le chemin (avec 2 tile de marge)
+        if (Math.abs(dx - pathX(dy)) <= 2) continue;
         const idx = dy * MAP_W + dx;
         if (map[idx] >= 3) continue;
-        // tuile décor
         const r = rand();
         let tileId;
-        if (env === 'marais' && r < 0.5) tileId = 6; // eau
-        else if (r < 0.55) tileId = 3;               // décor principal
-        else if (r < 0.85) tileId = 4;               // rocher
-        else                tileId = 5;               // fleur
+        if (env === 'marais' && r < 0.5) tileId = 6;
+        else if (r < 0.55) tileId = 3;
+        else if (r < 0.85) tileId = 4;
+        else                tileId = 5;
         map[idx] = tileId;
-        // arbres/batiments/cactus/eau bloquent le passage
         if (tileId === 3 || tileId === 4 || tileId === 6) collisionMap[idx] = 1;
         placed++;
       }
 
-      // 4) bordures latérales : décor pour empêcher de sortir
+      // 4) bordures latérales
       for (let y = startY; y < endY; y++){
-        // 0 et MAP_W-1 = mur de décor
         if (map[y * MAP_W + 0] < 3) map[y * MAP_W + 0] = 4;
         if (map[y * MAP_W + (MAP_W - 1)] < 3) map[y * MAP_W + (MAP_W - 1)] = 4;
         collisionMap[y * MAP_W + 0] = 1;
         collisionMap[y * MAP_W + (MAP_W - 1)] = 1;
       }
 
-      // 5) pancartes : 1 par panneau du thème, placées le long du chemin
+      // 5) pancartes : 1 par panneau du thème, placées sur le chemin
       const panneaux = window.PORTFOLIO[zoneId]?.panneaux || [];
       for (let p = 0; p < panneaux.length; p++){
-        // position : alternance gauche/droite du chemin, espacement vertical
         const signY = startY + 5 + p * 6;
-        const signX = (p % 2 === 0) ? PATH_X + 3 : PATH_X - 3;
-        // s'assurer que la case est libre
-        const sIdx = signY * MAP_W + signX;
-        map[sIdx] = 7; // tuile pancarte
-        collisionMap[sIdx] = 1; // bloque (collision)
+        const cx = pathX(signY);
+        // pancarte juste à côté du chemin (1 case à droite ou gauche)
+        const signX = (p % 2 === 0) ? cx + 3 : cx - 3;
+        const safeX = Math.max(1, Math.min(MAP_W - 2, signX));
+        const sIdx = signY * MAP_W + safeX;
+        map[sIdx] = 7;
+        collisionMap[sIdx] = 1;
         signs.push({
-          x: signX, y: signY,
+          x: safeX, y: signY,
           zoneId, panneauIdx: p,
-          env
+          env,
+          type: panneaux[p].type || 'projet',
+          label: panneauTypeLabel(panneaux[p].type || 'projet')
         });
       }
     }
+  }
+
+  function panneauTypeLabel(t){
+    return ({
+      projet: 'PROJET',
+      formation: 'FORMATION',
+      challenge: 'CHALLENGE',
+      hackathon: 'HACKATHON',
+      conference: 'CONFÉRENCE',
+      visite: 'VISITE',
+      jobday: 'JOB DAY',
+      salon: 'SALON'
+    })[t] || 'PROJET';
   }
 
   /* ============== JOUEUR (ERIS) ============== */
@@ -613,6 +641,46 @@
     }
   }
 
+  /* ============== LABELS HTML DES PANCARTES ============== */
+  // On crée un label DOM pour chaque pancarte, qu'on positionne en absolu
+  // au-dessus du canvas. Bien plus net que dessiner du texte sur le canvas.
+  const signLabels = [];
+  function createSignLabels(){
+    const worldSection = document.getElementById('world');
+    if (!worldSection) return;
+    let layer = worldSection.querySelector('.sign-labels-layer');
+    if (!layer){
+      layer = document.createElement('div');
+      layer.className = 'sign-labels-layer';
+      worldSection.appendChild(layer);
+    }
+    layer.innerHTML = '';
+    for (const s of signs){
+      const el = document.createElement('div');
+      el.className = `sign-label sign-${s.type}`;
+      el.textContent = s.label;
+      layer.appendChild(el);
+      signLabels.push({ sign: s, el });
+    }
+  }
+
+  function updateSignsHud(){
+    if (!signLabels.length) return;
+    const canvasRect = canvas.getBoundingClientRect();
+    for (const { sign, el } of signLabels){
+      const sx = sign.x * TILE * renderScale;
+      const sy = sign.y * TILE * renderScale;
+      const offsetX = (viewW - WORLD_PX_W * renderScale) / 2;
+      const screenX = offsetX + sx + (TILE * renderScale) / 2;
+      const screenY = sy - camera.y * renderScale - (TILE * renderScale * 0.3);
+      el.style.left = `${screenX}px`;
+      el.style.top  = `${screenY}px`;
+      // visible seulement si dans le viewport
+      const visible = screenY > -50 && screenY < viewH + 50;
+      el.style.display = visible ? 'block' : 'none';
+    }
+  }
+
   /* ============== ZONE COURANTE / INTRO ============== */
   let currentZoneIdx = -1;
   const zoneIntroEl = ensureZoneIntro();
@@ -713,6 +781,7 @@
 
     updateCamera();
     updateZone();
+    updateSignsHud();
 
     // pancarte proche
     nearbySign = findNearbySign();
@@ -772,41 +841,56 @@
   }
 
   function drawPlayer(offsetX, offsetY, sc){
-    let img = sprIdle;
-    let frame = 0;
-    if (player.walking){
-      img = sprWalk.complete ? sprWalk : sprIdle;
-      frame = player.frame;
+    // Eris : un seul row utilisé comme base, avec frame qui change à la marche
+    // Layout présumé : 8 frames horizontales par row, on prend row 0 (down) par défaut
+    let img;
+    if (player.walking && sprWalk.complete && sprWalk.naturalWidth > 0){
+      img = sprWalk;
+    } else if (sprIdle.complete && sprIdle.naturalWidth > 0){
+      img = sprIdle;
     } else {
-      frame = Math.floor(performance.now() / 400) % 2;
+      img = null;
     }
 
     const dirRow = DIR_ROW[player.facing] ?? 0;
-    const sx = (frame % SPR_COLS) * SPR_W;
+    const frame  = player.walking ? (player.frame % 4) : Math.floor(performance.now() / 500) % 2;
+    const sx = frame * SPR_W;
     const sy = dirRow * SPR_H;
 
-    // taille rendue (en world units puis scaled) : x3 = 48x96 world units
-    const SCALE = 3;
+    // taille rendue : le perso reste à taille "world" raisonnable (32x64)
+    // peu importe le scale global. On scale par renderScale uniquement (pas de SCALE multiplier)
+    const SCALE = 2;
     const dw = SPR_W * SCALE * sc;
     const dh = SPR_H * SCALE * sc;
     const px = player.x * sc + offsetX;
     const py = player.y * sc + offsetY;
     const dx = Math.round(px - dw/2);
-    const dy = Math.round(py - dh + 6 * sc);
+    const dy = Math.round(py - dh + 4 * sc);
 
     // ombre
     ctx.fillStyle = 'rgba(0,0,0,.4)';
     ctx.beginPath();
-    ctx.ellipse(px, py - sc, dw*0.32, 5*sc, 0, 0, Math.PI*2);
+    ctx.ellipse(px, py - sc, dw*0.32, 4*sc, 0, 0, Math.PI*2);
     ctx.fill();
 
-    if (img.complete && img.naturalWidth > 0){
-      ctx.drawImage(img, sx, sy, SPR_W, SPR_H, dx, dy, dw, dh);
+    if (img){
+      // Si on regarde à gauche et qu'il n'y a pas de row left, on flip horizontalement le sprite down
+      const flip = (player.facing === 'left' && DIR_ROW.left === undefined);
+      if (flip){
+        ctx.save();
+        ctx.translate(px, 0);
+        ctx.scale(-1, 1);
+        ctx.drawImage(img, sx, sy, SPR_W, SPR_H, -dw/2, dy, dw, dh);
+        ctx.restore();
+      } else {
+        ctx.drawImage(img, sx, sy, SPR_W, SPR_H, dx, dy, dw, dh);
+      }
     } else {
+      // Fallback temps de chargement : kid rectangulaire
       ctx.fillStyle = '#ffd24a';
       ctx.fillRect(dx, dy, dw, dh);
       ctx.fillStyle = '#5b3812';
-      ctx.fillRect(dx + dw*0.3, dy + dh*0.2, dw*0.4, dh*0.15);
+      ctx.fillRect(dx + dw*0.25, dy + dh*0.1, dw*0.5, dh*0.25);
     }
   }
 
@@ -869,8 +953,10 @@
   // Vérification initiale après chargement complet
   setTimeout(checkWorldVisibility, 200);
 
-  // Resize initial
+  // Resize initial + creation des labels HTML
   resize();
+  createSignLabels();
+  updateSignsHud();
   requestAnimationFrame(loop);
 
 })();

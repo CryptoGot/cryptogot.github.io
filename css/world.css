@@ -10,14 +10,82 @@
 }
 
 /* =====================================================
-   COFFRE MARIO (top-hero)
+   TITRE COMPACT (top-hero, plus petit, en haut centre)
+===================================================== */
+.hero-title{
+  position: absolute;
+  top: clamp(110px, 12vh, 130px);
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 2;
+  display: flex;
+  justify-content: center;
+  max-width: calc(100vw - 32px);
+}
+@media (max-width: 700px){
+  .hero-title{
+    top: clamp(150px, 18vh, 180px);
+  }
+}
+.title-banner.compact{
+  padding: clamp(10px, 1.6vw, 16px) clamp(16px, 2.6vw, 28px);
+  text-align: center;
+  display: inline-block;
+  background: #c85d32;
+}
+.title.compact-portfolio{
+  font-size: clamp(18px, 3.2vw, 30px);
+  margin: 0;
+  display: block;
+  text-align: center;
+  line-height: 1;
+  --m-stroke: 2px;
+  --m-off: 3px;
+  letter-spacing: .04em;
+  padding: 0 0 .15em;
+}
+.title.compact-name{
+  font-size: clamp(20px, 3.6vw, 36px);
+  margin: 0;
+  display: block;
+  text-align: center;
+  line-height: 1;
+  transform: none;
+  --m-stroke: 2.4px;
+  --m-off: 4px;
+  letter-spacing: .03em;
+}
+
+.hero-cta{
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 3;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+}
+.hero-cta .who-btn{
+  position: static;
+  transform: none;
+}
+.hero-cta .who-arrow{
+  position: static;
+  transform: none;
+}
+
+/* L'ancien hero-center est neutralisé (titre compact en haut désormais) */
+.hero-center{ display: none; }
+
+/* =====================================================
+   COFFRES (3 sur le sol : Forces, Projet pro, Faiblesses)
 ===================================================== */
 .treasure-chest{
   position:absolute;
-  right: clamp(20px, 8vw, 90px);
-  bottom: calc(var(--gH) + 24svh + 7svh + 6px);
-  width: clamp(48px, 7vw, 72px);
-  height: clamp(40px, 6vw, 60px);
+  width: clamp(54px, 7vw, 76px);
+  height: clamp(46px, 6vw, 64px);
   z-index: 4;
   border:none;
   background:transparent;
@@ -32,6 +100,27 @@
 .treasure-chest:hover{ transform: translateY(-2px); }
 .treasure-chest:active{ transform: translateY(2px); }
 .treasure-chest.bumped{ animation: chestBump .3s ease; }
+
+/* Positions des 3 coffres */
+.chest-forces{
+  left: clamp(30px, 8vw, 120px);
+  bottom: calc(var(--gH) - 4px);
+}
+.chest-projet{
+  /* sur la plateforme p2 */
+  right: clamp(40px, 10vw, 160px);
+  bottom: calc(var(--gH) + 24svh + 7svh + 6px);
+}
+.chest-faiblesses{
+  right: clamp(30px, 8vw, 120px);
+  bottom: calc(var(--gH) - 4px);
+}
+
+@media (max-width: 700px){
+  .chest-forces{ left: clamp(12px, 4vw, 40px); }
+  .chest-faiblesses{ right: clamp(12px, 4vw, 40px); }
+  .chest-projet{ right: clamp(12px, 4vw, 40px); }
+}
 
 @keyframes chestBump{
   0%{ transform: translateY(0); }
@@ -111,8 +200,36 @@
   0%,100%{ transform: translate(-50%, -8px); }
   50%    { transform: translate(-50%, -14px); }
 }
-.treasure-chest.opened .chest-hint{ display:none; }
 .treasure-chest.opened .chest-glow{ animation: none; opacity:.2; }
+
+/* === Variantes de couleurs des coffres === */
+.chest-forces .chest-base{
+  background: linear-gradient(180deg, #6cbb3c 0%, #3a6018 60%, #1e3210 100%);
+}
+.chest-forces .chest-lid{
+  background: linear-gradient(180deg, #b6e890 0%, #6cbb3c 90%, #3a6018 100%);
+}
+.chest-forces .chest-glow{
+  background: radial-gradient(circle, rgba(110,220,90,.55), transparent 60%);
+}
+.chest-forces .chest-base::before, .chest-forces .chest-base::after{
+  background: linear-gradient(180deg, #c9f29e 0%, #82c54a 100%);
+}
+
+.chest-faiblesses .chest-base{
+  background: linear-gradient(180deg, #d2552c 0%, #8a3416 60%, #4a1a08 100%);
+}
+.chest-faiblesses .chest-lid{
+  background: linear-gradient(180deg, #fbb38a 0%, #d2552c 90%, #8a3416 100%);
+}
+.chest-faiblesses .chest-glow{
+  background: radial-gradient(circle, rgba(220,120,90,.55), transparent 60%);
+}
+.chest-faiblesses .chest-base::before, .chest-faiblesses .chest-base::after{
+  background: linear-gradient(180deg, #fcd3b8 0%, #f48a5c 100%);
+}
+
+/* le coffre projet pro garde la couleur dorée d'origine */
 
 @media (max-width:700px){
   .treasure-chest{
@@ -457,6 +574,41 @@ body.in-world .world-hud{
 .world-controls-hint p{ margin: 0; }
 body.in-world .world-controls-hint{ opacity: 1; }
 body.in-world .world-controls-hint.fade-out{ opacity: 0; }
+
+/* Labels HTML par-dessus les pancartes du canvas (texte propre) */
+.sign-labels-layer{
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 5;
+}
+.sign-label{
+  position: absolute;
+  transform: translate(-50%, -100%);
+  background: #fff8e8;
+  color: #5b3812;
+  border: 3px solid #5b3812;
+  padding: 4px 10px;
+  border-radius: 6px;
+  font-family: "Anton", system-ui, sans-serif;
+  font-size: clamp(11px, 1.4vw, 16px);
+  letter-spacing: .08em;
+  white-space: nowrap;
+  box-shadow: 0 4px 0 #5b3812, 0 8px 16px rgba(0,0,0,.4);
+  text-shadow: 0 1px 0 rgba(255,255,255,.6);
+}
+.sign-label::after{
+  content: "";
+  position: absolute;
+  left: 50%; top: 100%;
+  transform: translateX(-50%);
+  width: 4px; height: 8px;
+  background: #5b3812;
+}
+.sign-label.sign-projet     { background: #ffe6a8; }
+.sign-label.sign-formation  { background: #c2e8ff; }
+.sign-label.sign-challenge  { background: #ffc2c2; }
+.sign-label.sign-hackathon  { background: #d8c2ff; }
 
 /* Indicateur d'interaction avec une pancarte */
 .sign-prompt{

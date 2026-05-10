@@ -454,67 +454,38 @@ function createGameLayer(rootSelector, canvasId, opts = {}) {
    Instanciation des couches
 ========================= */
 
-// Header
+// Seul le top-hero a un side-slider maintenant (la grotte a été supprimée)
 const headerLayer = createGameLayer('.top-hero', 'gameLayer', { spawnX: 64 });
-
-// About + ressort
-const aboutLayer  = createGameLayer('#about.about-cave', 'gameLayerAbout', {
-  spawnX: 64,
-  items: [
-    { kind:'bouncer', img: BOUNCER_IMG, x: 80, y: -40, w: 64, h: 64, gravity:true, bouncePower: 2200 }
-  ]
-});
-
-// État initial
-aboutLayer?.disable();
 window.gameLayer = headerLayer;
 
-// Handoff bas (header -> about)
-headerLayer?.setOnFallOut((state)=>{
+// Quand le perso tombe par le trou : animation de chute puis on entre dans le world top-down
+headerLayer?.setOnFallOut(() => {
   headerLayer.disable();
-  aboutLayer.enable();
-  aboutLayer.setState({ x: state.x, facing: state.facing });
-  document.getElementById('about')?.scrollIntoView({ behavior: prefersReducedMotion ? 'auto' : 'smooth' });
-  window.gameLayer = aboutLayer;
+  triggerFallToWorld();
+  setTimeout(() => {
+    // après l'anim, on garde le headerLayer désactivé pour ne pas re-spawn
+    // Si l'utilisateur remonte, on le réactive (cf. scroll listener plus bas)
+  }, 1000);
 });
 
-// Sortie haut (about -> header)
-aboutLayer?.setOnExitTop(()=>{
-  aboutLayer.disable();
-  headerLayer.enable();
-  headerLayer.setState({ x: 64, facing: 1 });
-  document.querySelector('.top-hero')?.scrollIntoView({ behavior: prefersReducedMotion ? 'auto' : 'smooth' });
-  document.body.classList.add('mode-game');
-  document.body.classList.remove('mode-mouse');
-  window.gameLayer = headerLayer;
-});
+// Réactiver le headerLayer si on remonte vers le top-hero
+window.addEventListener('scroll', () => {
+  const heroRect = document.querySelector('.top-hero')?.getBoundingClientRect();
+  if (heroRect && heroRect.bottom > window.innerHeight * 0.6 && headerLayer){
+    if (!window.gameLayer || window.gameLayer !== headerLayer){
+      headerLayer.enable();
+      headerLayer.setState({ x: 64, facing: 1 });
+      window.gameLayer = headerLayer;
+    }
+  }
+}, { passive: true });
 
-// Clic “Who I am ?”
+// Clic "Qui suis-je ?" : ouvre le modal
 document.addEventListener('click', (e) => {
-  const link = e.target.closest('a.who-btn');
-  if (!link) return;
+  const btn = e.target.closest('#whoBtn');
+  if (!btn) return;
   e.preventDefault();
-  headerLayer?.disable();
-  aboutLayer?.enable();
-  aboutLayer?.setState({ x: 64, facing: 1 });
-  document.getElementById('about')?.scrollIntoView({ behavior: prefersReducedMotion ? 'auto' : 'smooth' });
-  document.body.classList.remove('mode-game');
-  document.body.classList.add('mode-mouse');
-  window.gameLayer = aboutLayer;
-});
-
-// Clic “Back to start”
-document.addEventListener('click', (e) => {
-  const link = e.target.closest('a.back-btn');
-  if (!link) return;
-  e.preventDefault();
-  aboutLayer?.disable();
-  headerLayer?.enable();
-  headerLayer?.setState({ x: 64, facing: 1 });
-  document.querySelector('.top-hero')?.scrollIntoView({ behavior: prefersReducedMotion ? 'auto' : 'smooth' });
-  document.body.classList.add('mode-game');
-  document.body.classList.remove('mode-mouse');
-  window.gameLayer = headerLayer;
+  showWhoModal();
 });
 
 /* =========================
@@ -590,36 +561,70 @@ document.addEventListener('click', (e) => {
 })();
 
 /* =========================
-   Setup Forces / Faiblesses : écriteaux ouvrent un modal
+   Setup des 3 coffres : Forces, Projet pro, Faiblesses
 ========================= */
-(function setupTraits(){
+(function setupChests(){
   if (!window.PORTFOLIO) return;
-  const btnF = document.getElementById('btnForces');
-  const btnW = document.getElementById('btnFaiblesses');
-  if (btnF) btnF.addEventListener('click', () => showTraitsModal('forces'));
-  if (btnW) btnW.addEventListener('click', () => showTraitsModal('faiblesses'));
+  const cF = document.getElementById('chestForces');
+  const cP = document.getElementById('chestProjet');
+  const cW = document.getElementById('chestFaiblesses');
+  if (cF) cF.addEventListener('click', () => { animateChest(cF); showChestModal('forces'); });
+  if (cP) cP.addEventListener('click', () => { animateChest(cP); showChestModal('projet'); });
+  if (cW) cW.addEventListener('click', () => { animateChest(cW); showChestModal('faiblesses'); });
 })();
 
-function showTraitsModal(kind){
+function animateChest(el){
+  el.classList.add('opened', 'bumped');
+  setTimeout(() => el.classList.remove('bumped'), 320);
+}
+
+function showChestModal(kind){
   const data = window.PORTFOLIO.identite;
-  const modal = document.getElementById('modalTraits');
-  const title = document.getElementById('modalTraitsTitre');
-  const body  = document.getElementById('modalTraitsBody');
+  const modal = document.getElementById('modalChest');
+  const title = document.getElementById('modalChestTitre');
+  const body  = document.getElementById('modalChestBody');
   if (!modal || !title || !body) return;
 
-  const items = (kind === 'forces') ? data.forces : data.faiblesses;
-  const label = (kind === 'forces') ? 'Mes forces' : 'Mes faiblesses';
-  const intro = (kind === 'forces')
-    ? 'Voici les qualités que je reconnais chez moi en lien avec mon projet de game developer indépendant.'
-    : 'Et voici mes points faibles, tels que je les identifie aujourd\'hui. Les nommer, c\'est déjà commencer à les travailler.';
+  if (kind === 'forces' || kind === 'faiblesses'){
+    const items = (kind === 'forces') ? data.forces : data.faiblesses;
+    const label = (kind === 'forces') ? 'Mes forces' : 'Mes faiblesses';
+    const intro = (kind === 'forces')
+      ? 'Voici les qualités que je reconnais chez moi en lien avec mon projet de game developer indépendant.'
+      : 'Et voici mes points faibles, tels que je les identifie aujourd\'hui. Les nommer, c\'est déjà commencer à les travailler.';
+    title.textContent = label;
+    const itemsHtml = items.map(it =>
+      `<li><strong>${escapeHtml(it.titre)}</strong><span class="desc">${escapeHtml(it.texte)}</span></li>`
+    ).join('');
+    body.innerHTML = `
+      <p>${escapeHtml(intro)}</p>
+      <ul class="traits-list ${kind}">${itemsHtml}</ul>
+    `;
+  } else if (kind === 'projet'){
+    title.textContent = 'Mon projet professionnel';
+    const objectifsHtml = (data.objectifs || []).map(o =>
+      `<li>${escapeHtml(o)}</li>`
+    ).join('');
+    body.innerHTML = `
+      <p><strong>${escapeHtml(data.parcours)}</strong></p>
+      <h3>Mon projet professionnel</h3>
+      <p>${escapeHtml(data.projetPro)}</p>
+      <h3>Mes objectifs concrets</h3>
+      <ul class="objectifs-list">${objectifsHtml}</ul>
+    `;
+  }
+  openModal(modal);
+}
 
-  title.textContent = label;
-  const itemsHtml = items.map(it =>
-    `<li><strong>${escapeHtml(it.titre)}</strong><span class="desc">${escapeHtml(it.texte)}</span></li>`
-  ).join('');
+function showWhoModal(){
+  if (!window.PORTFOLIO) return;
+  const modal = document.getElementById('modalWho');
+  const body  = document.getElementById('modalWhoBody');
+  if (!modal || !body) return;
   body.innerHTML = `
-    <p>${escapeHtml(intro)}</p>
-    <ul class="traits-list ${kind}">${itemsHtml}</ul>
+    <p>Je m'appelle <strong>Aurélien Lannoye</strong>, j'ai 22 ans et je suis étudiant en Bac 3 Technologies de l'Informatique à l'EPHEC (Louvain-la-Neuve).</p>
+    <p>Mon projet professionnel : devenir <strong>game developer indépendant</strong> et continuer à créer mes propres jeux et SaaS, de la conception à la publication.</p>
+    <p>Deux de mes jeux sont déjà publiés sur Steam (Somnum et Escape The Brainrots), mon TFE GamAI est en ligne, et je passe la plupart de mon temps libre à apprendre Unity, Unreal, Blender, et tout ce qui peut servir à créer des univers.</p>
+    <p>Tombe dans le trou central pour explorer mes activités d'acquisition de compétences, organisées en <strong>huit thèmes</strong>.</p>
   `;
   openModal(modal);
 }
@@ -630,51 +635,7 @@ function escapeHtml(s){
   }[c]));
 }
 
-/* =========================
-   Coffre (projet pro + objectifs)
-========================= */
-(function setupTreasureChest(){
-  const chest = document.getElementById('treasureChest');
-  if (!chest) return;
-
-  function openProjetProModal(){
-    chest.classList.add('opened');
-    chest.classList.add('bumped');
-    setTimeout(() => chest.classList.remove('bumped'), 320);
-    showProjetProModal();
-  }
-
-  chest.addEventListener('click', (e) => {
-    e.preventDefault();
-    e.stopPropagation();
-    openProjetProModal();
-  });
-
-  // Possibilité d'ouvrir aussi avec collision joueur (saut par dessous)
-  // détection externe si le moteur header émet un événement, sinon juste le clic
-  window.openTreasureChest = openProjetProModal;
-})();
-
-function showProjetProModal(){
-  if (!window.PORTFOLIO) return;
-  const data = window.PORTFOLIO.identite;
-  const modal = document.getElementById('modalProjetPro');
-  const body  = document.getElementById('modalProjetBody');
-  if (!modal || !body) return;
-
-  const objectifsHtml = (data.objectifs || []).map(o =>
-    `<li>${escapeHtml(o)}</li>`
-  ).join('');
-
-  body.innerHTML = `
-    <p><strong>${escapeHtml(data.parcours)}</strong></p>
-    <h3>Mon projet professionnel</h3>
-    <p>${escapeHtml(data.projetPro)}</p>
-    <h3>Mes objectifs concrets</h3>
-    <ul class="objectifs-list">${objectifsHtml}</ul>
-  `;
-  openModal(modal);
-}
+/* (l'ancienne logique de coffre unique a été remplacée par setupChests ci-dessus) */
 
 /* =========================
    Modal générique : open / close
@@ -809,22 +770,14 @@ function openLightbox(src, alt){
 }
 
 /* =========================
-   Continue button vers le monde
+   Animation de chute vers le monde top-down
 ========================= */
-document.addEventListener('click', (e) => {
-  const btn = e.target.closest('a.continue-btn');
-  if (!btn) return;
-  e.preventDefault();
-  triggerFallToWorld();
-});
-
 function triggerFallToWorld(){
   const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   if (reduced){
     document.getElementById('world')?.scrollIntoView();
     return;
   }
-  // animation overlay
   let overlay = document.querySelector('.fall-overlay');
   if (!overlay){
     overlay = document.createElement('div');
@@ -837,11 +790,8 @@ function triggerFallToWorld(){
     document.getElementById('world')?.scrollIntoView({ behavior: 'auto' });
     setTimeout(() => {
       overlay.classList.remove('active');
-    }, 200);
+    }, 250);
   }, 700);
 }
 
-/* =========================
-   Hook : chute du header => projet pro popup ?
-   Désactivé : on garde la chute classique vers about
-========================= */
+window.triggerFallToWorld = triggerFallToWorld;
