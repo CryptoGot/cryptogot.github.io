@@ -445,10 +445,9 @@
         placed++;
       }
 
-      // 4) bordures latérales
+      // 4) bordures latérales : collision invisible (le perso ne sort pas de
+      // la map) mais SANS poser de décor, pour ne pas avoir de cases bordées
       for (let y = startY; y < endY; y++){
-        if (map[y * MAP_W + 0] < 3) map[y * MAP_W + 0] = 4;
-        if (map[y * MAP_W + (MAP_W - 1)] < 3) map[y * MAP_W + (MAP_W - 1)] = 4;
         collisionMap[y * MAP_W + 0] = 1;
         collisionMap[y * MAP_W + (MAP_W - 1)] = 1;
       }
@@ -672,17 +671,17 @@
 
   function updateSignsHud(){
     if (!signLabels.length) return;
-    const canvasRect = canvas.getBoundingClientRect();
+    const drawnTile = TILE * renderScale;
+    const offsetX = (viewW - WORLD_PX_W * renderScale) / 2;
+    const PANNEAU_SCALE = 1.6; // doit matcher DECO_SCALE[7]
     for (const { sign, el } of signLabels){
-      const sx = sign.x * TILE * renderScale;
-      const sy = sign.y * TILE * renderScale;
-      const offsetX = (viewW - WORLD_PX_W * renderScale) / 2;
-      const screenX = offsetX + sx + (TILE * renderScale) / 2;
-      const screenY = sy - camera.y * renderScale - (TILE * renderScale * 0.3);
-      el.style.left = `${screenX}px`;
-      el.style.top  = `${screenY}px`;
-      // visible seulement si dans le viewport
-      const visible = screenY > -50 && screenY < viewH + 50;
+      const centerX = offsetX + (sign.x + 0.5) * drawnTile;
+      // baseY = bas du sprite ; haut du sprite = baseY - dh
+      const baseY = -camera.y * renderScale + (sign.y + 1) * drawnTile;
+      const topY  = baseY - drawnTile * PANNEAU_SCALE;
+      el.style.left = `${centerX}px`;
+      el.style.top  = `${topY - 6}px`;
+      const visible = topY > -60 && topY < viewH + 60;
       el.style.display = visible ? 'block' : 'none';
     }
   }
@@ -978,26 +977,48 @@
   }
 
   /* ============== RENDU DÉCOR (sprites isolés sur le sol coloré) ============== */
+  // Echelle d'agrandissement par type de décor (tile id) : valeurs > 1 rendent
+  // l'élément plus grand que sa case.
+  // 3 = arbre/batiment/cactus/montagne, 4 = rocher/buisson, 5 = fleur,
+  // 6 = eau, 7 = pancarte
+  const DECO_SCALE = { 3: 2.0, 4: 1.4, 5: 1.0, 6: 1.2, 7: 1.6 };
+
   function drawDecorations(offsetX, offsetY, sc){
     const drawnTile = TILE * sc;
     const visHeightWorld = viewH / sc;
-    const firstRow = Math.max(0, Math.floor(camera.y / TILE) - 1);
-    const lastRow  = Math.min(MAP_H - 1, Math.ceil((camera.y + visHeightWorld) / TILE) + 1);
+    // étendre la marge pour ne pas couper les gros sprites en bord d'écran
+    const firstRow = Math.max(0, Math.floor(camera.y / TILE) - 2);
+    const lastRow  = Math.min(MAP_H - 1, Math.ceil((camera.y + visHeightWorld) / TILE) + 2);
 
+    // Trier par y pour avoir un ordre de rendu cohérent (les sprites du bas
+    // dessinés par-dessus ceux du haut, effet de profondeur)
+    const items = [];
     for (let y = firstRow; y <= lastRow; y++){
       for (let x = 0; x < MAP_W; x++){
         const id = map[y * MAP_W + x];
-        // Ne dessiner que les vraies décorations (pas le sol/path)
         if (id < 3) continue;
-        const zoneIdx = Math.floor(y / ZONE_H);
-        const env = ENV_BY_ZONE[PARCOURS[Math.min(NUM_ZONES - 1, zoneIdx)]];
-        const ts = tilesets[env];
-        const sx = id * TILE;
-        ctx.drawImage(ts, sx, 0, TILE, TILE,
-                      offsetX + x * drawnTile,
-                      offsetY + y * drawnTile,
-                      drawnTile, drawnTile);
+        items.push({ x, y, id });
       }
+    }
+    items.sort((a, b) => a.y - b.y);
+
+    for (const it of items){
+      const id = it.id;
+      const zoneIdx = Math.floor(it.y / ZONE_H);
+      const env = ENV_BY_ZONE[PARCOURS[Math.min(NUM_ZONES - 1, zoneIdx)]];
+      const ts = tilesets[env];
+      const sx = id * TILE;
+
+      const k = DECO_SCALE[id] || 1;
+      const dw = drawnTile * k;
+      const dh = drawnTile * k;
+      // ancrer le sprite par le bas centre (les arbres/maisons "poussent" du sol)
+      const centerX = offsetX + (it.x + 0.5) * drawnTile;
+      const baseY   = offsetY + (it.y + 1)   * drawnTile;
+      const dx = Math.round(centerX - dw / 2);
+      const dy = Math.round(baseY   - dh);
+
+      ctx.drawImage(ts, sx, 0, TILE, TILE, dx, dy, dw, dh);
     }
   }
 
