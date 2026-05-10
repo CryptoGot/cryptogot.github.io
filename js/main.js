@@ -588,3 +588,245 @@ document.addEventListener('click', (e) => {
     }
   });
 })();
+
+/* =========================
+   Populate Forces / Faiblesses depuis PORTFOLIO
+========================= */
+(function populateForcesFaiblesses(){
+  if (!window.PORTFOLIO) return;
+  const data = window.PORTFOLIO.identite;
+  const forcesUl = document.getElementById('forces-list');
+  const faibUl   = document.getElementById('faiblesses-list');
+  if (forcesUl && data?.forces){
+    forcesUl.innerHTML = data.forces.map(f =>
+      `<li><strong>${escapeHtml(f.titre)}</strong><span class="desc">${escapeHtml(f.texte)}</span></li>`
+    ).join('');
+  }
+  if (faibUl && data?.faiblesses){
+    faibUl.innerHTML = data.faiblesses.map(f =>
+      `<li><strong>${escapeHtml(f.titre)}</strong><span class="desc">${escapeHtml(f.texte)}</span></li>`
+    ).join('');
+  }
+})();
+
+function escapeHtml(s){
+  return String(s).replace(/[&<>"']/g, c => ({
+    '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'
+  }[c]));
+}
+
+/* =========================
+   Coffre (projet pro + objectifs)
+========================= */
+(function setupTreasureChest(){
+  const chest = document.getElementById('treasureChest');
+  if (!chest) return;
+
+  function openProjetProModal(){
+    chest.classList.add('opened');
+    chest.classList.add('bumped');
+    setTimeout(() => chest.classList.remove('bumped'), 320);
+    showProjetProModal();
+  }
+
+  chest.addEventListener('click', (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    openProjetProModal();
+  });
+
+  // Possibilité d'ouvrir aussi avec collision joueur (saut par dessous)
+  // détection externe si le moteur header émet un événement, sinon juste le clic
+  window.openTreasureChest = openProjetProModal;
+})();
+
+function showProjetProModal(){
+  if (!window.PORTFOLIO) return;
+  const data = window.PORTFOLIO.identite;
+  const modal = document.getElementById('modalProjetPro');
+  const body  = document.getElementById('modalProjetBody');
+  if (!modal || !body) return;
+
+  const objectifsHtml = (data.objectifs || []).map(o =>
+    `<li>${escapeHtml(o)}</li>`
+  ).join('');
+
+  body.innerHTML = `
+    <p><strong>${escapeHtml(data.parcours)}</strong></p>
+    <h3>Mon projet professionnel</h3>
+    <p>${escapeHtml(data.projetPro)}</p>
+    <h3>Mes objectifs concrets</h3>
+    <ul class="objectifs-list">${objectifsHtml}</ul>
+  `;
+  openModal(modal);
+}
+
+/* =========================
+   Modal générique : open / close
+========================= */
+let lastFocusedBeforeModal = null;
+
+function openModal(modal){
+  if (!modal) return;
+  lastFocusedBeforeModal = document.activeElement;
+  modal.hidden = false;
+  document.body.style.overflow = 'hidden';
+  // focus sur le bouton fermer
+  const closeBtn = modal.querySelector('.modal-close');
+  setTimeout(() => closeBtn?.focus(), 50);
+}
+
+function closeModal(modal){
+  if (!modal) return;
+  modal.hidden = true;
+  // si plus aucune modal n'est ouverte, restaurer scroll
+  if (!document.querySelector('.modal:not([hidden])')){
+    document.body.style.overflow = '';
+  }
+  if (lastFocusedBeforeModal && typeof lastFocusedBeforeModal.focus === 'function'){
+    lastFocusedBeforeModal.focus();
+  }
+}
+
+document.addEventListener('click', (e) => {
+  const closer = e.target.closest('[data-modal-close]');
+  if (!closer) return;
+  const modal = closer.closest('.modal');
+  closeModal(modal);
+});
+
+document.addEventListener('keydown', (e) => {
+  if (e.code === 'Escape'){
+    const open = document.querySelector('.modal:not([hidden])');
+    if (open){ closeModal(open); }
+  }
+});
+
+/* =========================
+   Modal d'une zone (ouverte par world.js via window.showZoneModal)
+========================= */
+window.showZoneModal = function(zoneData, panneau){
+  const modal = document.getElementById('modalZone');
+  const titre = document.getElementById('modalZoneTitre');
+  const meta  = document.getElementById('modalZoneMeta');
+  const icon  = document.getElementById('modalZoneIcon');
+  const body  = document.getElementById('modalZoneBody');
+  if (!modal || !titre || !body) return;
+
+  const ICONS_ZONE = {
+    foret:'🌲', ville:'🏙️', plaine:'🌾', marais:'🪵',
+    montagne:'⛰️', desert:'🏜️', plage:'🏖️', neige:'❄️'
+  };
+
+  titre.textContent = panneau.titre;
+  if (icon) icon.textContent = ICONS_ZONE[zoneData.environnement] || '📜';
+  if (meta){
+    const heures = panneau.heures ? `${panneau.heures}h investies` : '';
+    const valo   = panneau.valorisation ? `${panneau.valorisation}h valorisées` : '';
+    const type   = panneau.type ? typeLabel(panneau.type) : '';
+    const pills = [type, heures, valo].filter(Boolean)
+      .map(t => `<span class="meta-pill">${escapeHtml(t)}</span>`).join('');
+    meta.innerHTML = pills;
+  }
+
+  // construction du body
+  let html = '';
+  if (panneau.description){
+    html += `<p>${escapeHtml(panneau.description)}</p>`;
+  }
+  if (panneau.screenshots && panneau.screenshots.length){
+    html += `<h3>Captures et preuves</h3>`;
+    html += `<div class="screenshots">`;
+    for (const src of panneau.screenshots){
+      html += `<img src="${escapeAttr(src)}" alt="Capture ${escapeAttr(panneau.titre)}" loading="lazy">`;
+    }
+    html += `</div>`;
+  }
+  if (panneau.liens && panneau.liens.length){
+    html += `<h3>Liens et ressources</h3>`;
+    html += `<div class="links">`;
+    for (const l of panneau.liens){
+      const target = l.url.startsWith('http') ? ' target="_blank" rel="noopener"' : '';
+      html += `<a class="link-pill" href="${escapeAttr(l.url)}"${target}>${escapeHtml(l.label)}</a>`;
+    }
+    html += `</div>`;
+  }
+  if (panneau.analyseReflexive){
+    html += `<h3>Analyse réflexive</h3>`;
+    const paragraphs = panneau.analyseReflexive.split(/\n\n+/);
+    html += `<div class="reflexive">`;
+    for (const p of paragraphs){
+      html += `<p>${escapeHtml(p)}</p>`;
+    }
+    html += `</div>`;
+  }
+  body.innerHTML = html;
+
+  // lightbox pour les screenshots
+  body.querySelectorAll('.screenshots img').forEach(img => {
+    img.addEventListener('click', () => openLightbox(img.src, img.alt));
+  });
+
+  openModal(modal);
+};
+
+function typeLabel(type){
+  return ({
+    'projet':     'Projet',
+    'formation':  'Formation',
+    'challenge':  'Challenge',
+    'hackathon':  'Hackathon',
+    'conference': 'Conférence',
+    'visite':     'Visite',
+    'jobday':     'Job Day',
+    'salon':      'Salon'
+  })[type] || type;
+}
+
+function escapeAttr(s){ return escapeHtml(s); }
+
+function openLightbox(src, alt){
+  const lb = document.createElement('div');
+  lb.className = 'lightbox';
+  lb.innerHTML = `<img src="${escapeAttr(src)}" alt="${escapeAttr(alt || '')}">`;
+  lb.addEventListener('click', () => lb.remove());
+  document.body.appendChild(lb);
+}
+
+/* =========================
+   Continue button vers le monde
+========================= */
+document.addEventListener('click', (e) => {
+  const btn = e.target.closest('a.continue-btn');
+  if (!btn) return;
+  e.preventDefault();
+  triggerFallToWorld();
+});
+
+function triggerFallToWorld(){
+  const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if (reduced){
+    document.getElementById('world')?.scrollIntoView();
+    return;
+  }
+  // animation overlay
+  let overlay = document.querySelector('.fall-overlay');
+  if (!overlay){
+    overlay = document.createElement('div');
+    overlay.className = 'fall-overlay';
+    overlay.innerHTML = '<div class="falling-char"></div>';
+    document.body.appendChild(overlay);
+  }
+  overlay.classList.add('active');
+  setTimeout(() => {
+    document.getElementById('world')?.scrollIntoView({ behavior: 'auto' });
+    setTimeout(() => {
+      overlay.classList.remove('active');
+    }, 200);
+  }, 700);
+}
+
+/* =========================
+   Hook : chute du header => projet pro popup ?
+   Désactivé : on garde la chute classique vers about
+========================= */

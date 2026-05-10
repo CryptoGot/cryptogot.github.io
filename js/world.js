@@ -1,0 +1,839 @@
+/* =============================================================
+   WORLD.JS : moteur top-down RPG avec 8 environnements générés
+   procéduralement en pixel art
+   - Le perso (Eris) descend de zone en zone
+   - Caméra suit Y, jamais X
+   - Pancartes interactives qui ouvrent les panneaux EPHEC
+============================================================= */
+
+(function(){
+  'use strict';
+
+  if (!window.PORTFOLIO) {
+    console.error('content.js doit être chargé avant world.js');
+    return;
+  }
+
+  /* ============== CONSTANTES ============== */
+  const TILE   = 32;         // taille d'une tuile à l'écran (px)
+  const MAP_W  = 22;         // largeur de la carte en tuiles (704px)
+  const ZONE_H = 18;         // hauteur d'une zone en tuiles (576px ~ 100vh sur petit écran)
+  const PARCOURS = window.PORTFOLIO.parcours;
+  const NUM_ZONES = PARCOURS.length;
+  const MAP_H = ZONE_H * NUM_ZONES;
+  const WORLD_PX_W = MAP_W * TILE;
+  const WORLD_PX_H = MAP_H * TILE;
+
+  // Mapping zone id -> environnement visuel
+  const ENV_BY_ZONE = {
+    design3d:    'foret',
+    app:         'ville',
+    gamedev:     'plaine',
+    electronique:'marais',
+    hardware:    'montagne',
+    ia:          'desert',
+    securite:    'plage',
+    site:        'neige'
+  };
+
+  // Noms affichés à l'entrée de zone
+  const ZONE_NAMES = {
+    foret:    { titre: '🌲 Forêt du 3D Design',          sub: 'Mes assets Blender' },
+    ville:    { titre: '🏙️ Ville de l\'App',              sub: 'Diopside, projet d\'équipe' },
+    plaine:   { titre: '🌾 Plaine du Game Dev',           sub: 'Mes jeux Unity et Unreal' },
+    marais:   { titre: '🪵 Marais de l\'Électronique',    sub: 'Frigo connecté Raspberry Pi' },
+    montagne: { titre: '⛰️ Montagne du Hardware',         sub: 'Réparations PC' },
+    desert:   { titre: '🏜️ Désert de l\'IA',              sub: 'Agents et jeux IA' },
+    plage:    { titre: '🏖️ Plage de la Sécurité',         sub: 'Challenge cybersécurité' },
+    neige:    { titre: '❄️ Neige des Sites Web',          sub: 'GamAI et formations web' }
+  };
+
+  /* ============== CANVAS / RESIZE ============== */
+  const canvas = document.getElementById('worldCanvas');
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+  let viewW = 0, viewH = 0;
+  let dpr = 1;
+
+  function resize(){
+    dpr = Math.max(1, Math.floor(window.devicePixelRatio || 1));
+    const rect = canvas.getBoundingClientRect();
+    viewW = Math.max(1, Math.floor(rect.width));
+    viewH = Math.max(1, Math.floor(rect.height));
+    canvas.width  = viewW * dpr;
+    canvas.height = viewH * dpr;
+    ctx.setTransform(dpr,0,0,dpr,0,0);
+    ctx.imageSmoothingEnabled = false;
+  }
+  window.addEventListener('resize', () => { resize(); }, { passive: true });
+
+  /* ============== PALETTES ENVIRONNEMENTS ============== */
+  // Chaque palette est tirée pour pixel-art lisible et cohérent
+  const PAL = {
+    foret:    { g1:'#2d4a26', g2:'#3a5e30', g3:'#1e2f1a', accent:'#5a8a48',  trunk:'#3a2515', leaf:'#1a3010', flower:'#ffe066', water:null,        path:'#7a5c30', pathEdge:'#5a3e1a' },
+    ville:    { g1:'#82868c', g2:'#969aa2', g3:'#62666c', accent:'#a8acb4',  trunk:'#3a3e44', leaf:'#5a5e64', flower:'#dadada', water:null,        path:'#605860', pathEdge:'#403840' },
+    plaine:   { g1:'#7eb84a', g2:'#92ce5e', g3:'#5e9230', accent:'#bce06a',  trunk:'#5a3a20', leaf:'#3a6a1a', flower:'#fff060', water:null,        path:'#c8a060', pathEdge:'#9a7038' },
+    marais:   { g1:'#5a4a30', g2:'#6c5a3a', g3:'#3a2e1a', accent:'#7a6840',  trunk:'#2a1e10', leaf:'#3a5230', flower:'#7090a0', water:'#3a5a5a',   path:'#8a7050', pathEdge:'#5a4030' },
+    montagne: { g1:'#7a7a8a', g2:'#9090a0', g3:'#5a5a6a', accent:'#c0c0d0',  trunk:'#3a2a2a', leaf:'#fff',    flower:'#fff',    water:null,        path:'#605860', pathEdge:'#403840' },
+    desert:   { g1:'#d2a854', g2:'#e0bc70', g3:'#a07c30', accent:'#f0d090',  trunk:'#4a8a30', leaf:'#3a7020', flower:'#ff8050', water:null,        path:'#a07c30', pathEdge:'#806030' },
+    plage:    { g1:'#e8d080', g2:'#f4e0a0', g3:'#b89058', accent:'#fff4c8',  trunk:'#5a3a20', leaf:'#3a8a30', flower:'#ff8080', water:'#3a8aaa',   path:'#c8a060', pathEdge:'#9a7038' },
+    neige:    { g1:'#e8eef4', g2:'#fff',    g3:'#a8b8c8', accent:'#fff',     trunk:'#3a2a1a', leaf:'#1a3010', flower:'#fff',    water:null,        path:'#b8c0c8', pathEdge:'#788090' }
+  };
+
+  /* ============== GÉNÉRATION DES TILESETS PIXEL ART ============== */
+  // Chaque tileset = canvas 16xTILE × TILE avec 16 tuiles indexées
+  // Tile IDs :
+  //   0,1 : ground variant 1, 2
+  //   2   : path
+  //   3   : tree / building / cactus selon environnement
+  //   4   : rock / shrub
+  //   5   : flower / detail
+  //   6   : water (si applicable)
+  //   7   : sign (pancarte)
+  //   8   : ground variant 3 (plus rare)
+
+  const tilesets = {};
+  for (const env of Object.keys(PAL)) {
+    tilesets[env] = makeTileset(env, PAL[env]);
+  }
+
+  function makeTileset(env, pal){
+    const c = document.createElement('canvas');
+    c.width = TILE * 16;
+    c.height = TILE;
+    const tc = c.getContext('2d');
+    tc.imageSmoothingEnabled = false;
+
+    // ---- 0 : ground principal (texture mouchetée 4x4 mini-pixels)
+    drawGround(tc, 0, pal.g1, pal.g2);
+    // ---- 1 : ground variant (mêmes couleurs, autre seed)
+    drawGround(tc, 1, pal.g2, pal.g1);
+    // ---- 2 : path
+    drawGround(tc, 2, pal.path, pal.pathEdge);
+    // ---- 3 : décor "vertical" (arbre / bâtiment / cactus / rocher selon env)
+    drawDecor(tc, 3, env, pal);
+    // ---- 4 : rocher / petit décor
+    drawRock(tc, 4, pal);
+    // ---- 5 : fleur / détail
+    drawFlower(tc, 5, pal);
+    // ---- 6 : eau ou variante sol
+    if (pal.water) drawWater(tc, 6, pal);
+    else           drawGround(tc, 6, pal.g3, pal.g1);
+    // ---- 7 : pancarte (sign en bois, vue de haut)
+    drawSign(tc, 7);
+    // ---- 8 : ground variant 3
+    drawGround(tc, 8, pal.g3, pal.g2);
+    // ---- 9 : edge sol/path (transition)
+    drawGroundMix(tc, 9, pal.g1, pal.path);
+
+    return c;
+  }
+
+  // Helper : dessine un carré 32x32 à l'index t avec texture mouchetée
+  function drawGround(tc, t, base, splash){
+    const x = t * TILE;
+    tc.fillStyle = base;
+    tc.fillRect(x, 0, TILE, TILE);
+    // mouchetures pixel art
+    tc.fillStyle = splash;
+    const seed = (t * 7919 + 13) & 0xffff;
+    for (let i = 0; i < 14; i++){
+      const px = x + ((seed * (i+1)) % TILE) - ((seed * (i+1)) % TILE) % 2;
+      const py = ((seed * (i+3)) % TILE) - ((seed * (i+3)) % TILE) % 2;
+      tc.fillRect(px, py, 2, 2);
+    }
+  }
+
+  function drawGroundMix(tc, t, c1, c2){
+    drawGround(tc, t, c1, c2);
+    // bord du chemin (ligne de transition)
+    const x = t * TILE;
+    tc.fillStyle = c2;
+    for (let i = 0; i < TILE; i+=2){
+      tc.fillRect(x + i, TILE - 4 + ((i/2)%2)*2, 2, 2);
+    }
+  }
+
+  function drawDecor(tc, t, env, pal){
+    const x = t * TILE;
+    // base sol en dessous du décor
+    tc.fillStyle = pal.g1;
+    tc.fillRect(x, 0, TILE, TILE);
+
+    if (env === 'foret' || env === 'plaine' || env === 'plage' || env === 'neige'){
+      // ARBRE
+      // ombre au pied
+      tc.fillStyle = 'rgba(0,0,0,.25)';
+      tc.fillRect(x+8, 26, 16, 4);
+      // tronc
+      tc.fillStyle = pal.trunk;
+      tc.fillRect(x+13, 18, 6, 12);
+      tc.fillStyle = '#000';
+      tc.fillRect(x+13, 18, 1, 12); // ombre tronc
+      // feuillage
+      tc.fillStyle = pal.leaf;
+      // boule de feuilles (cercle pixelisé)
+      const leafBlocks = [
+        [12, 4, 8, 16],
+        [10, 6, 12, 12],
+        [8, 8, 16, 8],
+      ];
+      for (const [bx, by, bw, bh] of leafBlocks){
+        tc.fillRect(x + bx, by, bw, bh);
+      }
+      // hightlight
+      tc.fillStyle = pal.accent;
+      tc.fillRect(x+12, 6, 4, 4);
+      tc.fillRect(x+18, 10, 2, 2);
+
+      if (env === 'neige'){
+        // neige sur l'arbre
+        tc.fillStyle = '#fff';
+        tc.fillRect(x+10, 4, 4, 2);
+        tc.fillRect(x+14, 6, 6, 2);
+        tc.fillRect(x+16, 10, 4, 2);
+      }
+    } else if (env === 'ville'){
+      // BÂTIMENT
+      tc.fillStyle = pal.g3;
+      tc.fillRect(x+4, 4, 24, 24);
+      tc.fillStyle = pal.accent;
+      tc.fillRect(x+4, 4, 24, 4); // toit
+      tc.fillStyle = '#1a1a1a';
+      // fenêtres
+      tc.fillRect(x+8,  12, 4, 4);
+      tc.fillRect(x+16, 12, 4, 4);
+      tc.fillRect(x+24, 12, 4, 4);
+      tc.fillRect(x+8,  20, 4, 4);
+      tc.fillRect(x+24, 20, 4, 4);
+      // porte
+      tc.fillStyle = pal.trunk;
+      tc.fillRect(x+14, 18, 8, 10);
+      tc.fillStyle = '#ffd24a';
+      tc.fillRect(x+19, 22, 1, 2); // poignée
+    } else if (env === 'marais'){
+      // ROSEAUX
+      tc.fillStyle = pal.water;
+      tc.fillRect(x, 14, TILE, TILE-14);
+      tc.fillStyle = pal.leaf;
+      // 5 tiges
+      for (let i = 0; i < 5; i++){
+        tc.fillRect(x + 4 + i*5, 6 + (i%2)*2, 2, 18);
+        tc.fillStyle = pal.flower;
+        tc.fillRect(x + 4 + i*5 - 1, 4 + (i%2)*2, 4, 3);
+        tc.fillStyle = pal.leaf;
+      }
+    } else if (env === 'montagne'){
+      // PIC ROCHEUX
+      tc.fillStyle = pal.g3;
+      const peak = [
+        [14, 4, 4, 4],
+        [12, 8, 8, 4],
+        [10, 12, 12, 4],
+        [8,  16, 16, 4],
+        [6,  20, 20, 4],
+        [4,  24, 24, 4],
+      ];
+      for (const [bx, by, bw, bh] of peak){
+        tc.fillRect(x+bx, by, bw, bh);
+      }
+      // sommet enneigé
+      tc.fillStyle = '#fff';
+      tc.fillRect(x+14, 4, 4, 2);
+      tc.fillRect(x+12, 6, 8, 2);
+      // ombre droite
+      tc.fillStyle = '#000';
+      tc.globalAlpha = .25;
+      tc.fillRect(x+18, 8, 4, 20);
+      tc.globalAlpha = 1;
+    } else if (env === 'desert'){
+      // CACTUS
+      tc.fillStyle = pal.leaf;
+      tc.fillRect(x+13, 6, 6, 22);
+      tc.fillRect(x+8,  14, 5, 8);
+      tc.fillRect(x+19, 16, 5, 6);
+      tc.fillStyle = pal.accent;
+      // ombre interne
+      tc.fillRect(x+13, 6, 1, 22);
+      tc.fillStyle = '#fff';
+      // épines (points)
+      for (let i = 0; i < 4; i++){
+        tc.fillRect(x+15, 9 + i*5, 1, 1);
+        tc.fillRect(x+10, 17 + i*2, 1, 1);
+      }
+    }
+  }
+
+  function drawRock(tc, t, pal){
+    const x = t * TILE;
+    tc.fillStyle = pal.g1;
+    tc.fillRect(x, 0, TILE, TILE);
+    // ombre
+    tc.fillStyle = 'rgba(0,0,0,.3)';
+    tc.fillRect(x+8, 22, 16, 4);
+    // rocher
+    tc.fillStyle = pal.g3;
+    tc.fillRect(x+10, 12, 12, 12);
+    tc.fillRect(x+8,  16, 16, 6);
+    tc.fillRect(x+12, 10, 8,  4);
+    // hightlight haut-gauche
+    tc.fillStyle = pal.accent;
+    tc.fillRect(x+12, 12, 4, 2);
+    tc.fillRect(x+10, 14, 2, 4);
+  }
+
+  function drawFlower(tc, t, pal){
+    const x = t * TILE;
+    tc.fillStyle = pal.g1;
+    tc.fillRect(x, 0, TILE, TILE);
+    // herbe + fleur
+    tc.fillStyle = pal.g2;
+    for (let i = 0; i < 6; i++){
+      tc.fillRect(x + 4 + i*4, 22 + (i%2)*2, 1, 4);
+    }
+    // fleur centrale
+    tc.fillStyle = pal.flower;
+    tc.fillRect(x+14, 14, 4, 4);
+    tc.fillStyle = '#fff';
+    tc.fillRect(x+15, 15, 2, 2);
+    // tige
+    tc.fillStyle = pal.leaf;
+    tc.fillRect(x+15, 18, 2, 6);
+  }
+
+  function drawWater(tc, t, pal){
+    const x = t * TILE;
+    tc.fillStyle = pal.water;
+    tc.fillRect(x, 0, TILE, TILE);
+    // vagues
+    tc.fillStyle = 'rgba(255,255,255,.25)';
+    tc.fillRect(x+4, 8, 6, 1);
+    tc.fillRect(x+18, 14, 8, 1);
+    tc.fillRect(x+10, 22, 6, 1);
+    tc.fillRect(x+22, 26, 6, 1);
+  }
+
+  function drawSign(tc, t){
+    const x = t * TILE;
+    // base sol invisible
+    tc.fillStyle = 'rgba(0,0,0,0)';
+    tc.clearRect(x, 0, TILE, TILE);
+    // ombre
+    tc.fillStyle = 'rgba(0,0,0,.3)';
+    tc.fillRect(x+10, 24, 12, 4);
+    // poteau
+    tc.fillStyle = '#5b3812';
+    tc.fillRect(x+15, 10, 2, 18);
+    // panneau bois
+    tc.fillStyle = '#c98c3b';
+    tc.fillRect(x+6, 4, 20, 14);
+    // bordure
+    tc.fillStyle = '#5b3812';
+    tc.fillRect(x+6, 4, 20, 1);
+    tc.fillRect(x+6, 17, 20, 1);
+    tc.fillRect(x+6, 4, 1, 14);
+    tc.fillRect(x+25, 4, 1, 14);
+    // texte simulé (lignes blanches)
+    tc.fillStyle = '#fff8e8';
+    tc.fillRect(x+9, 8, 14, 1);
+    tc.fillRect(x+9, 11, 10, 1);
+    tc.fillRect(x+9, 14, 12, 1);
+    // clous
+    tc.fillStyle = '#3a2515';
+    tc.fillRect(x+8,  6, 1, 1);
+    tc.fillRect(x+24, 6, 1, 1);
+    tc.fillRect(x+8,  16, 1, 1);
+    tc.fillRect(x+24, 16, 1, 1);
+  }
+
+  /* ============== GÉNÉRATION DE LA CARTE ============== */
+  // map[y * MAP_W + x] = id de tuile
+  const map = new Uint8Array(MAP_W * MAP_H);
+  // collisionMap[y * MAP_W + x] = 1 si non franchissable
+  const collisionMap = new Uint8Array(MAP_W * MAP_H);
+  // signs : objets avec position + référence au panneau du contenu
+  const signs = [];
+
+  // PRNG simple pour rendu déterministe
+  function mulberry32(seed){
+    return function(){
+      seed |= 0; seed = (seed + 0x6D2B79F5) | 0;
+      let t = Math.imul(seed ^ (seed >>> 15), 1 | seed);
+      t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+      return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+    };
+  }
+
+  generateMap();
+
+  function generateMap(){
+    const rand = mulberry32(424242);
+    const PATH_X = Math.floor(MAP_W / 2);
+
+    for (let z = 0; z < NUM_ZONES; z++){
+      const zoneId = PARCOURS[z];
+      const env = ENV_BY_ZONE[zoneId];
+      const startY = z * ZONE_H;
+      const endY = startY + ZONE_H;
+
+      // 1) sol de base : alternance ground 0/1 avec quelques 8 (variant)
+      for (let y = startY; y < endY; y++){
+        for (let x = 0; x < MAP_W; x++){
+          const r = rand();
+          map[y * MAP_W + x] = r < 0.55 ? 0 : (r < 0.92 ? 1 : 8);
+        }
+      }
+
+      // 2) chemin central (3 tuiles de large)
+      for (let y = startY; y < endY; y++){
+        for (let dx = -1; dx <= 1; dx++){
+          map[y * MAP_W + (PATH_X + dx)] = 2;
+        }
+      }
+      // bord du chemin (mix)
+      for (let y = startY; y < endY; y++){
+        if (rand() < 0.4){
+          map[y * MAP_W + (PATH_X - 2)] = 9;
+          map[y * MAP_W + (PATH_X + 2)] = 9;
+        }
+      }
+
+      // 3) décorations (arbres/bâtiments/cactus)
+      const decoCount = 12 + Math.floor(rand() * 6);
+      let attempts = 0;
+      let placed = 0;
+      while (placed < decoCount && attempts < 80){
+        attempts++;
+        const dx = Math.floor(rand() * MAP_W);
+        const dy = startY + 1 + Math.floor(rand() * (ZONE_H - 2));
+        // pas sur le chemin (et 1 tile de marge)
+        if (Math.abs(dx - PATH_X) <= 2) continue;
+        const idx = dy * MAP_W + dx;
+        if (map[idx] >= 3) continue;
+        // tuile décor
+        const r = rand();
+        let tileId;
+        if (env === 'marais' && r < 0.5) tileId = 6; // eau
+        else if (r < 0.55) tileId = 3;               // décor principal
+        else if (r < 0.85) tileId = 4;               // rocher
+        else                tileId = 5;               // fleur
+        map[idx] = tileId;
+        // arbres/batiments/cactus/eau bloquent le passage
+        if (tileId === 3 || tileId === 4 || tileId === 6) collisionMap[idx] = 1;
+        placed++;
+      }
+
+      // 4) bordures latérales : décor pour empêcher de sortir
+      for (let y = startY; y < endY; y++){
+        // 0 et MAP_W-1 = mur de décor
+        if (map[y * MAP_W + 0] < 3) map[y * MAP_W + 0] = 4;
+        if (map[y * MAP_W + (MAP_W - 1)] < 3) map[y * MAP_W + (MAP_W - 1)] = 4;
+        collisionMap[y * MAP_W + 0] = 1;
+        collisionMap[y * MAP_W + (MAP_W - 1)] = 1;
+      }
+
+      // 5) pancartes : 1 par panneau du thème, placées le long du chemin
+      const panneaux = window.PORTFOLIO[zoneId]?.panneaux || [];
+      for (let p = 0; p < panneaux.length; p++){
+        // position : alternance gauche/droite du chemin, espacement vertical
+        const signY = startY + 5 + p * 6;
+        const signX = (p % 2 === 0) ? PATH_X + 3 : PATH_X - 3;
+        // s'assurer que la case est libre
+        const sIdx = signY * MAP_W + signX;
+        map[sIdx] = 7; // tuile pancarte
+        collisionMap[sIdx] = 1; // bloque (collision)
+        signs.push({
+          x: signX, y: signY,
+          zoneId, panneauIdx: p,
+          env
+        });
+      }
+    }
+  }
+
+  /* ============== JOUEUR (ERIS) ============== */
+  const sprIdle = new Image(); sprIdle.src = 'assets/eris/idle.png';
+  const sprWalk = new Image(); sprWalk.src = 'assets/eris/walk.png';
+
+  // Le sprite Eris est 16x32, organisé 8 cols x 5 rows
+  // On utilise les 4 premières lignes pour les directions (down, left, up, right)
+  // Approximation : on utilise frame 0 idle, frames 0-3 walk
+  const SPR_W = 16, SPR_H = 32;
+  const SPR_COLS = 8;
+  const DIR_ROW = { down: 0, left: 1, up: 2, right: 3 };
+
+  const player = {
+    // position en pixels monde (centre du sprite à ses pieds)
+    x: WORLD_PX_W / 2,
+    y: TILE * 1.5,
+    w: 18,         // hitbox (étroite, base du sprite)
+    h: 12,         // hitbox bas du corps seulement
+    speed: 130,    // px/seconde
+    facing: 'down',
+    walking: false,
+    frame: 0,
+    frameTime: 0
+  };
+
+  /* ============== CAMÉRA (Y uniquement) ============== */
+  const camera = { y: 0 };
+
+  function updateCamera(){
+    // Centre la caméra verticalement sur le perso, contrainte aux bords
+    const target = player.y - viewH / 2;
+    camera.y = Math.max(0, Math.min(WORLD_PX_H - viewH, target));
+  }
+
+  /* ============== INPUTS ============== */
+  const keys = { up:false, down:false, left:false, right:false, interact:false };
+  let interactPressed = false;
+  let active = false; // true quand le world est visible/jouable
+
+  function isTyping(e){
+    const tag = (e.target.tagName || '').toUpperCase();
+    return tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT' || e.target.isContentEditable;
+  }
+
+  window.addEventListener('keydown', (e) => {
+    if (!active) return;
+    if (isTyping(e)) return;
+    switch (e.code){
+      case 'ArrowUp': case 'KeyW': case 'KeyZ':
+        keys.up = true; e.preventDefault(); break;
+      case 'ArrowDown': case 'KeyS':
+        keys.down = true; e.preventDefault(); break;
+      case 'ArrowLeft': case 'KeyA': case 'KeyQ':
+        keys.left = true; e.preventDefault(); break;
+      case 'ArrowRight': case 'KeyD':
+        keys.right = true; e.preventDefault(); break;
+      case 'KeyE': case 'Enter': case 'Space':
+        if (!keys.interact){ interactPressed = true; }
+        keys.interact = true;
+        e.preventDefault();
+        break;
+      case 'Escape':
+        // retourne en haut
+        document.querySelector('#top')?.scrollIntoView({ behavior: 'smooth' });
+        break;
+    }
+  }, { passive: false });
+
+  window.addEventListener('keyup', (e) => {
+    if (isTyping(e)) return;
+    switch (e.code){
+      case 'ArrowUp': case 'KeyW': case 'KeyZ':    keys.up = false; break;
+      case 'ArrowDown': case 'KeyS':                keys.down = false; break;
+      case 'ArrowLeft': case 'KeyA': case 'KeyQ':   keys.left = false; break;
+      case 'ArrowRight': case 'KeyD':               keys.right = false; break;
+      case 'KeyE': case 'Enter': case 'Space':      keys.interact = false; break;
+    }
+  }, { passive: true });
+
+  /* ============== COLLISIONS ============== */
+  function isSolid(tx, ty){
+    if (tx < 0 || tx >= MAP_W || ty < 0 || ty >= MAP_H) return true;
+    return collisionMap[ty * MAP_W + tx] === 1;
+  }
+
+  function tryMove(dx, dy){
+    // hitbox = rectangle player.w × player.h centré sur (player.x, player.y)
+    const x0 = player.x - player.w/2 + dx;
+    const x1 = player.x + player.w/2 + dx;
+    const y0 = player.y - player.h    + dy;
+    const y1 = player.y               + dy;
+
+    // X
+    if (dx !== 0){
+      const newX0 = x0;
+      const newX1 = x1;
+      const tx0 = Math.floor(newX0 / TILE);
+      const tx1 = Math.floor(newX1 / TILE);
+      const ty0 = Math.floor((player.y - player.h) / TILE);
+      const ty1 = Math.floor((player.y - 1) / TILE);
+      let canMove = true;
+      for (let ty = ty0; ty <= ty1; ty++){
+        for (let tx = tx0; tx <= tx1; tx++){
+          if (isSolid(tx, ty)){ canMove = false; break; }
+        }
+        if (!canMove) break;
+      }
+      if (canMove) player.x += dx;
+    }
+    // Y
+    if (dy !== 0){
+      const newY0 = player.y - player.h + dy;
+      const newY1 = player.y + dy;
+      const ty0 = Math.floor(newY0 / TILE);
+      const ty1 = Math.floor(newY1 / TILE);
+      const tx0 = Math.floor((player.x - player.w/2) / TILE);
+      const tx1 = Math.floor((player.x + player.w/2 - 1) / TILE);
+      let canMove = true;
+      for (let ty = ty0; ty <= ty1; ty++){
+        for (let tx = tx0; tx <= tx1; tx++){
+          if (isSolid(tx, ty)){ canMove = false; break; }
+        }
+        if (!canMove) break;
+      }
+      if (canMove) player.y += dy;
+    }
+    // bornes monde
+    player.x = Math.max(player.w/2 + 2, Math.min(WORLD_PX_W - player.w/2 - 2, player.x));
+    player.y = Math.max(player.h + 2,    Math.min(WORLD_PX_H - 2,             player.y));
+  }
+
+  /* ============== INTERACTION PANCARTES ============== */
+  let nearbySign = null;
+
+  function findNearbySign(){
+    let best = null;
+    let bestD2 = (TILE * 1.6) * (TILE * 1.6);
+    const px = player.x;
+    const py = player.y - player.h/2;
+    for (const s of signs){
+      const sx = s.x * TILE + TILE/2;
+      const sy = s.y * TILE + TILE/2;
+      const d2 = (sx - px)*(sx - px) + (sy - py)*(sy - py);
+      if (d2 < bestD2){ bestD2 = d2; best = s; }
+    }
+    return best;
+  }
+
+  function openSignModal(sign){
+    const zoneData = window.PORTFOLIO[sign.zoneId];
+    if (!zoneData) return;
+    const panneau = zoneData.panneaux[sign.panneauIdx];
+    if (!panneau) return;
+    if (typeof window.showZoneModal === 'function') {
+      window.showZoneModal(zoneData, panneau);
+    }
+  }
+
+  /* ============== ZONE COURANTE / INTRO ============== */
+  let currentZoneIdx = -1;
+  const zoneIntroEl = ensureZoneIntro();
+  const progressLabel = document.querySelector('.zone-label');
+
+  function ensureZoneIntro(){
+    let el = document.querySelector('.zone-intro');
+    if (!el){
+      el = document.createElement('div');
+      el.className = 'zone-intro';
+      el.innerHTML = '<h3></h3><p></p>';
+      document.body.appendChild(el);
+    }
+    return el;
+  }
+
+  function updateZone(){
+    const zIdx = Math.min(NUM_ZONES - 1, Math.max(0, Math.floor(player.y / (ZONE_H * TILE))));
+    if (zIdx !== currentZoneIdx){
+      currentZoneIdx = zIdx;
+      const zoneId = PARCOURS[zIdx];
+      const env = ENV_BY_ZONE[zoneId];
+      const info = ZONE_NAMES[env];
+      if (info){
+        zoneIntroEl.querySelector('h3').textContent = info.titre;
+        zoneIntroEl.querySelector('p').textContent  = info.sub;
+        zoneIntroEl.classList.add('show');
+        clearTimeout(updateZone._t);
+        updateZone._t = setTimeout(() => zoneIntroEl.classList.remove('show'), 2800);
+      }
+      if (progressLabel){
+        progressLabel.textContent = `${zIdx + 1}/${NUM_ZONES}  ${info?.titre || ''}`.trim();
+      }
+    }
+  }
+
+  /* ============== SIGN PROMPT ============== */
+  const signPrompt = ensureSignPrompt();
+  function ensureSignPrompt(){
+    let el = document.querySelector('.sign-prompt');
+    if (!el){
+      el = document.createElement('div');
+      el.className = 'sign-prompt';
+      el.textContent = 'Appuie sur E';
+      document.body.appendChild(el);
+    }
+    return el;
+  }
+
+  /* ============== BOUCLE PRINCIPALE ============== */
+  let last = performance.now();
+  function loop(now){
+    const dt = Math.min(0.04, (now - last) / 1000);
+    last = now;
+
+    if (!active){
+      requestAnimationFrame(loop);
+      return;
+    }
+
+    update(dt);
+    render();
+    requestAnimationFrame(loop);
+  }
+
+  function update(dt){
+    // direction
+    let dx = 0, dy = 0;
+    if (keys.up)    dy -= 1;
+    if (keys.down)  dy += 1;
+    if (keys.left)  dx -= 1;
+    if (keys.right) dx += 1;
+    const moving = (dx !== 0 || dy !== 0);
+
+    if (moving){
+      const mag = Math.hypot(dx, dy);
+      dx /= mag; dy /= mag;
+      // facing prioritaire sur X si appuyé, sinon Y
+      if      (dx < 0) player.facing = 'left';
+      else if (dx > 0) player.facing = 'right';
+      else if (dy < 0) player.facing = 'up';
+      else if (dy > 0) player.facing = 'down';
+
+      tryMove(dx * player.speed * dt, 0);
+      tryMove(0, dy * player.speed * dt);
+
+      player.walking = true;
+      player.frameTime += dt;
+      if (player.frameTime > 0.12){
+        player.frameTime = 0;
+        player.frame = (player.frame + 1) % 4;
+      }
+    } else {
+      player.walking = false;
+      player.frame = 0;
+      player.frameTime = 0;
+    }
+
+    updateCamera();
+    updateZone();
+
+    // pancarte proche
+    nearbySign = findNearbySign();
+    if (nearbySign){
+      signPrompt.classList.add('show');
+    } else {
+      signPrompt.classList.remove('show');
+    }
+
+    if (interactPressed){
+      interactPressed = false;
+      if (nearbySign) openSignModal(nearbySign);
+    }
+  }
+
+  function render(){
+    // ciel/fond
+    ctx.fillStyle = '#0a0e1c';
+    ctx.fillRect(0, 0, viewW, viewH);
+
+    // décalage X pour centrer la map quand le viewport est plus large
+    const offsetX = Math.max(0, (viewW - WORLD_PX_W) / 2);
+    const offsetY = -camera.y;
+
+    // tuiles visibles
+    const firstRow = Math.max(0, Math.floor(camera.y / TILE) - 1);
+    const lastRow  = Math.min(MAP_H - 1, Math.ceil((camera.y + viewH) / TILE) + 1);
+
+    for (let y = firstRow; y <= lastRow; y++){
+      for (let x = 0; x < MAP_W; x++){
+        const id = map[y * MAP_W + x];
+        const zoneIdx = Math.floor(y / ZONE_H);
+        const env = ENV_BY_ZONE[PARCOURS[Math.min(NUM_ZONES - 1, zoneIdx)]];
+        const ts = tilesets[env];
+        const sx = id * TILE;
+        ctx.drawImage(ts, sx, 0, TILE, TILE,
+                      offsetX + x * TILE, offsetY + y * TILE, TILE, TILE);
+      }
+    }
+
+    // joueur
+    drawPlayer(offsetX, offsetY);
+
+    // contour (mask vignette pour bord noir)
+    if (offsetX > 0){
+      ctx.fillStyle = '#0a0e1c';
+      ctx.fillRect(0, 0, offsetX, viewH);
+      ctx.fillRect(viewW - offsetX, 0, offsetX, viewH);
+    }
+  }
+
+  function drawPlayer(offsetX, offsetY){
+    let img = sprIdle;
+    let frame = 0;
+    if (player.walking){
+      img = sprWalk.complete ? sprWalk : sprIdle;
+      frame = player.frame;
+    } else {
+      // idle anim douce
+      frame = Math.floor(performance.now() / 400) % 2;
+    }
+
+    if (!img.complete) return;
+
+    const dirRow = DIR_ROW[player.facing] ?? 0;
+    const sx = (frame % SPR_COLS) * SPR_W;
+    const sy = dirRow * SPR_H;
+
+    // taille rendue : x2 (32x64)
+    const dw = SPR_W * 2;
+    const dh = SPR_H * 2;
+    const dx = Math.round(player.x + offsetX - dw/2);
+    const dy = Math.round(player.y + offsetY - dh + 4);
+
+    // ombre
+    ctx.fillStyle = 'rgba(0,0,0,.35)';
+    ctx.beginPath();
+    ctx.ellipse(player.x + offsetX, player.y + offsetY - 1, dw*0.3, 4, 0, 0, Math.PI*2);
+    ctx.fill();
+
+    ctx.drawImage(img, sx, sy, SPR_W, SPR_H, dx, dy, dw, dh);
+  }
+
+  /* ============== API publique ============== */
+  window.WorldEngine = {
+    enter(){
+      active = true;
+      document.body.classList.add('in-world');
+      resize();
+      // spawn en haut du monde, sur le chemin
+      player.x = WORLD_PX_W / 2;
+      player.y = TILE * 1.5;
+      currentZoneIdx = -1;
+      updateZone();
+      // hint qui s'efface après 6s
+      const hint = document.getElementById('worldHint');
+      if (hint){
+        hint.classList.remove('fade-out');
+        clearTimeout(WorldEngine._hintT);
+        WorldEngine._hintT = setTimeout(() => hint.classList.add('fade-out'), 6500);
+      }
+    },
+    leave(){
+      active = false;
+      document.body.classList.remove('in-world');
+    },
+    isActive(){ return active; }
+  };
+
+  // Auto-activation si la section world est visible (pas de chute requise)
+  const worldSection = document.getElementById('world');
+  if (worldSection && 'IntersectionObserver' in window){
+    const io = new IntersectionObserver((entries) => {
+      for (const e of entries){
+        if (e.isIntersecting && e.intersectionRatio > 0.5){
+          window.WorldEngine.enter();
+        } else if (!e.isIntersecting){
+          window.WorldEngine.leave();
+        }
+      }
+    }, { threshold: [0, 0.5, 1] });
+    io.observe(worldSection);
+  }
+
+  // Resize initial
+  resize();
+  requestAnimationFrame(loop);
+
+})();

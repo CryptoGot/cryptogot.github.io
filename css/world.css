@@ -1,0 +1,617 @@
+/* =====================================================
+   WORLD.CSS : coffre Mario, modals, section monde top-down
+===================================================== */
+
+/* Accessibilité : visuellement caché mais lu par lecteur d'écran */
+.visually-hidden{
+  position:absolute !important;
+  width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;
+  clip:rect(0,0,0,0); white-space:nowrap; border:0;
+}
+
+/* =====================================================
+   COFFRE MARIO (top-hero)
+===================================================== */
+.treasure-chest{
+  position:absolute;
+  right: clamp(20px, 8vw, 90px);
+  bottom: calc(var(--gH) + 24svh + 7svh + 6px);
+  width: clamp(48px, 7vw, 72px);
+  height: clamp(40px, 6vw, 60px);
+  z-index: 4;
+  border:none;
+  background:transparent;
+  cursor:pointer;
+  padding:0;
+  display:grid;
+  place-items:center;
+  filter: drop-shadow(0 6px 0 rgba(0,0,0,.35));
+  transition: transform .08s ease;
+  -webkit-tap-highlight-color: transparent;
+}
+.treasure-chest:hover{ transform: translateY(-2px); }
+.treasure-chest:active{ transform: translateY(2px); }
+.treasure-chest.bumped{ animation: chestBump .3s ease; }
+
+@keyframes chestBump{
+  0%{ transform: translateY(0); }
+  30%{ transform: translateY(-12px) scale(1.08); }
+  100%{ transform: translateY(0); }
+}
+
+.chest-base{
+  position:absolute; left:0; right:0; bottom:0;
+  height:60%;
+  background: linear-gradient(180deg, #c98c3b 0%, #8e5b22 60%, #5b3812 100%);
+  border:3px solid #2b1a07;
+  border-radius: 4px 4px 6px 6px;
+  box-shadow: inset 0 -4px 0 rgba(0,0,0,.4),
+              inset 0 4px 0 rgba(255,220,160,.25);
+}
+.chest-base::before, .chest-base::after{
+  content:""; position:absolute;
+  width: 14%; height: 100%;
+  background: linear-gradient(180deg, #f4c97a 0%, #d49a48 100%);
+  border-right: 3px solid #2b1a07;
+  border-left: 3px solid #2b1a07;
+  top:0;
+}
+.chest-base::before{ left: 18%; }
+.chest-base::after{ right: 18%; }
+
+.chest-lid{
+  position:absolute; left:-2px; right:-2px; top:0;
+  height: 45%;
+  background: linear-gradient(180deg, #f4c97a 0%, #c98c3b 90%, #8e5b22 100%);
+  border:3px solid #2b1a07;
+  border-radius: 12px 12px 2px 2px;
+  box-shadow: inset 0 4px 0 rgba(255,240,200,.4),
+              inset 0 -3px 0 rgba(0,0,0,.3);
+}
+.chest-lock{
+  position:absolute; left:50%; top:38%; transform:translateX(-50%);
+  width: 20%; height: 20%;
+  background: #ffd24a;
+  border:2px solid #2b1a07;
+  border-radius: 4px;
+  z-index:2;
+  box-shadow: inset 0 -2px 0 rgba(0,0,0,.4);
+}
+.chest-lock::after{
+  content:""; position:absolute; left:35%; top:25%;
+  width:30%; height:30%; border-radius:50%;
+  background: #2b1a07;
+}
+.chest-glow{
+  position:absolute; inset:-20%;
+  background: radial-gradient(circle, rgba(255,220,120,.45), transparent 60%);
+  pointer-events:none;
+  animation: chestGlow 2.4s ease-in-out infinite;
+}
+@keyframes chestGlow{
+  0%,100%{ opacity:.5; }
+  50%{ opacity:1; }
+}
+.chest-hint{
+  position:absolute; bottom:100%; left:50%;
+  transform: translate(-50%, -8px);
+  font-family: "Press Start 2P", system-ui, monospace;
+  font-size: clamp(8px, 1.1vw, 11px);
+  background: #fff3c4;
+  color:#5b3812;
+  border:2px solid #2b1a07;
+  padding: 4px 8px;
+  border-radius: 4px;
+  white-space: nowrap;
+  pointer-events: none;
+  animation: chestHintFloat 1.6s ease-in-out infinite;
+  box-shadow: 0 3px 0 rgba(0,0,0,.4);
+}
+@keyframes chestHintFloat{
+  0%,100%{ transform: translate(-50%, -8px); }
+  50%    { transform: translate(-50%, -14px); }
+}
+.treasure-chest.opened .chest-hint{ display:none; }
+.treasure-chest.opened .chest-glow{ animation: none; opacity:.2; }
+
+@media (max-width:700px){
+  .treasure-chest{
+    right: clamp(12px, 4vw, 20px);
+    bottom: calc(var(--gH) + 26svh + 7svh + 6px);
+  }
+  .chest-hint{ font-size:8px; padding:3px 6px; }
+}
+
+/* =====================================================
+   MODAL générique
+===================================================== */
+.modal{
+  position:fixed; inset:0; z-index:200;
+  display:grid; place-items:center;
+  padding: clamp(12px, 4vw, 32px);
+}
+.modal[hidden]{ display:none; }
+.modal-backdrop{
+  position:absolute; inset:0;
+  background: rgba(8,12,28,.78);
+  backdrop-filter: blur(6px);
+  cursor:pointer;
+}
+.modal-content{
+  position:relative; z-index:1;
+  width: min(720px, 96vw);
+  max-height: min(86svh, 900px);
+  background: linear-gradient(160deg, #fff8e8 0%, #ffe5b8 100%);
+  color:#2b1a07;
+  border: 4px solid #5b3812;
+  border-radius: 14px;
+  box-shadow: 0 20px 60px rgba(0,0,0,.6),
+              inset 0 0 0 2px #ffd28a;
+  padding: clamp(18px, 4vw, 36px) clamp(20px, 5vw, 44px);
+  overflow-y: auto;
+  scrollbar-color: #8e5b22 #ffe5b8;
+  font-family: Inter, system-ui, Segoe UI, Roboto, Arial, sans-serif;
+  animation: modalIn .25s ease-out;
+}
+@keyframes modalIn{
+  from{ transform: scale(.92) translateY(20px); opacity:0 }
+  to  { transform: scale(1) translateY(0); opacity:1 }
+}
+.modal-close{
+  position:absolute; right:14px; top:10px;
+  width:36px; height:36px;
+  border:3px solid #5b3812;
+  background:#ffd24a;
+  color:#5b3812;
+  font-size:24px; font-weight:900; line-height:1;
+  border-radius:50%; cursor:pointer;
+  box-shadow: 0 4px 0 #5b3812;
+  transition: transform .08s ease;
+}
+.modal-close:hover{ transform: translateY(-1px); }
+.modal-close:active{ transform: translateY(2px); box-shadow: 0 1px 0 #5b3812; }
+.modal-title{
+  margin: 0 0 .4em;
+  font-family: "Anton", system-ui, sans-serif;
+  font-size: clamp(22px, 4.2vw, 36px);
+  color:#5b3812;
+  letter-spacing: .02em;
+  text-shadow: 0 2px 0 rgba(255,255,255,.6);
+}
+.modal-body{
+  font-size: clamp(14px, 1.9vw, 16px);
+  line-height: 1.65;
+}
+.modal-body h3{
+  font-family: "Anton", system-ui, sans-serif;
+  color:#7c2d12;
+  margin: 1em 0 .3em;
+  font-size: clamp(18px, 2.6vw, 22px);
+  letter-spacing: .015em;
+}
+.modal-body ul{ padding-left: 1.2em; margin: .5em 0 1em; }
+.modal-body li{ margin-bottom: .4em; }
+.modal-body p{ margin: .4em 0 .8em; }
+.modal-body a{
+  color:#7c2d12;
+  font-weight:700;
+  text-decoration: underline;
+  text-decoration-thickness: 2px;
+  text-underline-offset: 2px;
+}
+.modal-body a:hover{ color:#c85d32; }
+
+/* =====================================================
+   MODAL ZONE (panneau du monde)
+===================================================== */
+.modal-zone-content{
+  width: min(820px, 96vw);
+}
+.modal-zone-header{
+  display:flex; align-items:center; gap:14px;
+  padding-bottom: 12px;
+  border-bottom: 2px dashed #8e5b22;
+  margin-bottom: 14px;
+}
+.modal-zone-icon{
+  font-size: clamp(28px, 4vw, 40px);
+  filter: drop-shadow(0 2px 0 rgba(0,0,0,.2));
+}
+.modal-zone-meta{
+  margin: 4px 0 0;
+  font-size: 13px;
+  color:#7c2d12;
+  font-weight:700;
+}
+.modal-zone-meta .meta-pill{
+  display:inline-block;
+  padding: 2px 8px;
+  margin: 0 4px 4px 0;
+  background: #ffd24a;
+  border:2px solid #5b3812;
+  border-radius: 999px;
+  font-size: 11px;
+}
+.modal-zone-body .reflexive{
+  background: rgba(255,255,255,.55);
+  border-left: 4px solid #8e5b22;
+  padding: 10px 14px;
+  margin: 12px 0;
+  border-radius: 4px;
+  font-style: italic;
+}
+.modal-zone-body .screenshots{
+  display:grid;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: 8px;
+  margin: 12px 0;
+}
+.modal-zone-body .screenshots img{
+  width:100%; height: 110px;
+  object-fit: cover;
+  border:3px solid #5b3812;
+  border-radius: 6px;
+  box-shadow: 0 4px 0 rgba(0,0,0,.2);
+  cursor: zoom-in;
+  transition: transform .12s ease;
+}
+.modal-zone-body .screenshots img:hover{ transform: scale(1.04); }
+.modal-zone-body .links{
+  display:flex; flex-wrap:wrap; gap: 8px;
+  margin: 12px 0;
+}
+.modal-zone-body .link-pill{
+  display:inline-block;
+  padding: 8px 14px;
+  background: #ffd24a;
+  border:2px solid #5b3812;
+  border-radius: 999px;
+  color:#2b1a07;
+  font-weight:800;
+  text-decoration:none;
+  font-size: 13px;
+  box-shadow: 0 4px 0 #5b3812;
+  transition: transform .08s ease;
+}
+.modal-zone-body .link-pill:hover{ transform: translateY(-2px); }
+.modal-zone-body .link-pill:active{ transform: translateY(2px); box-shadow: 0 1px 0 #5b3812; }
+
+/* Lightbox image */
+.lightbox{
+  position:fixed; inset:0; z-index:300;
+  display:grid; place-items:center;
+  background: rgba(0,0,0,.92);
+  cursor: zoom-out;
+}
+.lightbox img{
+  max-width: 96vw; max-height: 92svh;
+  border:3px solid #fff;
+  border-radius:6px;
+  box-shadow: 0 20px 60px rgba(0,0,0,.6);
+}
+
+/* =====================================================
+   PROJET PRO / OBJECTIFS modal
+===================================================== */
+.objectifs-list{
+  list-style: none;
+  padding: 0;
+  margin: 12px 0;
+}
+.objectifs-list li{
+  position:relative;
+  padding: 10px 12px 10px 38px;
+  margin: 8px 0;
+  background: rgba(255,255,255,.5);
+  border:2px solid #8e5b22;
+  border-radius: 6px;
+}
+.objectifs-list li::before{
+  content: "★";
+  position:absolute; left: 12px; top: 50%;
+  transform: translateY(-50%);
+  color:#c85d32;
+  font-size: 18px;
+  font-weight: 900;
+  text-shadow: 0 1px 0 #fff;
+}
+
+/* =====================================================
+   ABOUT cave : bouton continuer + trou central
+===================================================== */
+.about-cave .cave-hole{
+  position:absolute; left:50%; transform:translateX(-50%);
+  bottom: 0;
+  width: clamp(80px, 14vw, 200px);
+  height: var(--caveGroundH, 7svh);
+  background: radial-gradient(ellipse at top, #000 60%, transparent 100%);
+  pointer-events:none;
+  z-index: 2;
+}
+
+.continue-prompt{
+  margin-top: 1.2em;
+  font-weight: 700;
+  color: #ffd166;
+  text-shadow: 0 2px 0 #000;
+}
+
+.continue-btn{
+  position:absolute;
+  bottom: clamp(80px, 14svh, 140px);
+  left: 50%; transform: translateX(-50%);
+  padding: 10px 18px;
+  background: #6cbb3c;
+  border: 3px solid #2f6018;
+  color: #fff;
+  font-weight: 800;
+  text-decoration: none;
+  border-radius: 10px;
+  box-shadow: 0 6px 0 #2f6018, 0 14px 28px rgba(0,0,0,.3);
+  z-index: 4;
+  text-shadow: 0 2px 0 rgba(0,0,0,.4);
+  transition: transform .08s ease;
+}
+.continue-btn:hover{ transform: translateX(-50%) translateY(-2px); }
+.continue-btn:active{ transform: translateX(-50%) translateY(2px); box-shadow: 0 3px 0 #2f6018, 0 8px 16px rgba(0,0,0,.2); }
+
+/* =====================================================
+   SECTION MONDE TOP-DOWN
+===================================================== */
+.world-section{
+  position: relative;
+  width: 100%;
+  min-height: 100svh;
+  background: #0a0e1c;
+  overflow: hidden;
+}
+
+.world-canvas{
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+  image-rendering: pixelated;
+  image-rendering: -moz-crisp-edges;
+  image-rendering: crisp-edges;
+  z-index: 1;
+}
+
+.world-hud{
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  padding: clamp(8px, 2vw, 16px);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  z-index: 50;
+  pointer-events: none;
+  background: linear-gradient(180deg, rgba(10,14,28,.85), rgba(10,14,28,0));
+  opacity: 0;
+  transition: opacity .3s ease;
+}
+.world-section.active ~ * .world-hud,
+body.in-world .world-hud{
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.world-back, .world-help{
+  pointer-events: auto;
+  background: #ffd24a;
+  border: 3px solid #5b3812;
+  color: #2b1a07;
+  font-weight: 800;
+  padding: 8px 14px;
+  border-radius: 999px;
+  text-decoration: none;
+  cursor: pointer;
+  font-family: inherit;
+  box-shadow: 0 4px 0 #5b3812;
+  transition: transform .08s ease;
+}
+.world-back:hover, .world-help:hover{ transform: translateY(-2px); }
+.world-back:active, .world-help:active{ transform: translateY(2px); box-shadow: 0 1px 0 #5b3812; }
+
+.world-help{
+  width: 40px;
+  height: 40px;
+  padding: 0;
+  font-size: 18px;
+  display: grid;
+  place-items: center;
+}
+
+.world-progress{
+  pointer-events: auto;
+  background: rgba(0,0,0,.7);
+  color: #ffd24a;
+  padding: 8px 18px;
+  border: 2px solid #ffd24a;
+  border-radius: 999px;
+  font-family: "Press Start 2P", monospace;
+  font-size: clamp(10px, 1.6vw, 14px);
+  letter-spacing: .05em;
+  text-transform: uppercase;
+  box-shadow: 0 4px 12px rgba(0,0,0,.5);
+}
+
+.world-controls-hint{
+  position: fixed;
+  bottom: clamp(12px, 3vw, 24px);
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 50;
+  background: rgba(0,0,0,.7);
+  color: #fff;
+  padding: 8px 16px;
+  border-radius: 999px;
+  border: 2px solid #ffd24a;
+  font-size: clamp(11px, 1.6vw, 14px);
+  text-align: center;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity .3s ease;
+}
+.world-controls-hint p{ margin: 0; }
+body.in-world .world-controls-hint{ opacity: 1; }
+body.in-world .world-controls-hint.fade-out{ opacity: 0; }
+
+/* Indicateur d'interaction avec une pancarte */
+.sign-prompt{
+  position: fixed;
+  top: 50%; left: 50%;
+  transform: translate(-50%, -50%) translateY(-80px);
+  z-index: 60;
+  background: #ffd24a;
+  color: #2b1a07;
+  border: 3px solid #5b3812;
+  padding: 10px 20px;
+  border-radius: 12px;
+  font-family: "Press Start 2P", monospace;
+  font-size: 13px;
+  box-shadow: 0 6px 0 #5b3812;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity .2s ease, transform .2s ease;
+}
+.sign-prompt.show{
+  opacity: 1;
+  transform: translate(-50%, -50%) translateY(-100px);
+}
+
+/* Animation de chute (transition side-slider → top-down) */
+.fall-overlay{
+  position: fixed; inset: 0;
+  z-index: 250;
+  background: radial-gradient(circle at center, rgba(0,0,0,0) 0%, #000 70%);
+  pointer-events: none;
+  opacity: 0;
+  display: grid; place-items: center;
+}
+.fall-overlay.active{
+  opacity: 1;
+  animation: fallIn .9s ease-in forwards;
+}
+.fall-overlay .falling-char{
+  width: 64px; height: 96px;
+  background: url("../assets/eris/idle.png") 0 0 / 256px 320px no-repeat;
+  image-rendering: pixelated;
+  animation: fallSpin .9s ease-in forwards;
+}
+@keyframes fallIn{
+  0%{ background: rgba(0,0,0,0); }
+  100%{ background: rgba(0,0,0,1); }
+}
+@keyframes fallSpin{
+  0%   { transform: translateY(-30vh) rotate(0deg); }
+  100% { transform: translateY(30vh) rotate(720deg); }
+}
+
+/* =====================================================
+   FORCES / FAIBLESSES contenu
+===================================================== */
+#forces-list li, #faiblesses-list li{
+  display: block;
+  margin-bottom: .8em;
+}
+#forces-list strong, #faiblesses-list strong{
+  display: block;
+  color: #ffd166;
+  font-size: 1.05em;
+  margin-bottom: 2px;
+}
+#forces-list .desc, #faiblesses-list .desc{
+  display: block;
+  font-size: .92em;
+  opacity: .9;
+}
+
+/* =====================================================
+   POSITIONNEMENT FORCES/FAIBLESSES dans le HEADER
+   (déplacés en bas, sous la plateforme p2)
+===================================================== */
+.top-hero .info-toggle{
+  position: absolute;
+  top: auto;
+  bottom: calc(var(--gH) + 4svh);
+  z-index: 5;
+}
+.top-hero .info-toggle.left{
+  left: clamp(12px, 4vw, 80px);
+  right: auto;
+}
+.top-hero .info-toggle.right{
+  right: clamp(12px, 4vw, 80px);
+  left: auto;
+}
+
+@media (max-width: 900px){
+  .top-hero .info-toggle{
+    bottom: calc(var(--gH) + 2svh);
+  }
+}
+@media (max-width: 700px){
+  .top-hero .info-toggle{
+    position: static;
+    display: inline-block;
+    margin: 8px;
+  }
+  .top-hero .info-toggle.left,
+  .top-hero .info-toggle.right{
+    left: auto; right: auto;
+  }
+}
+
+/* Garder la cohérence couleur du panneau forces/faiblesses */
+.top-hero .info-panel{
+  background: rgba(20,28,52,.88);
+  border-color: #c85d32;
+}
+
+/* =====================================================
+   Modal panneau "introduction de zone"
+===================================================== */
+.zone-intro{
+  position: fixed;
+  top: 80px; left: 50%;
+  transform: translateX(-50%);
+  z-index: 70;
+  background: rgba(0,0,0,.85);
+  color: #ffd24a;
+  padding: 14px 28px;
+  border: 3px solid #ffd24a;
+  border-radius: 16px;
+  text-align: center;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity .4s ease, transform .4s ease;
+  min-width: min(360px, 90vw);
+}
+.zone-intro h3{
+  margin: 0 0 4px;
+  font-family: "Anton", system-ui, sans-serif;
+  font-size: clamp(20px, 3.4vw, 28px);
+  letter-spacing: .04em;
+  text-transform: uppercase;
+}
+.zone-intro p{
+  margin: 0;
+  font-size: clamp(12px, 1.7vw, 14px);
+  color: #fff;
+  font-weight: 600;
+}
+.zone-intro.show{
+  opacity: 1;
+  transform: translateX(-50%) translateY(8px);
+}
+
+/* =====================================================
+   Reduced motion
+===================================================== */
+@media (prefers-reduced-motion: reduce){
+  .chest-glow, .chest-hint{ animation: none; }
+  .fall-overlay.active, .fall-overlay .falling-char{ animation-duration: 0s; }
+  .modal-content{ animation: none; }
+}
