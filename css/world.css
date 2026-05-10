@@ -30,33 +30,46 @@
   }
 }
 .title-banner.compact{
-  padding: clamp(6px, 1vw, 10px) clamp(14px, 2.4vw, 24px);
+  padding: clamp(8px, 1.2vw, 12px) clamp(18px, 3vw, 36px);
   text-align: center;
   display: inline-block;
   background: #c85d32;
   pointer-events: auto;
+  border-width: 2px;
 }
+/* Pas de pins/dots sur le banner compact (sinon ça déborde du texte) */
+.title-banner.compact .pins::before,
+.title-banner.compact .pins::after,
+.title-banner.compact::before,
+.title-banner.compact::after{ display: none; }
+
 .title.compact-portfolio{
-  font-size: clamp(14px, 2.2vw, 22px);
-  margin: 0;
-  display: block;
-  text-align: center;
-  line-height: 1;
-  --m-stroke: 1.5px;
-  --m-off: 2px;
-  letter-spacing: .04em;
-  padding: 0 0 .12em;
-}
-.title.compact-name{
   font-size: clamp(16px, 2.6vw, 26px);
   margin: 0;
   display: block;
   text-align: center;
-  line-height: 1;
+  line-height: 1.05;
+  --m-stroke: 1.6px;
+  --m-off: 2.5px;
+  letter-spacing: .04em;
+  padding: 0 0 .12em;
+}
+.title.compact-name{
+  font-size: clamp(18px, 3vw, 30px);
+  margin: 0;
+  display: block;
+  text-align: center;
+  line-height: 1.05;
   transform: none;
-  --m-stroke: 1.8px;
+  --m-stroke: 2px;
   --m-off: 3px;
   letter-spacing: .03em;
+  white-space: nowrap;
+}
+@media (max-width: 700px){
+  .title.compact-portfolio{ font-size: 14px; }
+  .title.compact-name    { font-size: 17px; }
+  .title-banner.compact  { padding: 6px 14px; }
 }
 
 /* CTA "Voir mes projets" : juste au-dessus du trou central, avec flèche dedans */
@@ -105,14 +118,14 @@
 .hero-center{ display: none; }
 
 /* =====================================================
-   PLATEFORME CENTRALE (p3) au-dessus du trou
+   PLATEFORME CENTRALE (p3) au-dessus du trou, accessible en saut
 ===================================================== */
 .platform.p3{
-  width: clamp(120px, 14vw, 220px);
+  width: clamp(140px, 18vw, 280px);
   height: 6svh;
   left: 50%;
   transform: translateX(-50%);
-  bottom: calc(var(--gH) + 32svh);
+  bottom: calc(var(--gH) + 14svh);
   border-radius: 0;
   background: var(--tiles) repeat left bottom / var(--tilesSize) var(--tilesSize);
   image-rendering: pixelated;
@@ -120,8 +133,8 @@
 }
 @media (max-width: 700px){
   .platform.p3{
-    width: clamp(100px, 30vw, 180px);
-    bottom: calc(var(--gH) + 30svh);
+    width: clamp(110px, 32vw, 200px);
+    bottom: calc(var(--gH) + 16svh);
   }
 }
 
@@ -153,10 +166,10 @@
   bottom: calc(var(--gH) - 4px);
 }
 .chest-projet{
-  /* sur la plateforme centrale p3, juste au-dessus du trou */
+  /* posé sur la plateforme centrale p3 */
   left: 50%;
   transform: translateX(-50%);
-  bottom: calc(var(--gH) + 32svh + 6svh + 4px);
+  bottom: calc(var(--gH) + 14svh + 6svh + 4px);
 }
 .chest-projet:hover{ transform: translateX(-50%) translateY(-2px); }
 .chest-projet:active{ transform: translateX(-50%) translateY(2px); }
@@ -168,7 +181,7 @@
 @media (max-width: 700px){
   .chest-forces{ left: clamp(12px, 4vw, 40px); }
   .chest-faiblesses{ right: clamp(12px, 4vw, 40px); }
-  .chest-projet{ bottom: calc(var(--gH) + 30svh + 6svh + 4px); }
+  .chest-projet{ bottom: calc(var(--gH) + 16svh + 6svh + 4px); }
 }
 
 /* Prompt "E" affiché quand le perso est à proximité d'un coffre */

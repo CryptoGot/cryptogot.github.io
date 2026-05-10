@@ -15,9 +15,10 @@
   }
 
   /* ============== CONSTANTES ============== */
-  const TILE   = 32;         // taille d'une tuile à l'écran (px)
-  const MAP_W  = 16;         // largeur de la carte en tuiles (512px)
-  const ZONE_H = 18;         // hauteur d'une zone en tuiles (576px)
+  const TILE   = 32;         // taille d'une tuile (world units)
+  const MAP_W  = 22;         // largeur de la carte en tuiles (704px world)
+  const ZONE_H = 12;         // hauteur d'une zone en tuiles (zones plus courtes)
+  const VIEW_ZOOM = 0.7;     // dézoom global pour voir plus de map à la fois
   const PARCOURS = window.PORTFOLIO.parcours;
   const NUM_ZONES = PARCOURS.length;
   const MAP_H = ZONE_H * NUM_ZONES;
@@ -63,8 +64,8 @@
     viewH = Math.max(1, Math.floor(rect.height));
     canvas.width  = viewW * dpr;
     canvas.height = viewH * dpr;
-    // Le monde prend toute la largeur (scale up sur desktop, scale down sur mobile)
-    renderScale = Math.max(0.6, viewW / WORLD_PX_W);
+    // viewZoom dézoome légèrement la map pour voir plus de zones à la fois
+    renderScale = Math.max(0.5, (viewW / WORLD_PX_W) * VIEW_ZOOM);
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
     ctx.imageSmoothingEnabled = false;
     updateSignsHud();
@@ -376,14 +377,33 @@
     const rand = mulberry32(424242);
     const CENTER_X = Math.floor(MAP_W / 2);
 
-    // Pour chaque row de la map, calculer la position X du chemin (sinusoïdale)
-    // Permet un chemin légèrement courbé qui bouge gauche/droite
+    // Anchor X par zone : alternance droite / gauche / centre / droite / gauche...
+    // Crée un VRAI zigzag entre les zones (zone 0 à droite, zone 1 à gauche, etc)
+    const X_DROITE = Math.floor(MAP_W * 0.78);
+    const X_GAUCHE = Math.floor(MAP_W * 0.22);
+    const X_CENTRE = CENTER_X;
+    const ANCHORS = [
+      X_DROITE,  // zone 0 : 3D Design — haut à droite
+      X_GAUCHE,  // zone 1 : App      — haut à gauche
+      X_CENTRE,  // zone 2 : GameDev  — centre
+      X_DROITE,  // zone 3 : Électro  — droite
+      X_GAUCHE,  // zone 4 : Hardware — gauche
+      X_CENTRE,  // zone 5 : IA       — centre
+      X_DROITE,  // zone 6 : Sécurité — droite
+      X_GAUCHE   // zone 7 : Site     — gauche
+    ];
+
+    // pathX(y) : interpole entre l'anchor de la zone courante et celui de la suivante
+    // pour avoir une transition smooth d'un point à l'autre
     function pathX(y){
-      // amplitude varie selon zone
-      const amp = 2.5;
-      const freq = 0.18;
-      const offset = Math.sin(y * freq) * amp;
-      return Math.round(CENTER_X + offset);
+      const z = y / ZONE_H;
+      const zIdx = Math.floor(z);
+      const tInZone = z - zIdx;
+      const a = ANCHORS[Math.min(NUM_ZONES - 1, zIdx)];
+      const b = ANCHORS[Math.min(NUM_ZONES - 1, zIdx + 1)];
+      // smoothstep pour un easing doux
+      const t = tInZone * tInZone * (3 - 2 * tInZone);
+      return Math.round(a + (b - a) * t);
     }
 
     for (let z = 0; z < NUM_ZONES; z++){
@@ -841,31 +861,23 @@
   }
 
   function drawPlayer(offsetX, offsetY, sc){
-    // Eris : un seul row utilisé comme base, avec frame qui change à la marche
-    // Layout présumé : 8 frames horizontales par row, on prend row 0 (down) par défaut
-    let img;
-    if (player.walking && sprWalk.complete && sprWalk.naturalWidth > 0){
-      img = sprWalk;
-    } else if (sprIdle.complete && sprIdle.naturalWidth > 0){
-      img = sprIdle;
-    } else {
-      img = null;
-    }
-
-    const dirRow = DIR_ROW[player.facing] ?? 0;
-    const frame  = player.walking ? (player.frame % 4) : Math.floor(performance.now() / 500) % 2;
-    const sx = frame * SPR_W;
-    const sy = dirRow * SPR_H;
-
-    // taille rendue : le perso reste à taille "world" raisonnable (32x64)
-    // peu importe le scale global. On scale par renderScale uniquement (pas de SCALE multiplier)
+    // Approche simple : on utilise UNIQUEMENT idle.png frame 0 (top-left 16x32),
+    // qu'on flippe horizontalement quand le perso regarde à gauche.
+    // Pendant la marche, petit "bobbing" vertical (haut-bas) pour donner du mouvement
+    // sans dépendre d'un mapping de sprite sheet incertain.
+    const img = (sprIdle.complete && sprIdle.naturalWidth > 0) ? sprIdle : null;
     const SCALE = 2;
     const dw = SPR_W * SCALE * sc;
     const dh = SPR_H * SCALE * sc;
     const px = player.x * sc + offsetX;
     const py = player.y * sc + offsetY;
+
+    // bobbing vertical pendant la marche
+    const bob = player.walking
+      ? Math.sin(performance.now() / 90) * 2 * sc
+      : Math.sin(performance.now() / 600) * 0.6 * sc;
     const dx = Math.round(px - dw/2);
-    const dy = Math.round(py - dh + 4 * sc);
+    const dy = Math.round(py - dh + 4 * sc + bob);
 
     // ombre
     ctx.fillStyle = 'rgba(0,0,0,.4)';
@@ -874,19 +886,17 @@
     ctx.fill();
 
     if (img){
-      // Si on regarde à gauche et qu'il n'y a pas de row left, on flip horizontalement le sprite down
-      const flip = (player.facing === 'left' && DIR_ROW.left === undefined);
+      const flip = (player.facing === 'left');
       if (flip){
         ctx.save();
         ctx.translate(px, 0);
         ctx.scale(-1, 1);
-        ctx.drawImage(img, sx, sy, SPR_W, SPR_H, -dw/2, dy, dw, dh);
+        ctx.drawImage(img, 0, 0, SPR_W, SPR_H, -dw/2, dy, dw, dh);
         ctx.restore();
       } else {
-        ctx.drawImage(img, sx, sy, SPR_W, SPR_H, dx, dy, dw, dh);
+        ctx.drawImage(img, 0, 0, SPR_W, SPR_H, dx, dy, dw, dh);
       }
     } else {
-      // Fallback temps de chargement : kid rectangulaire
       ctx.fillStyle = '#ffd24a';
       ctx.fillRect(dx, dy, dw, dh);
       ctx.fillStyle = '#5b3812';
