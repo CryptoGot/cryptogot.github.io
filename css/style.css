@@ -321,13 +321,14 @@ body{ margin:0; font-family:Inter,system-ui,Segoe UI,Roboto,Arial,sans-serif; co
   display:grid; place-items:center;
   background:#0c1224; border:3px solid #5aa2ff; border-radius:12px;
   box-shadow: 0 8px 20px rgba(0,0,0,.45);
-  transform: translate(-50%, -100%); animation: popUp .35s ease-out forwards;
+  /* Ancré par le HAUT : l'icône sort par en dessous de la case ? */
+  transform: translate(-50%, 0); animation: popDown .35s ease-out forwards;
   pointer-events:auto; cursor:pointer;
 }
-.pop-item:hover{ transform: translate(-50%, -100%) scale(1.05) }
-.pop-item:active{ transform: translate(-50%, -98%) scale(0.98) }
+.pop-item:hover{ transform: translate(-50%, 0) scale(1.05) }
+.pop-item:active{ transform: translate(-50%, 2%) scale(0.98) }
 .pop-item .label{ position:absolute; top:-22px; left:50%; transform:translateX(-50%); background:#000a; color:#fff; font-size:12px; padding:2px 6px; border-radius:6px }
-@keyframes popUp{ 0%{ opacity:0; translate:0 6px } 100%{ opacity:1; translate:0 -10px } }
+@keyframes popDown{ 0%{ opacity:0; translate:0 -6px } 100%{ opacity:1; translate:0 10px } }
 .qbtn.hit{ transform: translateY(4px); box-shadow:0 3px 0 #000, 0 8px 18px rgba(0,0,0,.30) }
 .qbtn.hit:after{ content:""; position:absolute; inset:0; border-radius:8px; box-shadow:0 0 0 3px #fff inset; animation: flash .15s linear }
 @keyframes flash{ from{opacity:.8} to{opacity:0} }

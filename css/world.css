@@ -874,8 +874,11 @@ body.in-world .world-controls-hint.fade-out{ opacity: 0; }
   animation: fallIn .9s ease-in forwards;
 }
 .fall-overlay .falling-char{
-  width: 64px; height: 96px;
-  background: url("../assets/eris/idle.png") 0 0 / 256px 320px no-repeat;
+  width: 64px; height: 128px;
+  /* Le sprite Aurélien fait 64×128 px (4 frames × 4 directions × 16×32).
+     Frame 0 down = top-left coin. On affiche en taille 256×512 pour zoom 4x */
+  background: 0 0 / 256px 512px no-repeat;
+  background-color: transparent;
   image-rendering: pixelated;
   animation: fallSpin .9s ease-in forwards;
 }

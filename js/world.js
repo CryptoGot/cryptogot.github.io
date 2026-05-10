@@ -639,6 +639,8 @@
       drawUp(f);
       drawSide(f, 1);  // left (right = flip horizontal au runtime)
     }
+    // Expose le sprite vers main.js pour l'animation de chute
+    try { window.AurelienSpriteDataURL = c.toDataURL(); } catch(e){}
     return c;
   }
 

@@ -96,7 +96,8 @@ function setupQuestionBoxes() {
     const rect = btn.getBoundingClientRect();
     const rH   = header.getBoundingClientRect();
     const x = rect.left + rect.width/2 - rH.left;
-    const y = rect.top  - 10 - rH.top;
+    // Icône qui sort PAR EN DESSOUS de la case (juste sous le bord bas)
+    const y = rect.bottom + 6 - rH.top;
 
     const el = document.createElement('div');
     el.className = `pop-item ${type}`;
@@ -880,6 +881,11 @@ function triggerFallToWorld(){
     overlay.className = 'fall-overlay';
     overlay.innerHTML = '<div class="falling-char"></div>';
     document.body.appendChild(overlay);
+  }
+  // Utilise le sprite Aurélien (frame 0 down) si disponible
+  const charEl = overlay.querySelector('.falling-char');
+  if (charEl && window.AurelienSpriteDataURL){
+    charEl.style.backgroundImage = `url(${window.AurelienSpriteDataURL})`;
   }
   overlay.classList.add('active');
   setTimeout(() => {
