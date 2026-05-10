@@ -64,8 +64,8 @@
     viewH = Math.max(1, Math.floor(rect.height));
     canvas.width  = viewW * dpr;
     canvas.height = viewH * dpr;
-    // viewZoom dézoome légèrement la map pour voir plus de zones à la fois
-    renderScale = Math.max(0.5, (viewW / WORLD_PX_W) * VIEW_ZOOM);
+    // La map prend toute la largeur du viewport (plus de bandes grises)
+    renderScale = viewW / WORLD_PX_W;
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
     ctx.imageSmoothingEnabled = false;
     updateSignsHud();
@@ -422,10 +422,10 @@
         }
       }
 
-      // 3) décorations (arbres/bâtiments/cactus/rochers/eau)
-      // On enleve les fleurs (id 5) qui faisaient des petits points blancs
-      // disgracieux dispersés dans le décor.
-      const decoCount = 12 + Math.floor(rand() * 5);
+      // 3) décorations : uniquement le décor principal de l'environnement
+      // (arbre, bâtiment, cactus, montagne) + eau pour le marais.
+      // Pas de rochers/buissons/fleurs : ils faisaient trop de petits carrés.
+      const decoCount = 10 + Math.floor(rand() * 4);
       let attempts = 0;
       let placed = 0;
       while (placed < decoCount && attempts < 100){
@@ -437,11 +437,10 @@
         if (map[idx] >= 3) continue;
         const r = rand();
         let tileId;
-        if (env === 'marais' && r < 0.4) tileId = 6;       // eau pour marais
-        else if (r < 0.7) tileId = 3;                       // arbre/batiment principal
-        else              tileId = 4;                       // rocher/buisson
+        if (env === 'marais' && r < 0.35) tileId = 6;      // eau pour marais
+        else                              tileId = 3;      // décor principal
         map[idx] = tileId;
-        if (tileId === 3 || tileId === 4 || tileId === 6) collisionMap[idx] = 1;
+        collisionMap[idx] = 1;
         placed++;
       }
 

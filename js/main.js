@@ -489,6 +489,67 @@ document.addEventListener('click', (e) => {
 });
 
 /* =========================
+   Barre de navigation : menu hamburger + liens directs
+========================= */
+(function setupNav(){
+  const toggle = document.getElementById('navToggle');
+  const menu   = document.getElementById('navMenu');
+  if (!toggle || !menu) return;
+
+  function setOpen(open){
+    toggle.setAttribute('aria-expanded', open ? 'true' : 'false');
+    menu.hidden = !open;
+  }
+
+  toggle.addEventListener('click', () => {
+    const open = toggle.getAttribute('aria-expanded') === 'true';
+    setOpen(!open);
+  });
+
+  // Fermer en cliquant ailleurs
+  document.addEventListener('click', (e) => {
+    if (!menu.hidden && !e.target.closest('.site-nav')){
+      setOpen(false);
+    }
+  });
+
+  // Fermer sur Echap
+  document.addEventListener('keydown', (e) => {
+    if (e.code === 'Escape' && !menu.hidden) setOpen(false);
+  });
+
+  // Liens vers les coffres
+  menu.addEventListener('click', (e) => {
+    const chestBtn = e.target.closest('[data-chest]');
+    const zoneBtn  = e.target.closest('[data-zone]');
+    const navLink  = e.target.closest('[data-nav]');
+
+    if (chestBtn){
+      const kind = chestBtn.dataset.chest;
+      if (typeof showChestModal === 'function') showChestModal(kind);
+      setOpen(false);
+      return;
+    }
+    if (zoneBtn){
+      // Ouvre directement le premier panneau de la zone
+      const zoneId = zoneBtn.dataset.zone;
+      const zone = window.PORTFOLIO?.[zoneId];
+      if (zone && zone.panneaux && zone.panneaux[0] && typeof window.showZoneModal === 'function'){
+        window.showZoneModal(zone, zone.panneaux[0]);
+      }
+      setOpen(false);
+      return;
+    }
+    if (navLink){
+      // lien interne (#top etc.) : laisse l'ancre faire son boulot
+      setOpen(false);
+    }
+    // Liens externes / mailto : laisse passer
+    if (e.target.closest('a.nav-link[href]')) setOpen(false);
+  });
+})();
+
+/* =========================
    Accordions (main)
 ========================= */
 (function(){

@@ -1,4 +1,127 @@
 /* =====================================================
+   BARRE DE NAVIGATION (fixe, en haut de tout)
+===================================================== */
+.site-nav{
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  z-index: 100;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 16px;
+  background: rgba(28, 18, 8, 0.92);
+  backdrop-filter: blur(8px);
+  border-bottom: 3px solid #5b3812;
+  font-family: Inter, system-ui, Segoe UI, Roboto, Arial, sans-serif;
+  pointer-events: auto;
+}
+.nav-brand{
+  color: #ffd24a;
+  font-family: "Anton", system-ui, sans-serif;
+  font-size: clamp(14px, 1.7vw, 18px);
+  letter-spacing: .04em;
+  text-transform: uppercase;
+  text-decoration: none;
+  font-weight: 700;
+  text-shadow: 0 2px 0 #2b1a07;
+}
+.nav-brand:hover{ color: #fff; }
+
+.nav-toggle{
+  display: grid;
+  gap: 4px;
+  align-content: center;
+  width: 40px; height: 40px;
+  border: 2px solid #ffd24a;
+  background: rgba(91, 56, 18, .7);
+  border-radius: 8px;
+  cursor: pointer;
+  padding: 8px;
+}
+.nav-toggle-bar{
+  display: block;
+  height: 3px;
+  background: #ffd24a;
+  border-radius: 2px;
+  transition: transform .2s ease, opacity .2s ease;
+}
+.nav-toggle[aria-expanded="true"] .nav-toggle-bar:nth-child(1){
+  transform: translateY(7px) rotate(45deg);
+}
+.nav-toggle[aria-expanded="true"] .nav-toggle-bar:nth-child(2){
+  opacity: 0;
+}
+.nav-toggle[aria-expanded="true"] .nav-toggle-bar:nth-child(3){
+  transform: translateY(-7px) rotate(-45deg);
+}
+
+.nav-menu{
+  position: absolute;
+  top: 100%;
+  right: 16px;
+  width: min(380px, 92vw);
+  max-height: 80svh;
+  overflow-y: auto;
+  background: rgba(28, 18, 8, 0.97);
+  backdrop-filter: blur(8px);
+  border: 3px solid #5b3812;
+  border-radius: 14px;
+  margin-top: 6px;
+  padding: 14px;
+  box-shadow: 0 12px 36px rgba(0,0,0,.6);
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+.nav-menu[hidden]{ display: none; }
+
+.nav-menu-section{
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.nav-section-title{
+  margin: 0 0 4px;
+  font-family: "Anton", system-ui, sans-serif;
+  font-size: 13px;
+  color: #ffd24a;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  text-shadow: 0 1px 0 #2b1a07;
+  border-bottom: 2px solid rgba(255, 210, 74, .35);
+  padding-bottom: 4px;
+}
+.nav-link{
+  display: block;
+  width: 100%;
+  text-align: left;
+  padding: 9px 12px;
+  background: rgba(255, 255, 255, .03);
+  color: #fff8e8;
+  border: 2px solid transparent;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: inherit;
+  text-decoration: none;
+  transition: background .12s ease, border-color .12s ease, transform .08s ease;
+}
+.nav-link:hover{
+  background: rgba(255, 210, 74, .15);
+  border-color: #ffd24a;
+}
+.nav-link:active{ transform: translateY(1px); }
+
+/* Décale le contenu pour que la nav fixe ne masque pas le top-hero */
+.top-hero{ padding-top: 56px; }
+@media (max-width: 700px){
+  .top-hero{ padding-top: 50px; }
+  .site-nav{ padding: 6px 12px; }
+  .nav-toggle{ width: 36px; height: 36px; }
+}
+
+/* =====================================================
    WORLD.CSS : coffre Mario, modals, section monde top-down
 ===================================================== */
 
@@ -594,16 +717,19 @@
 
 .world-hud{
   position: fixed;
-  top: 0; left: 0; right: 0;
-  padding: clamp(8px, 2vw, 16px);
+  top: 56px; left: 0; right: 0;        /* décalé sous la nav bar */
+  padding: clamp(6px, 1.4vw, 12px) clamp(8px, 2vw, 16px);
   display: flex;
   justify-content: space-between;
   align-items: center;
   z-index: 50;
   pointer-events: none;
-  background: linear-gradient(180deg, rgba(10,14,28,.85), rgba(10,14,28,0));
+  background: linear-gradient(180deg, rgba(10,14,28,.7), rgba(10,14,28,0));
   opacity: 0;
   transition: opacity .3s ease;
+}
+@media (max-width: 700px){
+  .world-hud{ top: 50px; }
 }
 .world-section.active ~ * .world-hud,
 body.in-world .world-hud{
