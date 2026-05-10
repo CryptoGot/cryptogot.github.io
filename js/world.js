@@ -991,12 +991,14 @@
     const lastRow  = Math.min(MAP_H - 1, Math.ceil((camera.y + visHeightWorld) / TILE) + 2);
 
     // Trier par y pour avoir un ordre de rendu cohérent (les sprites du bas
-    // dessinés par-dessus ceux du haut, effet de profondeur)
+    // dessinés par-dessus ceux du haut, effet de profondeur).
+    // Ne rendre que les vraies decorations (id 3..7), pas les variants de sol
+    // (0, 1, 8) ni le chemin (2) ni les transitions (9).
     const items = [];
     for (let y = firstRow; y <= lastRow; y++){
       for (let x = 0; x < MAP_W; x++){
         const id = map[y * MAP_W + x];
-        if (id < 3) continue;
+        if (id < 3 || id > 7) continue;
         items.push({ x, y, id });
       }
     }
