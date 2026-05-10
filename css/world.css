@@ -136,9 +136,18 @@
    TITRE COMPACT (top-hero, tout en haut centre, au-dessus
    des chips Jeu/Souris et des cases ?)
 ===================================================== */
+/* === Le titre, les chips Jeu/Souris et les cases ? sont alignés
+       sur la même ligne horizontale, juste sous la nav bar === */
+:root{
+  --topRowY: 70px;   /* top de la ligne Jeu/Souris/Titre/?  */
+}
+@media (max-width: 700px){
+  :root{ --topRowY: 60px; }
+}
+
 .hero-title{
   position: absolute;
-  top: clamp(70px, 9vh, 100px);   /* sous la nav bar (56px) avec marge */
+  top: var(--topRowY);
   left: 50%;
   transform: translateX(-50%);
   z-index: 6;
@@ -147,13 +156,8 @@
   max-width: calc(100vw - 32px);
   pointer-events: none;
 }
-@media (max-width: 700px){
-  .hero-title{
-    top: clamp(60px, 8vh, 80px);
-  }
-}
 .title-banner.compact{
-  padding: clamp(8px, 1.2vw, 12px) clamp(18px, 3vw, 36px);
+  padding: clamp(10px, 1.6vw, 16px) clamp(22px, 3.6vw, 42px);
   text-align: center;
   display: inline-block;
   background: #c85d32;
@@ -167,32 +171,32 @@
 .title-banner.compact::after{ display: none; }
 
 .title.compact-portfolio{
-  font-size: clamp(16px, 2.6vw, 26px);
+  font-size: clamp(20px, 3.4vw, 32px);
   margin: 0;
   display: block;
   text-align: center;
   line-height: 1.05;
-  --m-stroke: 1.6px;
-  --m-off: 2.5px;
+  --m-stroke: 2px;
+  --m-off: 3px;
   letter-spacing: .04em;
-  padding: 0 0 .12em;
+  padding: 0 0 .14em;
 }
 .title.compact-name{
-  font-size: clamp(18px, 3vw, 30px);
+  font-size: clamp(22px, 3.8vw, 38px);
   margin: 0;
   display: block;
   text-align: center;
   line-height: 1.05;
   transform: none;
-  --m-stroke: 2px;
-  --m-off: 3px;
+  --m-stroke: 2.4px;
+  --m-off: 3.5px;
   letter-spacing: .03em;
   white-space: nowrap;
 }
 @media (max-width: 700px){
-  .title.compact-portfolio{ font-size: 14px; }
-  .title.compact-name    { font-size: 17px; }
-  .title-banner.compact  { padding: 6px 14px; }
+  .title.compact-portfolio{ font-size: 16px; }
+  .title.compact-name    { font-size: 19px; }
+  .title-banner.compact  { padding: 8px 16px; }
 }
 
 /* CTA "Voir mes projets" : juste au-dessus du trou central, avec flèche dedans */

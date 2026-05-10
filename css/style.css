@@ -49,15 +49,22 @@ body{ margin:0; font-family:Inter,system-ui,Segoe UI,Roboto,Arial,sans-serif; co
   background: url("../assets/bg/clouds.png") repeat-x center 18% / auto 100%;
 }
 
-/* zones de contrôles */
-.controls{ position:absolute; top:16px; display:flex; gap:10px; z-index:5 }
+/* zones de contrôles : alignés sur la même ligne que le titre */
+.controls{
+  position:absolute;
+  top: var(--topRowY, 70px);
+  display:flex;
+  align-items:center;
+  gap:10px;
+  z-index:5;
+}
 .controls.left{ left:16px }
 .controls.right{ right:16px }
 
 /* =====================================================
    Cloud buttons (Game / Mouse)
 ===================================================== */
-.mode-toggle{ display:flex; gap:clamp(8px,2.4vw,14px); padding-top: clamp(8px, 6vw, 50px); }
+.mode-toggle{ display:flex; gap:clamp(8px,2.4vw,14px); padding-top:0; align-items:center; }
 
 .chip{
   --w: clamp(96px, 22vw, 200px);
@@ -88,9 +95,10 @@ body{ margin:0; font-family:Inter,system-ui,Segoe UI,Roboto,Arial,sans-serif; co
 ===================================================== */
 .q-actions{
   display:flex;
-  gap: clamp(8px, 4vw, 24px);
-  padding-top: clamp(12px, 10vw, 100px);
-  padding-right: clamp(8px, 5vw, 50px);
+  gap: clamp(8px, 2vw, 16px);
+  padding-top: 0;
+  padding-right: 0;
+  align-items: center;
 }
 
 .qbtn{
@@ -223,7 +231,7 @@ body{ margin:0; font-family:Inter,system-ui,Segoe UI,Roboto,Arial,sans-serif; co
   width: clamp(140px, 20vw, 320px);
   height: 6svh;
   right: clamp(12px, 5vw, 60px);
-  bottom: calc(var(--gH) + 14svh);
+  bottom: calc(var(--gH) + 22svh);
   border-radius: 0;
   background: var(--tiles) repeat left bottom / var(--tilesSize) var(--tilesSize);
   image-rendering: pixelated;
@@ -232,7 +240,7 @@ body{ margin:0; font-family:Inter,system-ui,Segoe UI,Roboto,Arial,sans-serif; co
 @media (max-width: 700px){
   .platform.p2{
     width: clamp(110px, 26vw, 220px);
-    bottom: calc(var(--gH) + 16svh);
+    bottom: calc(var(--gH) + 24svh);
     right: 4vw;
   }
 }
@@ -463,24 +471,17 @@ body{ margin:0; font-family:Inter,system-ui,Segoe UI,Roboto,Arial,sans-serif; co
 /* HEADER — sur mobile : rangée plus basse + tailles réduites + icônes pop plus petites */
 @media (max-width:700px){
   :root{
-    --qS: 42px;           /* taille carrés ? (réduit) */
-    --headRowTop: 76px;   /* rangée abaissée (64–84 selon goût) */
-    --popOffsetY: 12px;   /* décalage pop vers le bas */
+    --qS: 38px;           /* taille carrés ? (réduit pour mobile) */
+    --popOffsetY: 12px;
   }
 
   .qbtn{ --s: var(--qS); }
 
-  .controls.right{ top: var(--headRowTop); right:16px; left:auto; }
-  .q-actions{ gap:10px; padding-top:0; padding-right:0; }
-
-  /* Game/Mouse même hauteur, à gauche des ? */
-  .controls.left{
-    top: var(--headRowTop); left:auto;
-    right: calc(16px + (var(--qS) * 4) + (10px * 3)); /* 4 cases + 3 gaps */
-  }
-
+  /* On garde la rangée du haut (Jeu/Souris à gauche, ? à droite) sur la même
+     ligne que le titre. Mais le titre est centré, donc Jeu/Souris se cachent
+     derrière sur très petit écran. On les met sous la nav et le titre par-dessus. */
   .mode-toggle{ gap:8px; padding-top:0; }
-  .mode-toggle .chip{ --w: 88px; --h: 34px; font-size:12px; }
+  .mode-toggle .chip{ --w: 76px; --h: 30px; font-size:11px; }
 
   /* pop plus petits */
   .pop-item{

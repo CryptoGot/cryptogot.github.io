@@ -476,16 +476,171 @@
     })[t] || 'PROJET';
   }
 
-  /* ============== JOUEUR (ERIS) ============== */
-  const sprIdle = new Image(); sprIdle.src = 'assets/eris/idle.png';
-  const sprWalk = new Image(); sprWalk.src = 'assets/eris/walk.png';
-
-  // Le sprite Eris est 16x32, organisé 8 cols x 5 rows
-  // On utilise les 4 premières lignes pour les directions (down, left, up, right)
-  // Approximation : on utilise frame 0 idle, frames 0-3 walk
+  /* ============== JOUEUR (sprite custom Aurélien) ============== */
+  // Sprite généré procéduralement en canvas (cheveux brun + casque audio
+  // noir + bouc + t-shirt crème + pantalon noir).
+  // Layout : 4 frames par direction × 4 directions = 64×128 px
+  // directions : 0=down, 1=left, 2=up, 3=right
   const SPR_W = 16, SPR_H = 32;
-  const SPR_COLS = 8;
+  const SPR_COLS = 4;
   const DIR_ROW = { down: 0, left: 1, up: 2, right: 3 };
+
+  const PLAYER_SPRITE = generateAurelienSprite();
+
+  function generateAurelienSprite(){
+    const c = document.createElement('canvas');
+    c.width  = SPR_W * SPR_COLS;
+    c.height = SPR_H * 4;
+    const tc = c.getContext('2d');
+    tc.imageSmoothingEnabled = false;
+
+    const COL = {
+      skin    : '#e8c39a',
+      hair    : '#2a1d10',
+      hpDark  : '#0e0e10',
+      hpLight : '#3a3a3e',
+      eyes    : '#1a1a1a',
+      beard   : '#1f120a',
+      shirt   : '#ece4c4',
+      shirtSh : '#c8c098',
+      pants   : '#1a1a1a',
+      shoes   : '#000'
+    };
+
+    // Helper : dessine un rectangle dans la frame (frame, dir)
+    function P(frame, dir, x, y, w, h, color){
+      tc.fillStyle = color;
+      tc.fillRect(frame * SPR_W + x, dir * SPR_H + y, w, h);
+    }
+
+    function drawDown(frame){
+      const dir = 0;
+      const isWalking = frame !== 0;
+      // cycle marche : 0 = idle, 1 = jambe gauche avancée, 2 = idle, 3 = jambe droite
+      const lLegOffset = (frame === 1 ? 1 : (frame === 3 ? 0 : 0));
+      const rLegOffset = (frame === 3 ? 1 : (frame === 1 ? 0 : 0));
+      const armSwing   = isWalking ? (frame === 1 || frame === 2 ? -1 : 1) : 0;
+
+      // CHEVEUX (haut bouclé)
+      P(frame,dir, 4,1, 8,1, COL.hair);
+      P(frame,dir, 3,2,10,2, COL.hair);
+      P(frame,dir, 3,4,10,1, COL.hair);
+      P(frame,dir, 4,4, 1,1, COL.skin); // mèche front
+      // VISAGE
+      P(frame,dir, 5,5, 6,4, COL.skin);
+      // SOURCILS
+      P(frame,dir, 6,5, 1,1, COL.hair);
+      P(frame,dir, 9,5, 1,1, COL.hair);
+      // YEUX
+      P(frame,dir, 6,6, 1,1, COL.eyes);
+      P(frame,dir, 9,6, 1,1, COL.eyes);
+      // BOUC + MOUSTACHE
+      P(frame,dir, 6,8, 4,1, COL.beard);  // moustache
+      P(frame,dir, 7,9, 2,1, COL.beard);  // bouc central
+      // CASQUE AUDIO (cups noirs sur les côtés + bandeau)
+      P(frame,dir, 4,1, 8,1, COL.hpDark); // bandeau (au-dessus des cheveux)
+      P(frame,dir, 2,3, 2,5, COL.hpDark); // cup gauche
+      P(frame,dir, 12,3, 2,5, COL.hpDark);// cup droite
+      // léger highlight sur les cups
+      P(frame,dir, 2,3, 1,1, COL.hpLight);
+      P(frame,dir, 13,3, 1,1, COL.hpLight);
+      // COU
+      P(frame,dir, 7,10, 2,1, COL.skin);
+      // T-SHIRT
+      P(frame,dir, 3,11,10,9, COL.shirt);
+      // ombre bas du t-shirt (pli)
+      P(frame,dir, 3,19,10,1, COL.shirtSh);
+      // BRAS (pendants, swing pour anim marche)
+      P(frame,dir, 2,12 + armSwing, 1,7, COL.shirt);
+      P(frame,dir, 13,12 - armSwing, 1,7, COL.shirt);
+      // MAINS
+      P(frame,dir, 2,19 + armSwing, 1,1, COL.skin);
+      P(frame,dir, 13,19 - armSwing, 1,1, COL.skin);
+      // PANTALON
+      P(frame,dir, 4,20, 8,7, COL.pants);
+      // JAMBES (avec animation)
+      P(frame,dir, 4,26 - lLegOffset, 3,3, COL.pants);
+      P(frame,dir, 9,26 - rLegOffset, 3,3, COL.pants);
+      // CHAUSSURES
+      P(frame,dir, 4,29 - lLegOffset, 3,2, COL.shoes);
+      P(frame,dir, 9,29 - rLegOffset, 3,2, COL.shoes);
+    }
+
+    function drawUp(frame){
+      const dir = 2;
+      const lLegOffset = (frame === 1 ? 1 : 0);
+      const rLegOffset = (frame === 3 ? 1 : 0);
+      // ARRIÈRE DE LA TÊTE : juste cheveux
+      P(frame,dir, 3,2,10,7, COL.hair);
+      P(frame,dir, 4,1, 8,1, COL.hair);
+      // CASQUE (visible aussi de dos, cups)
+      P(frame,dir, 2,3, 2,5, COL.hpDark);
+      P(frame,dir, 12,3, 2,5, COL.hpDark);
+      P(frame,dir, 4,1, 8,1, COL.hpDark);
+      // COU
+      P(frame,dir, 7,10, 2,1, COL.skin);
+      // DOS T-SHIRT
+      P(frame,dir, 3,11,10,9, COL.shirt);
+      P(frame,dir, 3,19,10,1, COL.shirtSh);
+      // BRAS
+      const armSwing = (frame === 1 || frame === 2 ? -1 : 1);
+      P(frame,dir, 2,12 + armSwing, 1,7, COL.shirt);
+      P(frame,dir, 13,12 - armSwing, 1,7, COL.shirt);
+      P(frame,dir, 2,19 + armSwing, 1,1, COL.skin);
+      P(frame,dir, 13,19 - armSwing, 1,1, COL.skin);
+      // PANTALON + JAMBES
+      P(frame,dir, 4,20, 8,7, COL.pants);
+      P(frame,dir, 4,26 - lLegOffset, 3,3, COL.pants);
+      P(frame,dir, 9,26 - rLegOffset, 3,3, COL.pants);
+      P(frame,dir, 4,29 - lLegOffset, 3,2, COL.shoes);
+      P(frame,dir, 9,29 - rLegOffset, 3,2, COL.shoes);
+    }
+
+    function drawSide(frame, dir){
+      // dir 1 = left (nous on dessine la version "vu du côté gauche") ;
+      // dir 3 = right sera fait par flip horizontal au runtime
+      const lLegOffset = (frame === 1 ? 1 : 0);
+      const rLegOffset = (frame === 3 ? 1 : 0);
+      const armSwing   = (frame === 1 || frame === 2 ? -1 : 1);
+
+      // CHEVEUX bouclé profil
+      P(frame,dir, 4,1, 7,1, COL.hair);
+      P(frame,dir, 3,2, 8,3, COL.hair);
+      // VISAGE de profil (peau)
+      P(frame,dir, 5,5, 5,4, COL.skin);
+      // ŒIL (un seul visible)
+      P(frame,dir, 6,6, 1,1, COL.eyes);
+      // SOURCIL
+      P(frame,dir, 6,5, 1,1, COL.hair);
+      // BOUC
+      P(frame,dir, 5,8, 3,1, COL.beard);
+      // CASQUE : un seul cup visible (côté gauche)
+      P(frame,dir, 2,3, 2,5, COL.hpDark);
+      P(frame,dir, 4,1, 7,1, COL.hpDark);
+      // COU
+      P(frame,dir, 6,10, 2,1, COL.skin);
+      // T-SHIRT (de profil, légèrement plus étroit)
+      P(frame,dir, 3,11, 9,9, COL.shirt);
+      P(frame,dir, 3,19, 9,1, COL.shirtSh);
+      // BRAS visible devant (swing fort de profil)
+      P(frame,dir, 6,12 + armSwing, 2,7, COL.shirt);
+      P(frame,dir, 6,19 + armSwing, 2,1, COL.skin);
+      // PANTALON
+      P(frame,dir, 4,20, 7,7, COL.pants);
+      // JAMBES de profil : alternance plus prononcée
+      P(frame,dir, 4,26 - lLegOffset, 3,3, COL.pants);
+      P(frame,dir, 7,26 - rLegOffset, 3,3, COL.pants);
+      P(frame,dir, 4,29 - lLegOffset, 3,2, COL.shoes);
+      P(frame,dir, 7,29 - rLegOffset, 3,2, COL.shoes);
+    }
+
+    for (let f = 0; f < SPR_COLS; f++){
+      drawDown(f);
+      drawUp(f);
+      drawSide(f, 1);  // left (right = flip horizontal au runtime)
+    }
+    return c;
+  }
 
   const player = {
     // position en pixels monde (centre du sprite à ses pieds)
@@ -1014,23 +1169,14 @@
   }
 
   function drawPlayer(offsetX, offsetY, sc){
-    // Approche simple : on utilise UNIQUEMENT idle.png frame 0 (top-left 16x32),
-    // qu'on flippe horizontalement quand le perso regarde à gauche.
-    // Pendant la marche, petit "bobbing" vertical (haut-bas) pour donner du mouvement
-    // sans dépendre d'un mapping de sprite sheet incertain.
-    const img = (sprIdle.complete && sprIdle.naturalWidth > 0) ? sprIdle : null;
-    const SCALE = 2;
+    // Sprite custom Aurélien : 4 frames × 4 directions sur PLAYER_SPRITE
+    const SCALE = 2.5;
     const dw = SPR_W * SCALE * sc;
     const dh = SPR_H * SCALE * sc;
     const px = player.x * sc + offsetX;
     const py = player.y * sc + offsetY;
-
-    // bobbing vertical pendant la marche
-    const bob = player.walking
-      ? Math.sin(performance.now() / 90) * 2 * sc
-      : Math.sin(performance.now() / 600) * 0.6 * sc;
     const dx = Math.round(px - dw/2);
-    const dy = Math.round(py - dh + 4 * sc + bob);
+    const dy = Math.round(py - dh + 4 * sc);
 
     // ombre
     ctx.fillStyle = 'rgba(0,0,0,.4)';
@@ -1038,22 +1184,34 @@
     ctx.ellipse(px, py - sc, dw*0.32, 4*sc, 0, 0, Math.PI*2);
     ctx.fill();
 
-    if (img){
-      const flip = (player.facing === 'left');
-      if (flip){
-        ctx.save();
-        ctx.translate(px, 0);
-        ctx.scale(-1, 1);
-        ctx.drawImage(img, 0, 0, SPR_W, SPR_H, -dw/2, dy, dw, dh);
-        ctx.restore();
-      } else {
-        ctx.drawImage(img, 0, 0, SPR_W, SPR_H, dx, dy, dw, dh);
-      }
+    // Choix de la frame : si on marche on cycle 0..3 toutes les 120ms, sinon idle
+    let frame = 0;
+    if (player.walking){
+      frame = player.frame % SPR_COLS;
     } else {
-      ctx.fillStyle = '#ffd24a';
-      ctx.fillRect(dx, dy, dw, dh);
-      ctx.fillStyle = '#5b3812';
-      ctx.fillRect(dx + dw*0.25, dy + dh*0.1, dw*0.5, dh*0.25);
+      frame = 0;
+    }
+
+    // Direction : right = flip horizontal de left (économise des frames)
+    const facing = player.facing;
+    let dirRow = DIR_ROW[facing] ?? 0;
+    let flip = false;
+    if (facing === 'right'){
+      dirRow = DIR_ROW.left;
+      flip = true;
+    }
+
+    const sx = frame * SPR_W;
+    const sy = dirRow * SPR_H;
+
+    if (flip){
+      ctx.save();
+      ctx.translate(px, 0);
+      ctx.scale(-1, 1);
+      ctx.drawImage(PLAYER_SPRITE, sx, sy, SPR_W, SPR_H, -dw/2, dy, dw, dh);
+      ctx.restore();
+    } else {
+      ctx.drawImage(PLAYER_SPRITE, sx, sy, SPR_W, SPR_H, dx, dy, dw, dh);
     }
   }
 
