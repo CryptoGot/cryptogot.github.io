@@ -590,24 +590,39 @@ document.addEventListener('click', (e) => {
 })();
 
 /* =========================
-   Populate Forces / Faiblesses depuis PORTFOLIO
+   Setup Forces / Faiblesses : écriteaux ouvrent un modal
 ========================= */
-(function populateForcesFaiblesses(){
+(function setupTraits(){
   if (!window.PORTFOLIO) return;
-  const data = window.PORTFOLIO.identite;
-  const forcesUl = document.getElementById('forces-list');
-  const faibUl   = document.getElementById('faiblesses-list');
-  if (forcesUl && data?.forces){
-    forcesUl.innerHTML = data.forces.map(f =>
-      `<li><strong>${escapeHtml(f.titre)}</strong><span class="desc">${escapeHtml(f.texte)}</span></li>`
-    ).join('');
-  }
-  if (faibUl && data?.faiblesses){
-    faibUl.innerHTML = data.faiblesses.map(f =>
-      `<li><strong>${escapeHtml(f.titre)}</strong><span class="desc">${escapeHtml(f.texte)}</span></li>`
-    ).join('');
-  }
+  const btnF = document.getElementById('btnForces');
+  const btnW = document.getElementById('btnFaiblesses');
+  if (btnF) btnF.addEventListener('click', () => showTraitsModal('forces'));
+  if (btnW) btnW.addEventListener('click', () => showTraitsModal('faiblesses'));
 })();
+
+function showTraitsModal(kind){
+  const data = window.PORTFOLIO.identite;
+  const modal = document.getElementById('modalTraits');
+  const title = document.getElementById('modalTraitsTitre');
+  const body  = document.getElementById('modalTraitsBody');
+  if (!modal || !title || !body) return;
+
+  const items = (kind === 'forces') ? data.forces : data.faiblesses;
+  const label = (kind === 'forces') ? 'Mes forces' : 'Mes faiblesses';
+  const intro = (kind === 'forces')
+    ? 'Voici les qualités que je reconnais chez moi en lien avec mon projet de game developer indépendant.'
+    : 'Et voici mes points faibles, tels que je les identifie aujourd\'hui. Les nommer, c\'est déjà commencer à les travailler.';
+
+  title.textContent = label;
+  const itemsHtml = items.map(it =>
+    `<li><strong>${escapeHtml(it.titre)}</strong><span class="desc">${escapeHtml(it.texte)}</span></li>`
+  ).join('');
+  body.innerHTML = `
+    <p>${escapeHtml(intro)}</p>
+    <ul class="traits-list ${kind}">${itemsHtml}</ul>
+  `;
+  openModal(modal);
+}
 
 function escapeHtml(s){
   return String(s).replace(/[&<>"']/g, c => ({

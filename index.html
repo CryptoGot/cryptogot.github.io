@@ -75,26 +75,24 @@
       <div class="who-arrow" aria-hidden="true"></div>
     </div>
 
-    <!-- NOUVEAU : Forces et faiblesses (panneaux dépliables) -->
-    <div class="info-toggle left">
-      <button class="info-head" type="button" aria-expanded="false" aria-controls="panel-forces">
-        <span>Mes forces</span><i class="chev" aria-hidden="true"></i>
-      </button>
-      <section id="panel-forces" class="info-panel" hidden>
-        <h3 class="info-title">Mes forces</h3>
-        <ul class="info-list" id="forces-list"></ul>
-      </section>
-    </div>
+    <!-- NOUVEAU : Forces et faiblesses (écriteaux cliquables, ouvrent un modal) -->
+    <button class="trait-sign trait-forces" id="btnForces" type="button"
+            aria-label="Ouvrir mes forces">
+      <span class="trait-sign-post"></span>
+      <span class="trait-sign-board">
+        <span class="trait-sign-icon">💪</span>
+        <span class="trait-sign-label">Mes forces</span>
+      </span>
+    </button>
 
-    <div class="info-toggle right">
-      <button class="info-head" type="button" aria-expanded="false" aria-controls="panel-faiblesses">
-        <span>Mes faiblesses</span><i class="chev" aria-hidden="true"></i>
-      </button>
-      <section id="panel-faiblesses" class="info-panel" hidden>
-        <h3 class="info-title">Mes faiblesses</h3>
-        <ul class="info-list" id="faiblesses-list"></ul>
-      </section>
-    </div>
+    <button class="trait-sign trait-faiblesses" id="btnFaiblesses" type="button"
+            aria-label="Ouvrir mes faiblesses">
+      <span class="trait-sign-post"></span>
+      <span class="trait-sign-board">
+        <span class="trait-sign-icon">🌱</span>
+        <span class="trait-sign-label">Mes faiblesses</span>
+      </span>
+    </button>
 
     <!-- Sol et plateformes -->
     <div class="ground-bar" aria-hidden="true">
@@ -179,6 +177,18 @@
       <button class="modal-close" type="button" data-modal-close aria-label="Fermer">×</button>
       <h2 id="modalProjetTitre" class="modal-title">Mon projet professionnel</h2>
       <div class="modal-body" id="modalProjetBody"></div>
+    </div>
+  </div>
+
+  <!-- ========================================================
+       MODAL Forces / Faiblesses (ouvert depuis les écriteaux)
+  ======================================================== -->
+  <div class="modal" id="modalTraits" hidden role="dialog" aria-modal="true" aria-labelledby="modalTraitsTitre">
+    <div class="modal-backdrop" data-modal-close></div>
+    <div class="modal-content">
+      <button class="modal-close" type="button" data-modal-close aria-label="Fermer">×</button>
+      <h2 id="modalTraitsTitre" class="modal-title"></h2>
+      <div class="modal-body" id="modalTraitsBody"></div>
     </div>
   </div>
 

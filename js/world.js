@@ -16,8 +16,8 @@
 
   /* ============== CONSTANTES ============== */
   const TILE   = 32;         // taille d'une tuile à l'écran (px)
-  const MAP_W  = 22;         // largeur de la carte en tuiles (704px)
-  const ZONE_H = 18;         // hauteur d'une zone en tuiles (576px ~ 100vh sur petit écran)
+  const MAP_W  = 16;         // largeur de la carte en tuiles (512px)
+  const ZONE_H = 18;         // hauteur d'une zone en tuiles (576px)
   const PARCOURS = window.PORTFOLIO.parcours;
   const NUM_ZONES = PARCOURS.length;
   const MAP_H = ZONE_H * NUM_ZONES;
@@ -54,6 +54,7 @@
   const ctx = canvas.getContext('2d');
   let viewW = 0, viewH = 0;
   let dpr = 1;
+  let renderScale = 1; // si le viewport est plus étroit que WORLD_PX_W, on scale
 
   function resize(){
     dpr = Math.max(1, Math.floor(window.devicePixelRatio || 1));
@@ -62,7 +63,9 @@
     viewH = Math.max(1, Math.floor(rect.height));
     canvas.width  = viewW * dpr;
     canvas.height = viewH * dpr;
-    ctx.setTransform(dpr,0,0,dpr,0,0);
+    // si la map est plus large que le viewport, on rétrécit l'affichage
+    renderScale = Math.min(1, viewW / WORLD_PX_W);
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
     ctx.imageSmoothingEnabled = false;
   }
   window.addEventListener('resize', () => { resize(); }, { passive: true });
@@ -465,10 +468,10 @@
   const player = {
     // position en pixels monde (centre du sprite à ses pieds)
     x: WORLD_PX_W / 2,
-    y: TILE * 1.5,
+    y: TILE * 3,
     w: 18,         // hitbox (étroite, base du sprite)
     h: 12,         // hitbox bas du corps seulement
-    speed: 130,    // px/seconde
+    speed: 140,    // px/seconde
     facing: 'down',
     walking: false,
     frame: 0,
@@ -480,8 +483,10 @@
 
   function updateCamera(){
     // Centre la caméra verticalement sur le perso, contrainte aux bords
-    const target = player.y - viewH / 2;
-    camera.y = Math.max(0, Math.min(WORLD_PX_H - viewH, target));
+    // viewH est en pixels CSS, on le convertit en world units via renderScale
+    const visHeight = viewH / renderScale;
+    const target = player.y - visHeight / 2;
+    camera.y = Math.max(0, Math.min(WORLD_PX_H - visHeight, target));
   }
 
   /* ============== INPUTS ============== */
@@ -728,13 +733,18 @@
     ctx.fillStyle = '#0a0e1c';
     ctx.fillRect(0, 0, viewW, viewH);
 
-    // décalage X pour centrer la map quand le viewport est plus large
-    const offsetX = Math.max(0, (viewW - WORLD_PX_W) / 2);
-    const offsetY = -camera.y;
+    const sc = renderScale;
+    const drawnW = WORLD_PX_W * sc;
+    const drawnTile = TILE * sc;
 
-    // tuiles visibles
+    // décalage X pour centrer la map (renderScaled) dans le viewport
+    const offsetX = (viewW - drawnW) / 2;
+    const offsetY = -camera.y * sc;
+
+    // tuiles visibles (en world units)
+    const visHeightWorld = viewH / sc;
     const firstRow = Math.max(0, Math.floor(camera.y / TILE) - 1);
-    const lastRow  = Math.min(MAP_H - 1, Math.ceil((camera.y + viewH) / TILE) + 1);
+    const lastRow  = Math.min(MAP_H - 1, Math.ceil((camera.y + visHeightWorld) / TILE) + 1);
 
     for (let y = firstRow; y <= lastRow; y++){
       for (let x = 0; x < MAP_W; x++){
@@ -744,12 +754,14 @@
         const ts = tilesets[env];
         const sx = id * TILE;
         ctx.drawImage(ts, sx, 0, TILE, TILE,
-                      offsetX + x * TILE, offsetY + y * TILE, TILE, TILE);
+                      offsetX + x * drawnTile,
+                      offsetY + y * drawnTile,
+                      drawnTile, drawnTile);
       }
     }
 
     // joueur
-    drawPlayer(offsetX, offsetY);
+    drawPlayer(offsetX, offsetY, sc);
 
     // contour (mask vignette pour bord noir)
     if (offsetX > 0){
@@ -759,36 +771,43 @@
     }
   }
 
-  function drawPlayer(offsetX, offsetY){
+  function drawPlayer(offsetX, offsetY, sc){
     let img = sprIdle;
     let frame = 0;
     if (player.walking){
       img = sprWalk.complete ? sprWalk : sprIdle;
       frame = player.frame;
     } else {
-      // idle anim douce
       frame = Math.floor(performance.now() / 400) % 2;
     }
-
-    if (!img.complete) return;
 
     const dirRow = DIR_ROW[player.facing] ?? 0;
     const sx = (frame % SPR_COLS) * SPR_W;
     const sy = dirRow * SPR_H;
 
-    // taille rendue : x2 (32x64)
-    const dw = SPR_W * 2;
-    const dh = SPR_H * 2;
-    const dx = Math.round(player.x + offsetX - dw/2);
-    const dy = Math.round(player.y + offsetY - dh + 4);
+    // taille rendue (en world units puis scaled) : x3 = 48x96 world units
+    const SCALE = 3;
+    const dw = SPR_W * SCALE * sc;
+    const dh = SPR_H * SCALE * sc;
+    const px = player.x * sc + offsetX;
+    const py = player.y * sc + offsetY;
+    const dx = Math.round(px - dw/2);
+    const dy = Math.round(py - dh + 6 * sc);
 
     // ombre
-    ctx.fillStyle = 'rgba(0,0,0,.35)';
+    ctx.fillStyle = 'rgba(0,0,0,.4)';
     ctx.beginPath();
-    ctx.ellipse(player.x + offsetX, player.y + offsetY - 1, dw*0.3, 4, 0, 0, Math.PI*2);
+    ctx.ellipse(px, py - sc, dw*0.32, 5*sc, 0, 0, Math.PI*2);
     ctx.fill();
 
-    ctx.drawImage(img, sx, sy, SPR_W, SPR_H, dx, dy, dw, dh);
+    if (img.complete && img.naturalWidth > 0){
+      ctx.drawImage(img, sx, sy, SPR_W, SPR_H, dx, dy, dw, dh);
+    } else {
+      ctx.fillStyle = '#ffd24a';
+      ctx.fillRect(dx, dy, dw, dh);
+      ctx.fillStyle = '#5b3812';
+      ctx.fillRect(dx + dw*0.3, dy + dh*0.2, dw*0.4, dh*0.15);
+    }
   }
 
   /* ============== API publique ============== */
@@ -799,7 +818,7 @@
       resize();
       // spawn en haut du monde, sur le chemin
       player.x = WORLD_PX_W / 2;
-      player.y = TILE * 1.5;
+      player.y = TILE * 3;
       currentZoneIdx = -1;
       updateZone();
       // hint qui s'efface après 6s
@@ -817,20 +836,38 @@
     isActive(){ return active; }
   };
 
-  // Auto-activation si la section world est visible (pas de chute requise)
+  // Auto-activation si la section world est visible
+  // Utilise scroll + intersection rect pour fiabilité
   const worldSection = document.getElementById('world');
-  if (worldSection && 'IntersectionObserver' in window){
-    const io = new IntersectionObserver((entries) => {
-      for (const e of entries){
-        if (e.isIntersecting && e.intersectionRatio > 0.5){
-          window.WorldEngine.enter();
-        } else if (!e.isIntersecting){
-          window.WorldEngine.leave();
-        }
-      }
-    }, { threshold: [0, 0.5, 1] });
-    io.observe(worldSection);
+
+  function checkWorldVisibility(){
+    if (!worldSection) return;
+    const rect = worldSection.getBoundingClientRect();
+    const vh = window.innerHeight;
+    // World est "actif" si plus de la moitié du viewport est dans world
+    const visibleTop    = Math.max(0, rect.top);
+    const visibleBottom = Math.min(vh, rect.bottom);
+    const visibleH      = Math.max(0, visibleBottom - visibleTop);
+    const ratio         = vh > 0 ? (visibleH / vh) : 0;
+    if (ratio >= 0.5){
+      if (!active) window.WorldEngine.enter();
+    } else {
+      if (active) window.WorldEngine.leave();
+    }
   }
+
+  let scrollTimer = null;
+  window.addEventListener('scroll', () => {
+    clearTimeout(scrollTimer);
+    scrollTimer = setTimeout(checkWorldVisibility, 60);
+  }, { passive: true });
+  window.addEventListener('resize', () => {
+    clearTimeout(scrollTimer);
+    scrollTimer = setTimeout(checkWorldVisibility, 100);
+  }, { passive: true });
+
+  // Vérification initiale après chargement complet
+  setTimeout(checkWorldVisibility, 200);
 
   // Resize initial
   resize();

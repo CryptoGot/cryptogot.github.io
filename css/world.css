@@ -510,64 +510,112 @@ body.in-world .world-controls-hint.fade-out{ opacity: 0; }
 }
 
 /* =====================================================
-   FORCES / FAIBLESSES contenu
+   ÉCRITEAUX FORCES / FAIBLESSES (boutons style "pancarte"
+   plantés au sol du side-slider)
 ===================================================== */
-#forces-list li, #faiblesses-list li{
-  display: block;
-  margin-bottom: .8em;
+.trait-sign{
+  position: absolute;
+  z-index: 4;
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  padding: 0;
+  filter: drop-shadow(0 6px 0 rgba(0,0,0,.35));
+  transition: transform .1s ease;
+  -webkit-tap-highlight-color: transparent;
 }
-#forces-list strong, #faiblesses-list strong{
-  display: block;
-  color: #ffd166;
-  font-size: 1.05em;
-  margin-bottom: 2px;
+.trait-sign:hover{ transform: translateY(-3px); }
+.trait-sign:active{ transform: translateY(2px); }
+
+.trait-sign-board{
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 16px;
+  background: linear-gradient(180deg, #f4c97a 0%, #c98c3b 100%);
+  border: 3px solid #5b3812;
+  border-radius: 8px;
+  box-shadow: inset 0 -3px 0 rgba(0,0,0,.25),
+              inset 0 3px 0 rgba(255,240,200,.3);
+  font-family: "Anton", system-ui, sans-serif;
+  font-size: clamp(13px, 1.4vw, 16px);
+  color: #2b1a07;
+  letter-spacing: .04em;
+  white-space: nowrap;
 }
-#forces-list .desc, #faiblesses-list .desc{
-  display: block;
-  font-size: .92em;
-  opacity: .9;
+.trait-sign-icon{
+  font-size: 1.2em;
+  filter: drop-shadow(0 1px 0 rgba(0,0,0,.3));
+}
+.trait-sign-post{
+  width: 6px;
+  height: clamp(36px, 5vw, 56px);
+  background: #5b3812;
+  border-left: 1px solid #2b1a07;
+  border-right: 1px solid #2b1a07;
+}
+
+/* Position au sol */
+.trait-sign.trait-forces{
+  left: clamp(12px, 5vw, 80px);
+  bottom: calc(var(--gH) - 4px);
+}
+.trait-sign.trait-faiblesses{
+  right: clamp(12px, 16vw, 320px);
+  bottom: calc(var(--gH) - 4px);
+}
+
+@media (max-width: 700px){
+  .trait-sign.trait-forces{
+    left: clamp(8px, 3vw, 24px);
+  }
+  .trait-sign.trait-faiblesses{
+    right: clamp(8px, 3vw, 24px);
+  }
 }
 
 /* =====================================================
-   POSITIONNEMENT FORCES/FAIBLESSES dans le HEADER
-   (déplacés en bas, sous la plateforme p2)
+   FORCES / FAIBLESSES contenu (dans modal)
 ===================================================== */
-.top-hero .info-toggle{
+.traits-list{
+  list-style: none;
+  padding: 0;
+  margin: 12px 0;
+}
+.traits-list li{
+  position: relative;
+  padding: 12px 14px 12px 50px;
+  margin: 10px 0;
+  background: rgba(255,255,255,.55);
+  border: 2px solid #8e5b22;
+  border-radius: 8px;
+}
+.traits-list li::before{
+  content: "";
   position: absolute;
-  top: auto;
-  bottom: calc(var(--gH) + 4svh);
-  z-index: 5;
+  left: 14px; top: 50%;
+  transform: translateY(-50%);
+  width: 24px; height: 24px;
+  background: #ffd24a;
+  border: 2px solid #5b3812;
+  border-radius: 50%;
 }
-.top-hero .info-toggle.left{
-  left: clamp(12px, 4vw, 80px);
-  right: auto;
+.traits-list.forces li::before{ background: #b8e986; }
+.traits-list.faiblesses li::before{ background: #ffb480; }
+.traits-list strong{
+  display: block;
+  font-size: 1.08em;
+  color: #5b3812;
+  margin-bottom: 4px;
 }
-.top-hero .info-toggle.right{
-  right: clamp(12px, 4vw, 80px);
-  left: auto;
-}
-
-@media (max-width: 900px){
-  .top-hero .info-toggle{
-    bottom: calc(var(--gH) + 2svh);
-  }
-}
-@media (max-width: 700px){
-  .top-hero .info-toggle{
-    position: static;
-    display: inline-block;
-    margin: 8px;
-  }
-  .top-hero .info-toggle.left,
-  .top-hero .info-toggle.right{
-    left: auto; right: auto;
-  }
-}
-
-/* Garder la cohérence couleur du panneau forces/faiblesses */
-.top-hero .info-panel{
-  background: rgba(20,28,52,.88);
-  border-color: #c85d32;
+.traits-list .desc{
+  display: block;
+  font-size: .96em;
+  line-height: 1.5;
+  color: #2b1a07;
 }
 
 /* =====================================================
