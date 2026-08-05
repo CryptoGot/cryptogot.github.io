@@ -142,6 +142,13 @@ input.onInteract = tryInteract;
 input.onToggleHelp = () => ui.toggleHelp();
 document.getElementById('actionBtn').addEventListener('click', tryInteract);
 
+// M : change le style de marche du perso (pour choisir sa préférée)
+addEventListener('keydown', (e) => {
+  if (e.code !== 'KeyM' || e.repeat || mode !== 'play' || spaceView.isOpen) return;
+  const name = player.cycleWalk();
+  if (name) ui.toast(`🚶 Marche : ${name}`);
+});
+
 /* Clic direct sur une pancarte ou un coffre */
 const raycaster = new THREE.Raycaster();
 const pointer = new THREE.Vector2();

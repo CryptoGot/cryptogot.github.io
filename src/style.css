@@ -589,6 +589,30 @@ body:not(.playing) #labels { opacity: 0; }
 .liste-simple { margin: 10px 0 0 18px; font-size: 13.5px; line-height: 1.7; color: #d5e6ff; }
 .liste-simple li { margin-bottom: 6px; }
 
+/* ---------- Toast ---------- */
+.toast {
+  position: fixed;
+  top: 74px;
+  left: 50%;
+  transform: translateX(-50%) translateY(-8px);
+  z-index: 45;
+  background: rgba(29, 36, 51, 0.92);
+  color: #fff;
+  font-weight: 700;
+  font-size: 14px;
+  padding: 10px 18px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 183, 3, 0.5);
+  box-shadow: var(--shadow);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity .25s ease, transform .25s ease;
+}
+.toast.show {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}
+
 /* ---------- Lightbox ---------- */
 .lightbox {
   position: fixed;

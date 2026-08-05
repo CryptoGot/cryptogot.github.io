@@ -37,21 +37,39 @@ export class Player {
     this.body.add(model);
 
     this.mixer = new THREE.AnimationMixer(model);
-    const clips = entry.animations;
-    // « marche détente » demandée : Casual_Walk (sinon premier clip de marche)
-    const walkClip =
-      clips.find((c) => /casual[_ ]?walk/i.test(c.name)) ??
-      clips.find((c) => /walk/i.test(c.name)) ??
-      clips[0];
-    if (!walkClip) return;
+    this.clips = entry.animations ?? [];
+    if (!this.clips.length) return;
 
-    this.walkAction = this.mixer.clipAction(walkClip);
+    // Marche par défaut : Confident_Strut (touche M pour changer en jeu)
+    const idx = this.clips.findIndex((c) => /confident/i.test(c.name));
+    this.setWalkClip(idx >= 0 ? idx : 0);
+  }
+
+  /** Active le clip de marche `index` (idle = 1re frame figée du même clip). */
+  setWalkClip(index) {
+    if (!this.mixer || !this.clips?.length) return null;
+    this.walkIndex = ((index % this.clips.length) + this.clips.length) % this.clips.length;
+    const clip = this.clips[this.walkIndex];
+
+    if (this.walkAction) this.walkAction.stop();
+    if (this.idleAction) {
+      this.idleAction.stop();
+      this.mixer.uncacheClip(this.idleClip);
+    }
+
+    this.walkAction = this.mixer.clipAction(clip);
     this.walkAction.play();
 
     // Pose figée (1re frame de la marche) comme idle — évite le T-pose
-    const idleClip = THREE.AnimationUtils.subclip(walkClip, 'IdlePose', 0, 1, 30);
-    this.idleAction = this.mixer.clipAction(idleClip);
+    this.idleClip = THREE.AnimationUtils.subclip(clip, `IdlePose_${this.walkIndex}`, 0, 1, 30);
+    this.idleAction = this.mixer.clipAction(this.idleClip);
     this.idleAction.play();
+    return clip.name;
+  }
+
+  /** Passe au style de marche suivant, renvoie son nom (touche M). */
+  cycleWalk() {
+    return this.setWalkClip((this.walkIndex ?? 0) + 1);
   }
 
   buildBody() {
@@ -175,7 +193,7 @@ export class Player {
 
     this.animT += dt * (this.speed > 0.05 ? 11 : 2.4);
 
-    if (this.mixer) {
+    if (this.mixer && this.walkAction) {
       // Personnage Meshy : mélange marche ↔ pose figée selon la vitesse
       this.walkAction.setEffectiveWeight(this.speed);
       this.idleAction.setEffectiveWeight(1 - this.speed);

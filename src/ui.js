@@ -135,6 +135,23 @@ export class UI {
     this.actionBtn.hidden = true;
   }
 
+  /* ---------------- Toast ---------------- */
+
+  /** Petit message furtif en haut de l'écran. */
+  toast(text) {
+    if (!this.toastEl) {
+      this.toastEl = document.createElement('div');
+      this.toastEl.className = 'toast';
+      document.body.appendChild(this.toastEl);
+    }
+    this.toastEl.textContent = text;
+    this.toastEl.classList.remove('show');
+    void this.toastEl.offsetWidth; // relance l'animation
+    this.toastEl.classList.add('show');
+    clearTimeout(this.toastTimer);
+    this.toastTimer = setTimeout(() => this.toastEl.classList.remove('show'), 1800);
+  }
+
   /* ---------------- Lightbox ---------------- */
 
   openLightbox(src) {
