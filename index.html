@@ -2,241 +2,105 @@
 <html lang="fr">
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Aurélien Lannoye, Portfolio EPHEC</title>
-  <meta name="description" content="Portfolio EPHEC d'Aurélien Lannoye, étudiant en Bac 3 Technologies de l'Informatique. Projet pro, activités d'acquisition de compétences, projets de jeux vidéo et SaaS." />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Anton&family=Press+Start+2P&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="css/style.css">
-  <link rel="stylesheet" href="css/world.css">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>Aurélien Lannoye — Game Developer</title>
+  <meta name="description" content="Portfolio 3D interactif d'Aurélien Lannoye, game developer. Deux jeux publiés sur Steam (Somnum, Escape The Brainrots), un SaaS en ligne (GamAI), Unity, Unreal Engine, Blender." />
+  <meta property="og:title" content="Aurélien Lannoye — Game Developer" />
+  <meta property="og:description" content="Explore mon monde 3D : jeux Steam, SaaS, IA, et tous mes projets." />
+  <meta property="og:type" content="website" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Titan+One&family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
 </head>
 <body>
 
-  <!-- ========================================================
-       BARRE DE NAVIGATION (fixe, accès direct à toutes les sections)
-  ======================================================== -->
-  <nav class="site-nav" id="siteNav" aria-label="Navigation principale">
-    <a href="#top" class="nav-brand">Aurélien Lannoye</a>
+  <!-- Canvas 3D -->
+  <div id="app" aria-hidden="true"></div>
+  <!-- Labels 3D (CSS2D) -->
+  <div id="labels" aria-hidden="true"></div>
+  <!-- Voile pendant la vue spatiale (clic = fermer, molette = naviguer) -->
+  <div id="spaceBackdrop" class="space-backdrop" hidden>
+    <p class="space-hint"><span class="kbd">Échap</span> ou clic dans le vide pour redescendre</p>
+  </div>
+  <!-- Hologrammes d'information (CSS3D) -->
+  <div id="panels" aria-hidden="false"></div>
 
-    <button class="nav-toggle" id="navToggle" type="button"
-            aria-expanded="false" aria-controls="navMenu" aria-label="Ouvrir le menu">
-      <span class="nav-toggle-bar"></span>
-      <span class="nav-toggle-bar"></span>
-      <span class="nav-toggle-bar"></span>
+  <!-- ================= INTRO (titre → météorite) ================= -->
+  <div id="intro" class="intro">
+    <div class="intro-stack">
+      <h1 class="intro-name">AURÉLIEN<br>LANNOYE</h1>
+      <p class="intro-portfolio">PORTFOLIO</p>
+      <p class="intro-sub">GameDev · WebDev · AppDev</p>
+    </div>
+    <p class="intro-click">🚀 Clique pour atterrir sur ma planète</p>
+  </div>
+
+  <!-- Flash blanc à l'impact -->
+  <div id="flash" class="flash" hidden></div>
+
+  <!-- ================= HUD ================= -->
+  <header class="hud-top">
+    <button id="navToggle" class="hud-btn" type="button" aria-label="Ouvrir le menu" aria-expanded="false">
+      <span class="burger"></span>
     </button>
-
-    <div class="nav-menu" id="navMenu" hidden>
-      <div class="nav-menu-section">
-        <h3 class="nav-section-title">Moi</h3>
-        <a href="#top" class="nav-link" data-nav="top">🏠 Accueil</a>
-        <button class="nav-link" type="button" data-chest="projet">🎯 Projet professionnel</button>
-        <button class="nav-link" type="button" data-chest="forces">💪 Mes forces</button>
-        <button class="nav-link" type="button" data-chest="faiblesses">🌱 Mes faiblesses</button>
-        <a href="docs/CV_2025-10-05_Aurelien_Lannoye.pdf" class="nav-link" target="_blank" rel="noopener">📄 Mon CV (PDF)</a>
-        <a href="tableau.html" class="nav-link" target="_blank" rel="noopener">📊 Tableau récapitulatif</a>
-      </div>
-
-      <div class="nav-menu-section">
-        <h3 class="nav-section-title">Mes 8 thèmes</h3>
-        <button class="nav-link" type="button" data-zone="design3d">🌲 3D Design</button>
-        <button class="nav-link" type="button" data-zone="app">🏙️ Application mobile</button>
-        <button class="nav-link" type="button" data-zone="gamedev">🌾 Game Dev</button>
-        <button class="nav-link" type="button" data-zone="electronique">🪵 Électronique</button>
-        <button class="nav-link" type="button" data-zone="hardware">⛰️ Hardware</button>
-        <button class="nav-link" type="button" data-zone="ia">🏜️ Intelligence Artificielle</button>
-        <button class="nav-link" type="button" data-zone="securite">🏖️ Cybersécurité</button>
-        <button class="nav-link" type="button" data-zone="site">❄️ Sites Web</button>
-      </div>
-
-      <div class="nav-menu-section">
-        <h3 class="nav-section-title">Liens</h3>
-        <a href="https://github.com/CryptoGot?tab=repositories" class="nav-link" target="_blank" rel="noopener">💻 GitHub</a>
-        <a href="mailto:aurlannoye@gmail.com" class="nav-link">✉️ Email</a>
-        <a href="https://www.linkedin.com/in/aurelien-lannoye-05218940a/" class="nav-link" target="_blank" rel="noopener">💼 LinkedIn</a>
-      </div>
-    </div>
-  </nav>
-
-  <!-- ========================================================
-       SECTION 1 : SIDE-SLIDER (description perso, projet pro)
-  ======================================================== -->
-  <header id="top" class="top-hero" role="banner">
-
-    <!-- Game/Mouse toggle -->
-    <div class="controls left">
-      <div class="mode-toggle" id="modeToggle" aria-label="Mode d'interaction">
-        <button type="button" data-mode="game" class="chip active" aria-pressed="true">Jeu</button>
-        <button type="button" data-mode="mouse" class="chip" aria-pressed="false">Souris</button>
-      </div>
-    </div>
-
-    <!-- Aide -->
-    <button class="help-chip" id="helpChip" type="button" aria-label="Afficher ou masquer l'aide">?</button>
-
-    <div class="controls-hints" id="controlsHints" role="status" aria-live="polite" hidden>
-      <figure class="hint">
-        <img src="assets/ui/keys-arrows.png" alt="Déplacements gauche droite avec les flèches ou A et D" width="180" height="80" loading="lazy">
-        <figcaption>Bouger : ← → (ou A / D)</figcaption>
-      </figure>
-      <figure class="hint">
-        <img src="assets/ui/key-space.png" alt="Sauter avec la barre Espace" width="180" height="80" loading="lazy">
-        <figcaption>Sauter : Espace</figcaption>
-      </figure>
-      <p class="hint-note">Appuie sur <strong>H</strong> pour afficher ou cacher l'aide</p>
-    </div>
-
-    <!-- 4 boutons "?" : GitHub, Mail, CV, LinkedIn -->
-    <nav class="controls right q-actions" aria-label="Liens rapides">
-      <button class="qbtn pop-box" type="button"
-              data-item="github"
-              data-href="https://github.com/CryptoGot?tab=repositories"
-              aria-label="GitHub"><span class="q" aria-hidden="true">?</span></button>
-
-      <button class="qbtn pop-box" type="button"
-              data-item="mail"
-              data-href="mailto:aurlannoye@gmail.com"
-              aria-label="Email"><span class="q" aria-hidden="true">?</span></button>
-
-      <button class="qbtn pop-box" type="button"
-              data-item="cv"
-              data-href="docs/CV_2025-10-05_Aurelien_Lannoye.pdf"
-              aria-label="CV (PDF)"><span class="q" aria-hidden="true">?</span></button>
-
-      <button class="qbtn pop-box" type="button"
-              data-item="linkedin"
-              data-href="https://www.linkedin.com/in/aurelien-lannoye-05218940a/"
-              aria-label="LinkedIn"><span class="q" aria-hidden="true">?</span></button>
-    </nav>
-
-    <!-- Titre (compact, en haut centre) -->
-    <div class="hero-title">
-      <div class="title-banner compact">
-        <span class="pins" aria-hidden="true"></span>
-        <h1 class="title title-3d compact-portfolio">PORTFOLIO</h1>
-        <h1 class="title title-3d compact-name" data-text="AURÉLIEN LANNOYE">AURÉLIEN LANNOYE</h1>
-      </div>
-    </div>
-
-    <!-- Sol et plateformes -->
-    <div class="ground-bar" aria-hidden="true">
-      <div class="seg left collider"></div>
-      <div class="gap"></div>
-      <div class="seg right collider"></div>
-    </div>
-
-    <!-- Plateforme à droite pour atteindre les cases ? en sautant -->
-    <div class="platform p2 collider" aria-hidden="true"></div>
-
-    <!-- Plateforme centrale (au-dessus du trou) avec coffre projet pro -->
-    <div class="platform p3 collider" aria-hidden="true"></div>
-
-    <!-- 3 COFFRES : Forces (vert) à gauche, Projet pro (doré) au centre sur p3, Faiblesses (orange) à droite -->
-    <button class="treasure-chest chest-forces" id="chestForces" type="button"
-            aria-label="Ouvrir le coffre Mes forces">
-      <span class="chest-base"></span>
-      <span class="chest-lid"></span>
-      <span class="chest-lock"></span>
-      <span class="chest-glow" aria-hidden="true"></span>
-      <span class="chest-hint">Mes forces</span>
-      <span class="chest-key-prompt" aria-hidden="true">E</span>
-    </button>
-
-    <button class="treasure-chest chest-projet" id="chestProjet" type="button"
-            aria-label="Ouvrir le coffre Projet pro et objectifs">
-      <span class="chest-base"></span>
-      <span class="chest-lid"></span>
-      <span class="chest-lock"></span>
-      <span class="chest-glow" aria-hidden="true"></span>
-      <span class="chest-hint">Projet pro</span>
-      <span class="chest-key-prompt" aria-hidden="true">E</span>
-    </button>
-
-    <button class="treasure-chest chest-faiblesses" id="chestFaiblesses" type="button"
-            aria-label="Ouvrir le coffre Mes faiblesses">
-      <span class="chest-base"></span>
-      <span class="chest-lid"></span>
-      <span class="chest-lock"></span>
-      <span class="chest-glow" aria-hidden="true"></span>
-      <span class="chest-hint">Mes faiblesses</span>
-      <span class="chest-key-prompt" aria-hidden="true">E</span>
-    </button>
-
-    <!-- CTA "Voir mes projets" : pointe vers le trou, mène au top-down -->
-    <div class="hero-cta">
-      <p class="hero-cta-hint">Descends pour explorer mon monde !</p>
-      <button id="whoBtn" class="who-btn" type="button">↓ Voir mes projets</button>
-      <div class="who-arrow arrow-jump" aria-hidden="true">
-        <svg viewBox="0 0 32 40" width="32" height="40" focusable="false">
-          <path d="M16 4 L16 28 M6 22 L16 32 L26 22" stroke="#1e2438" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
-        </svg>
-      </div>
-    </div>
-
-    <!-- Canvas du jeu -->
-    <canvas id="gameLayer" class="game-layer" aria-hidden="true"></canvas>
+    <span class="hud-brand">Aurélien Lannoye</span>
+    <button id="helpToggle" class="hud-btn hud-help" type="button" aria-label="Aide">?</button>
   </header>
 
-  <main id="main" role="main">
-
-    <!-- ========================================================
-         SECTION 2 : MONDE TOP-DOWN (8 zones thématiques)
-    ======================================================== -->
-    <section id="world" class="world-section" aria-labelledby="world-title">
-      <h2 id="world-title" class="visually-hidden">Mon monde d'activités</h2>
-
-      <div class="world-hud">
-        <a href="#top" class="world-back">← Retour</a>
-        <div class="world-progress" id="worldProgress">
-          <span class="zone-label">Forêt</span>
-        </div>
-        <button class="world-help" type="button" id="worldHelp" aria-label="Aide top-down">?</button>
-      </div>
-
-      <div class="world-controls-hint" id="worldHint">
-        <p><strong>ZQSD</strong> ou <strong>flèches</strong> pour bouger, <strong>E</strong> pour interagir avec une pancarte. <strong>Descends</strong> pour découvrir mes 8 thèmes ↓</p>
-      </div>
-
-      <!-- Indicateur permanent en bas de l'écran : "il y a encore des zones plus bas" -->
-      <div class="world-down-hint" id="worldDownHint" aria-hidden="true">
-        <span class="world-down-arrow">↓</span>
-        <span class="world-down-text">Continue vers le bas</span>
-      </div>
-
-      <canvas id="worldCanvas" class="world-canvas" aria-hidden="true"></canvas>
-    </section>
-  </main>
-
-  <!-- ========================================================
-       MODAL générique pour les coffres (Forces, Faiblesses, Projet pro)
-  ======================================================== -->
-  <div class="modal" id="modalChest" hidden role="dialog" aria-modal="true" aria-labelledby="modalChestTitre">
-    <div class="modal-backdrop" data-modal-close></div>
-    <div class="modal-content">
-      <button class="modal-close" type="button" data-modal-close aria-label="Fermer">×</button>
-      <h2 id="modalChestTitre" class="modal-title"></h2>
-      <div class="modal-body" id="modalChestBody"></div>
+  <!-- Panneau de navigation rapide -->
+  <nav id="navPanel" class="nav-panel" hidden aria-label="Navigation rapide">
+    <div class="nav-head">
+      <h2>Menu rapide</h2>
+      <button id="navClose" class="hud-btn" type="button" aria-label="Fermer le menu">×</button>
     </div>
+    <p class="nav-tip">Clique sur un thème pour t'y téléporter 🚀</p>
+    <div id="navZones" class="nav-zones"><!-- rempli en JS --></div>
+    <h3 class="nav-sub">À propos de moi</h3>
+    <div id="navChests" class="nav-zones"><!-- rempli en JS --></div>
+    <h3 class="nav-sub">Liens</h3>
+    <div id="navLinks" class="nav-links"><!-- rempli en JS --></div>
+  </nav>
+
+  <!-- Aide contextuelle -->
+  <div id="helpBox" class="help-box" hidden>
+    <p><strong>Bouger :</strong> <span class="kbd">Z</span><span class="kbd">Q</span><span class="kbd">S</span><span class="kbd">D</span> / <span class="kbd">W</span><span class="kbd">A</span><span class="kbd">S</span><span class="kbd">D</span> ou flèches</p>
+    <p><strong>Interagir :</strong> <span class="kbd">E</span> près d'une pancarte ou d'un coffre (ou clique dessus)</p>
+    <p><strong>Menu :</strong> bouton ☰ pour te téléporter directement à un thème</p>
+    <p class="help-close-hint">Appuie sur <span class="kbd">H</span> pour fermer</p>
   </div>
 
-  <!-- ========================================================
-       MODAL panneaux du monde (projet, formation, challenge)
-  ======================================================== -->
-  <div class="modal modal-zone" id="modalZone" hidden role="dialog" aria-modal="true" aria-labelledby="modalZoneTitre">
-    <div class="modal-backdrop" data-modal-close></div>
-    <div class="modal-content modal-zone-content">
-      <button class="modal-close" type="button" data-modal-close aria-label="Fermer">×</button>
-      <header class="modal-zone-header">
-        <span class="modal-zone-icon" id="modalZoneIcon" aria-hidden="true"></span>
-        <h2 id="modalZoneTitre" class="modal-title"></h2>
-        <p class="modal-zone-meta" id="modalZoneMeta"></p>
-      </header>
-      <div class="modal-body modal-zone-body" id="modalZoneBody"></div>
-    </div>
+  <!-- Invite d'interaction -->
+  <div id="prompt" class="prompt" hidden>
+    <span class="prompt-key">E</span>
+    <span id="promptText">Découvrir</span>
   </div>
 
-  <!-- Scripts -->
-  <script src="js/content.js" defer></script>
-  <script src="js/main.js" defer></script>
-  <script src="js/world.js" defer></script>
+  <!-- Contrôles mobiles -->
+  <div id="joystick" class="joystick" aria-hidden="true">
+    <div id="joyKnob" class="joy-knob"></div>
+  </div>
+  <button id="actionBtn" class="action-btn" type="button" hidden aria-label="Interagir">E</button>
+
+  <!-- Lightbox images -->
+  <div id="lightbox" class="lightbox" hidden>
+    <img id="lightboxImg" alt="Capture d'écran agrandie" />
+  </div>
+
+  <!-- Fallback SEO / lecteurs d'écran -->
+  <noscript>
+    <main style="max-width:640px;margin:2rem auto;font-family:sans-serif">
+      <h1>Aurélien Lannoye — Game Developer</h1>
+      <p>Ce portfolio est une expérience 3D qui nécessite JavaScript. En attendant :</p>
+      <ul>
+        <li><a href="https://store.steampowered.com/app/3713850/Somnum/">Somnum sur Steam</a></li>
+        <li><a href="https://store.steampowered.com/app/3781690/EscapeTheBrainrots/">Escape The Brainrots sur Steam</a></li>
+        <li><a href="https://gamai.app/">GamAI — SaaS de création de jeux par IA</a></li>
+        <li><a href="https://github.com/CryptoGot?tab=repositories">GitHub</a></li>
+        <li><a href="https://www.linkedin.com/in/aurelien-lannoye-05218940a/">LinkedIn</a></li>
+      </ul>
+    </main>
+  </noscript>
+
+  <script type="module" src="/src/main.js"></script>
 </body>
 </html>

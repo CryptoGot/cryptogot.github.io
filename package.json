@@ -1,0 +1,23 @@
+{
+  "name": "portfolio-aurelien-3d",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "description": "Portfolio 3D interactif d'Aurélien Lannoye — game developer",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "three": "^0.172.0"
+  },
+  "devDependencies": {
+    "@gltf-transform/cli": "^4.4.2",
+    "@gltf-transform/core": "^4.4.2",
+    "@gltf-transform/extensions": "^4.4.2",
+    "jimp": "^1.6.1",
+    "meshoptimizer": "^1.2.0",
+    "vite": "^6.0.0"
+  }
+}
