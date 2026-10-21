@@ -1,0 +1,453 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Aurélien Lannoye, développeur web et automatisation IA (version rapide)</title>
+  <meta name="description" content="Aurélien Lannoye, développeur web et automatisation IA : agents IA, n8n, BeaverCode, Start it @CBC, et jeux vidéo publiés sur Steam et CrazyGames. Disponible immédiatement, Bruxelles, Wallonie ou télétravail." />
+  <meta property="og:title" content="Aurélien Lannoye, développeur web et automatisation IA" />
+  <meta property="og:description" content="Mes projets, mes expériences et mon CV en un coup d'œil." />
+  <meta property="og:type" content="website" />
+  <meta property="og:image" content="https://cryptogot.github.io/assets/profil/aurelien.jpg" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --nuit: #0f1d28; --nuit2: #152532; --fond: #f3f6f9; --carte: #ffffff; --texte: #243244; --titre: #16222e;
+      --doux: #5b6b7d; --accent: #0e7490; --accent-fonce: #155e75; --menthe: #5eead4; --bord: #dfe7ee;
+      --ombre: 0 10px 30px rgba(15, 29, 40, 0.10);
+    }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body { margin: 0; background: var(--fond); color: var(--texte); font-family: "Outfit", "Segoe UI", Arial, sans-serif; font-size: 16px; line-height: 1.55; }
+    a { color: var(--accent); }
+    img { display: block; max-width: 100%; }
+
+    /* ---------- En-tête ---------- */
+    .hero { position: relative; overflow: hidden; color: #eef4f8; background: radial-gradient(1200px 500px at 80% -10%, rgba(94, 234, 212, .22), transparent 60%), linear-gradient(135deg, var(--nuit) 0%, var(--nuit2) 55%, #123a46 100%); padding: 56px 16px 70px; }
+    .hero::after { content: ""; position: absolute; inset: 0; background-image: radial-gradient(rgba(255,255,255,.08) 1px, transparent 1px); background-size: 22px 22px; pointer-events: none; }
+    .hero-in { position: relative; z-index: 1; max-width: 1040px; margin: 0 auto; display: flex; gap: 34px; align-items: center; }
+    .photo { width: 150px; height: 150px; border-radius: 50%; object-fit: cover; border: 4px solid var(--menthe); box-shadow: 0 0 0 8px rgba(94, 234, 212, .15); flex-shrink: 0; }
+    .salut { font-size: 15px; font-weight: 600; color: var(--menthe); letter-spacing: .5px; margin: 0 0 4px; }
+    h1 { margin: 0; font-size: clamp(34px, 6vw, 52px); line-height: 1.05; font-weight: 800; color: #fff; }
+    .role { margin: 10px 0 14px; font-size: clamp(17px, 2.4vw, 21px); font-weight: 600; color: #cfe9ee; }
+    .role b { color: var(--menthe); font-weight: 700; }
+    .dispo { display: inline-flex; align-items: center; gap: 8px; border: 1.5px solid rgba(94, 234, 212, .7); border-radius: 999px; padding: 5px 14px; font-size: 14px; font-weight: 600; }
+    .dispo::before { content: ""; width: 9px; height: 9px; border-radius: 50%; background: #34d399; box-shadow: 0 0 10px #34d399; }
+    .boutons { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 20px; }
+    .btn { display: inline-flex; align-items: center; gap: 7px; padding: 10px 16px; border-radius: 12px; background: rgba(255,255,255,.08); color: #eef4f8; text-decoration: none; font-weight: 600; font-size: 15px; border: 1px solid rgba(255,255,255,.18); transition: transform .15s, background .15s; }
+    .btn:hover { background: rgba(255,255,255,.16); transform: translateY(-2px); }
+    .btn.plein { background: var(--menthe); color: var(--nuit); border-color: var(--menthe); }
+    .btn.plein:hover { background: #8af3e2; }
+
+    /* ---------- Chiffres ---------- */
+    .chiffres { position: relative; z-index: 2; max-width: 1040px; margin: -38px auto 0; padding: 0 16px; display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
+    .chiffre { background: var(--carte); border-radius: 14px; box-shadow: var(--ombre); padding: 16px 14px; text-align: center; }
+    .chiffre strong { display: block; font-size: 26px; font-weight: 800; color: var(--accent-fonce); line-height: 1.1; }
+    .chiffre span { font-size: 14px; color: var(--doux); }
+
+    main { max-width: 1040px; margin: 0 auto; padding: 34px 16px 30px; }
+    section { margin-bottom: 44px; }
+    .tete { display: flex; align-items: end; justify-content: space-between; gap: 12px; flex-wrap: wrap; margin-bottom: 18px; }
+    h2 { margin: 0; font-size: 26px; font-weight: 800; color: var(--titre); }
+    h2 small { display: block; font-size: 14px; font-weight: 600; color: var(--accent); letter-spacing: 1.5px; text-transform: uppercase; margin-bottom: 2px; }
+    .intro-texte { font-size: 17px; max-width: 760px; }
+
+    /* ---------- Filtres et cartes projets ---------- */
+    .filtres { display: flex; flex-wrap: wrap; gap: 8px; }
+    .filtre { border: 1.5px solid var(--bord); background: var(--carte); color: var(--texte); font: inherit; font-size: 14px; font-weight: 600; padding: 7px 14px; border-radius: 999px; cursor: pointer; transition: all .15s; }
+    .filtre:hover { border-color: var(--accent); color: var(--accent); }
+    .filtre.actif { background: var(--accent-fonce); border-color: var(--accent-fonce); color: #fff; }
+    .projets { display: grid; grid-template-columns: repeat(auto-fill, minmax(290px, 1fr)); gap: 18px; }
+    .projet { position: relative; display: flex; flex-direction: column; background: var(--carte); border: 1px solid var(--bord); border-radius: 16px; overflow: hidden; cursor: pointer; text-align: left; font: inherit; color: inherit; padding: 0; transition: transform .2s, box-shadow .2s; }
+    .projet:hover, .projet:focus-visible { transform: translateY(-4px); box-shadow: var(--ombre); outline: none; }
+    .visuel { position: relative; aspect-ratio: 16 / 9; overflow: hidden; background: var(--nuit2); }
+    .visuel img { width: 100%; height: 100%; object-fit: cover; transition: transform .4s; }
+    .projet:hover .visuel img { transform: scale(1.06); }
+    .visuel .vide { width: 100%; height: 100%; display: grid; place-items: center; font-size: 54px; background: linear-gradient(135deg, #123a46, #0e7490 60%, #5eead4); }
+    .visuel .vide.violet { background: linear-gradient(135deg, #1e1b4b, #6d28d9 60%, #c4b5fd); }
+    .visuel .vide.orange { background: linear-gradient(135deg, #431407, #c2410c 60%, #fdba74); }
+    .badge { position: absolute; top: 10px; left: 10px; background: rgba(15, 29, 40, .78); color: #fff; font-size: 12px; font-weight: 700; padding: 4px 10px; border-radius: 999px; backdrop-filter: blur(4px); }
+    .nb { position: absolute; bottom: 10px; right: 10px; background: rgba(15, 29, 40, .78); color: #fff; font-size: 12px; font-weight: 600; padding: 3px 9px; border-radius: 999px; }
+    .corps { padding: 14px 16px 16px; display: flex; flex-direction: column; gap: 6px; flex: 1; }
+    .corps h3 { margin: 0; font-size: 18px; color: var(--titre); line-height: 1.25; }
+    .corps p { margin: 0; color: var(--doux); font-size: 15px; }
+    .tags { display: flex; flex-wrap: wrap; gap: 6px; margin-top: auto; padding-top: 6px; }
+    .tag { font-size: 12.5px; background: #e6f3f5; color: var(--accent-fonce); padding: 2px 9px; border-radius: 999px; font-weight: 600; }
+    .details { display: none; }
+
+    /* ---------- Parcours (frise) ---------- */
+    .frise { position: relative; padding-left: 26px; }
+    .frise::before { content: ""; position: absolute; left: 8px; top: 6px; bottom: 6px; width: 2px; background: linear-gradient(var(--menthe), var(--accent)); }
+    .etape { position: relative; background: var(--carte); border: 1px solid var(--bord); border-radius: 14px; padding: 16px 18px; margin-bottom: 14px; }
+    .etape::before { content: ""; position: absolute; left: -24px; top: 20px; width: 14px; height: 14px; border-radius: 50%; background: var(--carte); border: 3px solid var(--accent); }
+    .etape h3 { margin: 0; font-size: 18px; color: var(--titre); }
+    .quand { font-size: 14px; font-weight: 600; color: var(--accent); margin: 2px 0 8px; }
+    .etape ul { margin: 0; padding-left: 18px; }
+    .etape li { margin-bottom: 3px; }
+
+    /* ---------- Compétences ---------- */
+    .competences { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 14px; }
+    .groupe { background: var(--carte); border: 1px solid var(--bord); border-radius: 14px; padding: 14px 16px; }
+    .groupe h3 { margin: 0 0 8px; font-size: 16px; color: var(--titre); }
+    .groupe .tags { padding-top: 0; }
+
+    /* ---------- Contact ---------- */
+    .contact { background: linear-gradient(135deg, var(--nuit2), #123a46); color: #eef4f8; border-radius: 18px; padding: 28px 24px; text-align: center; }
+    .contact h2 { color: #fff; }
+    .contact p { color: #cfe9ee; margin: 8px 0 16px; }
+    .contact .boutons { justify-content: center; }
+    .pied { text-align: center; color: var(--doux); font-size: 14px; padding: 0 16px 34px; }
+
+    /* ---------- Fenêtre projet ---------- */
+    .modale { position: fixed; inset: 0; z-index: 50; display: none; align-items: center; justify-content: center; padding: 18px; background: rgba(8, 15, 22, .78); backdrop-filter: blur(4px); }
+    .modale.ouverte { display: flex; }
+    .boite { background: var(--carte); border-radius: 18px; width: min(920px, 100%); max-height: calc(100vh - 36px); overflow: auto; box-shadow: 0 30px 80px rgba(0,0,0,.4); }
+    .galerie { position: relative; background: #0b141b; aspect-ratio: 16 / 9; }
+    .galerie img { width: 100%; height: 100%; object-fit: contain; }
+    .galerie .vide { width: 100%; height: 100%; display: grid; place-items: center; font-size: 80px; }
+    .fleche { position: absolute; top: 50%; transform: translateY(-50%); width: 42px; height: 42px; border-radius: 50%; border: none; background: rgba(255,255,255,.88); color: var(--nuit); font-size: 22px; font-weight: 700; cursor: pointer; }
+    .fleche.g { left: 12px; } .fleche.d { right: 12px; }
+    .points { position: absolute; bottom: 10px; left: 0; right: 0; display: flex; justify-content: center; gap: 6px; }
+    .point { width: 9px; height: 9px; border-radius: 50%; background: rgba(255,255,255,.4); border: none; padding: 0; cursor: pointer; }
+    .point.actif { background: #fff; }
+    .fermer { position: absolute; top: 12px; right: 12px; z-index: 2; width: 38px; height: 38px; border-radius: 50%; border: none; background: rgba(255,255,255,.9); font-size: 22px; cursor: pointer; }
+    .contenu { padding: 20px 24px 24px; }
+    .contenu h3 { margin: 0 0 4px; font-size: 24px; color: var(--titre); }
+    .contenu .quand { margin-bottom: 10px; }
+    .contenu p { margin: 0 0 10px; }
+    .contenu .liens { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 12px; }
+    .contenu .liens a { background: var(--accent-fonce); color: #fff; text-decoration: none; font-weight: 600; padding: 8px 14px; border-radius: 10px; }
+    .contenu .liens a:hover { background: var(--accent); }
+
+    @media (max-width: 760px) {
+      .hero-in { flex-direction: column; text-align: center; }
+      .boutons { justify-content: center; }
+      .chiffres { grid-template-columns: repeat(2, 1fr); }
+    }
+  </style>
+</head>
+<body>
+
+  <header class="hero">
+    <div class="hero-in">
+      <img class="photo" src="/assets/profil/aurelien.jpg" alt="Photo d'Aurélien Lannoye" />
+      <div>
+        <p class="salut">Salut, moi c'est</p>
+        <h1>Aurélien Lannoye</h1>
+        <p class="role">Développeur web et <b>automatisation IA</b> : agents, n8n, intégrations d'API</p>
+        <span class="dispo">Disponible immédiatement | CDI ou CDD | Bruxelles, Wallonie ou télétravail</span>
+        <div class="boutons">
+          <a class="btn plein" href="/docs/CV_Aurelien_Lannoye_Dev_FR.pdf">📄 Mon CV (PDF)</a>
+          <a class="btn" href="/docs/CV_Aurelien_Lannoye_Dev_EN.pdf">📄 CV in English</a>
+          <a class="btn" href="mailto:aurlannoye@gmail.com">✉️ M'écrire</a>
+          <a class="btn" href="https://www.linkedin.com/in/aurelien-lannoye-05218940a/">💼 LinkedIn</a>
+          <a class="btn" href="https://github.com/CryptoGot?tab=repositories">💻 GitHub</a>
+          <a class="btn" href="/">🪐 Version 3D</a>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <div class="chiffres">
+    <div class="chiffre"><strong>2 stages</strong><span>et un job en agents IA</span></div>
+    <div class="chiffre"><strong>6 jeux</strong><span>publiés (Steam, CrazyGames)</span></div>
+    <div class="chiffre"><strong>8,6 / 10</strong><span>pour Slurp sur CrazyGames</span></div>
+    <div class="chiffre"><strong>500 h</strong><span>sur gamAI, mon TFE</span></div>
+  </div>
+
+  <main>
+    <section>
+      <div class="tete"><h2><small>En bref</small>Qui je suis</h2></div>
+      <p class="intro-texte">Bachelier en informatique de l'EPHEC, diplômé en septembre 2026. Je construis des agents IA et des automatisations, du besoin du client jusqu'à la mise en ligne, en développant avec l'IA (Claude Code). Mes deux stages et mon job étudiant portaient sur des produits utilisés pour de vrai, ce qui m'a appris à surveiller les coûts d'API et la fiabilité. En parallèle, je crée des jeux vidéo.</p>
+    </section>
+
+    <section id="projets">
+      <div class="tete">
+        <h2><small>Ce que j'ai construit</small>Mes projets</h2>
+        <div class="filtres" role="tablist" aria-label="Filtrer les projets">
+          <button class="filtre actif" data-filtre="tous" type="button">Tous</button>
+          <button class="filtre" data-filtre="ia" type="button">🤖 IA et automatisation</button>
+          <button class="filtre" data-filtre="web" type="button">🌐 Web</button>
+          <button class="filtre" data-filtre="jeux" type="button">🎮 Jeux vidéo</button>
+        </div>
+      </div>
+
+      <div class="projets">
+        <!-- Chaque carte : data-cat pour le filtre, data-images pour la galerie, .details pour la fenêtre -->
+        <article class="projet" tabindex="0" role="button" data-cat="ia web" data-images='["/assets/proofs/ia/Beaver1.png","/assets/proofs/ia/Beaver2.png"]'>
+          <div class="visuel"><img src="/assets/proofs/ia/Beaver1.png" alt="Capture de BeaverCode" loading="lazy"><span class="badge">Stage chez The Maul</span><span class="nb">2 images</span></div>
+          <div class="corps"><h3>BeaverCode</h3><p>Un SaaS qui crée des sites et des applications avec l'IA, avec de vrais utilisateurs.</p>
+            <div class="tags"><span class="tag">Agents IA</span><span class="tag">n8n</span><span class="tag">Supabase</span><span class="tag">VPS</span></div></div>
+          <div class="details" data-quand="Stage développeur full-stack et automatisation IA | février à mai 2026" data-liens='[["beavercode.be","https://beavercode.be/"]]'>
+            <p>Pendant mon stage chez The Maul, un startup studio de Mont-Saint-Guibert, j'ai participé à BeaverCode, côté front-end, back-end et base de données Supabase.</p>
+            <p>J'ai construit l'agent IA qui pose des questions au client qui veut un site pour sa boîte, puis définit son besoin à partir de ses réponses. Le système multi-agent (design, fonctionnalités, demandes de modification) tournait d'abord dans n8n, puis il est passé sur un VPS connecté à Supabase.</p>
+            <p>Le produit avait de vrais utilisateurs, donc il fallait surveiller les coûts d'API et la fiabilité des agents.</p>
+          </div>
+        </article>
+
+        <article class="projet" tabindex="0" role="button" data-cat="ia" data-images='[]' data-vide="📊">
+          <div class="visuel"><div class="vide">📊</div><span class="badge">Stage chez Start it @CBC</span></div>
+          <div class="corps"><h3>Agent d'analyse de pitch decks</h3><p>Un agent qui lit un pitch deck et rend une analyse des forces et des faiblesses.</p>
+            <div class="tags"><span class="tag">Agents IA</span><span class="tag">n8n</span><span class="tag">Automatisation</span></div></div>
+          <div class="details" data-quand="Stage volontaire en automatisation IA | juin à septembre 2026">
+            <p>Trois mois dans un accélérateur de startups. J'y ai fait un agent qui lit le pitch deck d'une startup et rend une analyse structurée de ses forces et de ses faiblesses.</p>
+            <p>J'ai aussi fait de l'automatisation documentaire dans n8n : chercher des informations dans plusieurs sources et produire des documents prêts à livrer.</p>
+          </div>
+        </article>
+
+        <article class="projet" tabindex="0" role="button" data-cat="ia" data-images='[]' data-vide="🧾">
+          <div class="visuel"><div class="vide violet">🧾</div><span class="badge">Job étudiant</span></div>
+          <div class="corps"><h3>Assistants en skills Claude</h3><p>Un agent finance qui trie les factures des boîtes mail vers Drive et Excel.</p>
+            <div class="tags"><span class="tag">Claude</span><span class="tag">Google Drive</span><span class="tag">Excel</span></div></div>
+          <div class="details" data-quand="Développeur d'agents IA, job étudiant | 2026">
+            <p>Pour une personne rencontrée pendant mon stage chez Start it @CBC, j'ai construit une suite d'assistants personnels en skills Claude.</p>
+            <p>Le principal : un agent finance qui récupère les factures dans plusieurs boîtes mail, les range dans Google Drive et les suit dans un fichier Excel. Il y a aussi une veille immobilière, le tri des e-mails et des rappels.</p>
+          </div>
+        </article>
+
+        <article class="projet" tabindex="0" role="button" data-cat="ia web" data-images='["/assets/proofs/site/GamAI.png","/assets/proofs/site/GamAI2.png"]'>
+          <div class="visuel"><img src="/assets/proofs/site/GamAI.png" alt="Capture de gamAI" loading="lazy"><span class="badge">Travail de fin d'études</span><span class="nb">2 images</span></div>
+          <div class="corps"><h3>gamAI</h3><p>Un SaaS où l'on crée un jeu web en discutant avec une IA.</p>
+            <div class="tags"><span class="tag">React</span><span class="tag">TypeScript</span><span class="tag">Supabase</span><span class="tag">E2B</span></div></div>
+          <div class="details" data-quand="Travail de fin d'études | EPHEC 2026">
+            <p>L'utilisateur crée son jeu web en discutant avec une IA, le personnalise et gère ses projets. Des agents génèrent les jeux (Phaser) dans des sandboxes cloud E2B.</p>
+            <p>Je l'ai construit et déployé seul, de bout en bout : authentification et Row Level Security avec Supabase, DNS et HTTPS, Cloudflare, mails transactionnels, quotas d'API, séparation entre dev et prod. Repris trois fois de zéro, environ 500 heures.</p>
+            <p>Le site n'est plus en ligne aujourd'hui.</p>
+          </div>
+        </article>
+
+        <article class="projet" tabindex="0" role="button" data-cat="web" data-images='["/assets/proofs/site/SécuritéChallenge.png","/assets/proofs/site/SécuritéChallenge2.png"]'>
+          <div class="visuel"><img src="/assets/proofs/site/SécuritéChallenge.png" alt="Capture de la plateforme Easter Egg" loading="lazy"><span class="badge">EPHEC, en binôme</span><span class="nb">2 images</span></div>
+          <div class="corps"><h3>Plateforme du challenge Easter Egg 2025</h3><p>La plateforme officielle du challenge cybersécurité de l'école.</p>
+            <div class="tags"><span class="tag">Next.js</span><span class="tag">Vercel</span><span class="tag">Sécurité</span></div></div>
+          <div class="details" data-quand="Projet en binôme | EPHEC 2025" data-liens='[["Voir le site","https://easter-egg-2025-git-main-lannoyes-projects.vercel.app/"]]'>
+            <p>Avec Fabian, nous avons construit la plateforme officielle du challenge cybersécurité de l'EPHEC : les étudiants y soumettent les codes des easter eggs cachés par les profs.</p>
+            <p>Front-end en Next.js sur Vercel, validation des codes côté serveur, scoring et historique horodaté. Sur un site de sécurité, aucune confiance dans les entrées des utilisateurs : tout est vérifié côté serveur.</p>
+          </div>
+        </article>
+
+        <article class="projet" tabindex="0" role="button" data-cat="web" data-images='["https://villasandoria.com/assets/img/large/vue-drone.jpg"]'>
+          <div class="visuel"><img src="https://villasandoria.com/assets/img/large/vue-drone.jpg" alt="Vue aérienne de la Villa Sandoria" loading="lazy"><span class="badge">Site en ligne</span></div>
+          <div class="corps"><h3>Villa Sandoria</h3><p>Le site vitrine d'une villa de location, en cinq langues.</p>
+            <div class="tags"><span class="tag">Site vitrine</span><span class="tag">Multilingue</span></div></div>
+          <div class="details" data-quand="Site réalisé pour un membre de ma famille" data-liens='[["villasandoria.com","https://villasandoria.com/"]]'>
+            <p>Le site d'une villa de location avec piscine à Tourrettes, dans le Var. Il est disponible en cinq langues (français, néerlandais, anglais, allemand, danois), avec une galerie, la présentation de la région et une demande de réservation.</p>
+          </div>
+        </article>
+
+        <article class="projet" tabindex="0" role="button" data-cat="web" data-images='[]' data-vide="📱">
+          <div class="visuel"><div class="vide orange">📱</div><span class="badge">Projet d'équipe</span></div>
+          <div class="corps"><h3>Diopside</h3><p>Une application mobile pour une marque de vêtements, avec avatars 3D.</p>
+            <div class="tags"><span class="tag">Mobile</span><span class="tag">Unity</span><span class="tag">Git en équipe</span></div></div>
+          <div class="details" data-quand="Projet d'équipe | EPHEC" data-liens='[["Vidéo de présentation","https://www.youtube.com/shorts/U7yy6cHPmjc?feature=share"],["Code source","https://github.com/Yielloow/Diopside-App"]]'>
+            <p>Une application pour une marque de vêtements : channels de discussion, avatars 3D personnalisables (Unity intégré dans l'app), système de récompenses et boutique dont les achats habillent l'avatar.</p>
+            <p>C'était mon premier vrai travail d'équipe sur du code : branches Git, pull requests, conflits de merge et découpage des tâches.</p>
+          </div>
+        </article>
+
+        <article class="projet" tabindex="0" role="button" data-cat="jeux" data-images='["https://imgs.crazygames.com/slurp_16x9/20260731041626/slurp_16x9-cover?metadata=none&quality=100&width=1200&height=630&fit=crop"]'>
+          <div class="visuel"><img src="https://imgs.crazygames.com/slurp_16x9/20260731041626/slurp_16x9-cover?metadata=none&quality=100&width=1200&height=630&fit=crop" alt="Couverture de Slurp" loading="lazy"><span class="badge">CrazyGames | 8,6 / 10</span></div>
+          <div class="corps"><h3>Slurp</h3><p>Un jeu de gestion en 3D pour le web, retenu par CrazyGames.</p>
+            <div class="tags"><span class="tag">Unity 6</span><span class="tag">Web</span><span class="tag">Tycoon</span></div></div>
+          <div class="details" data-quand="Sorti en juillet 2026" data-liens='[["Jouer sur CrazyGames","https://www.crazygames.com/game/slurp"]]'>
+            <p>Mon jeu le plus récent : un tycoon en 3D jouable dans le navigateur.</p>
+            <p>Retenu par CrazyGames (1 projet accepté sur 5 proposés), puis passé en Full Launch sur la plateforme. Noté 8,6 sur 10, plus de 11 000 parties jouées et 17 minutes de jeu en moyenne par partie.</p>
+          </div>
+        </article>
+
+        <article class="projet" tabindex="0" role="button" data-cat="jeux" data-images='["https://shared.fastly.steamstatic.com/store_item_assets/steam/apps/3713850/855d3852f59fd90d51d6f7e93173142cf70df560/capsule_616x353.jpg"]'>
+          <div class="visuel"><img src="https://shared.fastly.steamstatic.com/store_item_assets/steam/apps/3713850/855d3852f59fd90d51d6f7e93173142cf70df560/capsule_616x353.jpg" alt="Couverture de Somnum" loading="lazy"><span class="badge">Steam</span></div>
+          <div class="corps"><h3>Somnum</h3><p>Un jeu d'horreur multijoueur en client/host, fait seul.</p>
+            <div class="tags"><span class="tag">Unreal Engine 5</span><span class="tag">Multijoueur</span><span class="tag">Steam SDK</span></div></div>
+          <div class="details" data-quand="Unreal Engine 5 en Blueprints | publié sur Steam" data-liens='[["Voir sur Steam","https://store.steampowered.com/app/3713850/Somnum/"]]'>
+            <p>Les joueurs doivent récupérer de l'énergie sans se faire attraper par le tueur. Plusieurs maps, plusieurs tueurs.</p>
+            <p>Environ 400 heures de travail : gameplay, réseau, optimisation, Steam SDK, page Steam et retours des joueurs.</p>
+          </div>
+        </article>
+
+        <article class="projet" tabindex="0" role="button" data-cat="jeux" data-images='["https://shared.fastly.steamstatic.com/store_item_assets/steam/apps/3781690/e4b03cca9a3a0c1bc62caac5f5d0e9b00f0496e2/capsule_616x353.jpg"]'>
+          <div class="visuel"><img src="https://shared.fastly.steamstatic.com/store_item_assets/steam/apps/3781690/e4b03cca9a3a0c1bc62caac5f5d0e9b00f0496e2/capsule_616x353.jpg" alt="Couverture d'Escape The Brainrots" loading="lazy"><span class="badge">Steam</span></div>
+          <div class="corps"><h3>Escape The Brainrots</h3><p>De l'horreur fun en multijoueur, dans l'esprit des « italian brainrots ».</p>
+            <div class="tags"><span class="tag">Unreal Engine 5</span><span class="tag">Multijoueur</span></div></div>
+          <div class="details" data-quand="Unreal Engine 5 en Blueprints | publié sur Steam" data-liens='[["Voir sur Steam","https://store.steampowered.com/app/3781690/EscapeTheBrainrots/"]]'>
+            <p>Même exigence que Somnum côté réseau et publication, avec un ton complètement différent. Environ 400 heures de travail, fait seul.</p>
+          </div>
+        </article>
+
+        <article class="projet" tabindex="0" role="button" data-cat="jeux" data-images='["/assets/proofs/gamedev/Bete1.png","/assets/proofs/gamedev/Bete2.webp","/assets/proofs/gamedev/TheHunt.webp","/assets/proofs/gamedev/DinoEarth.webp","/assets/proofs/gamedev/EscapeYou.webp","/assets/proofs/gamedev/Jeu2.webp"]'>
+          <div class="visuel"><img src="/assets/proofs/gamedev/Bete1.png" alt="Capture du prototype Bete" loading="lazy"><span class="badge">Unity</span><span class="nb">6 images</span></div>
+          <div class="corps"><h3>Prototypes Unity</h3><p>Bete, TheHunt, DinoEarth, Escape You : un format différent à chaque fois.</p>
+            <div class="tags"><span class="tag">Unity 2D/3D</span><span class="tag">Blender</span><span class="tag">Game design</span></div></div>
+          <div class="details" data-quand="Projets persos" data-liens='[["TheHunt sur GitHub","https://github.com/CryptoGot/TheHunt"],["MelodyCollector sur GitHub","https://github.com/CryptoGot/MelodyCollector"]]'>
+            <p>Bete (3D, ambiance lugubre, avec mes propres assets Blender), TheHunt (top-down avec inventaire et IA ennemie), DinoEarth (idle game de dinosaures), Escape You (puzzle sur grille), MelodyCollector (side-scroller musical).</p>
+            <p>Chaque prototype m'a appris une mécanique ou un format différent.</p>
+          </div>
+        </article>
+
+        <article class="projet" tabindex="0" role="button" data-cat="jeux ia" data-images='["/assets/proofs/ia/Lumina1.webp","/assets/proofs/ia/Mixmoji.webp","/assets/proofs/ia/Cellulia1.webp","/assets/proofs/ia/Haven1.webp","/assets/proofs/ia/Immunis1.webp"]'>
+          <div class="visuel"><img src="/assets/proofs/ia/Immunis1.webp" alt="Capture du prototype Immunis" loading="lazy"><span class="badge">Expérience IA</span><span class="nb">5 images</span></div>
+          <div class="corps"><h3>Le labo : jusqu'où laisser l'IA seule ?</h3><p>Cinq prototypes de jeux, plus ou moins supervisés, pour tester les limites de l'IA.</p>
+            <div class="tags"><span class="tag">JavaScript</span><span class="tag">IA générative</span></div></div>
+          <div class="details" data-quand="Expérimentation">
+            <p>Lumina (beaucoup de supervision, un puzzle qui tient la route), Mixmoji (l'IA cale sur la créativité pure), Cellulia (presque autonome, fonctionnel mais sans âme), Haven (zéro supervision, volontairement injouable) et Immunis (tower defense contrôlé et débuggé à la main).</p>
+            <p>Ma conclusion : l'IA est excellente dans un cadre précis et se perd dès qu'il faut inventer.</p>
+          </div>
+        </article>
+
+        <article class="projet" tabindex="0" role="button" data-cat="jeux" data-images='["/assets/proofs/ia/Clu1.webp","/assets/proofs/ia/Clu2.webp"]'>
+          <div class="visuel"><img src="/assets/proofs/ia/Clu1.webp" alt="Capture de Clu" loading="lazy"><span class="badge">Unity 3D</span><span class="nb">2 images</span></div>
+          <div class="corps"><h3>Clu</h3><p>Un Cluedo croisé Among Us en 3D, en multijoueur host/client.</p>
+            <div class="tags"><span class="tag">Unity 3D</span><span class="tag">Multijoueur</span></div></div>
+          <div class="details" data-quand="Prototype Unity">
+            <p>Un Cluedo croisé Among Us en 3D, avec un système host/client. Ici, je suis aux commandes et l'IA n'est qu'un assistant.</p>
+          </div>
+        </article>
+
+        <article class="projet" tabindex="0" role="button" data-cat="jeux" data-images='["/assets/proofs/3ddesign/blender1.webp","/assets/proofs/3ddesign/blender2.webp","/assets/proofs/3ddesign/blender3.webp"]'>
+          <div class="visuel"><img src="/assets/proofs/3ddesign/blender1.webp" alt="Modèles 3D faits dans Blender" loading="lazy"><span class="badge">Blender</span><span class="nb">3 images</span></div>
+          <div class="corps"><h3>Mes assets 3D</h3><p>Des modèles low-poly faits moi-même pour mes jeux.</p>
+            <div class="tags"><span class="tag">Blender</span><span class="tag">Low-poly</span><span class="tag">UV mapping</span></div></div>
+          <div class="details" data-quand="Modélisation 3D">
+            <p>Les assets de Bete et de plusieurs prototypes sont modélisés par moi dans Blender, dans une ambiance sombre, en low-poly stylisé : modélisation, bevel, UV mapping, export vers Unity et Unreal.</p>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <section>
+      <div class="tete"><h2><small>Mon parcours</small>Expérience et formation</h2></div>
+      <div class="frise">
+        <div class="etape">
+          <h3>Stage volontaire en automatisation IA, Start it @CBC</h3>
+          <div class="quand">Juin à septembre 2026 | accélérateur de startups</div>
+          <ul><li>Agent IA qui analyse les pitch decks des startups.</li><li>Automatisation documentaire dans n8n.</li></ul>
+        </div>
+        <div class="etape">
+          <h3>Développeur d'agents IA, job étudiant</h3>
+          <div class="quand">2026 | client privé</div>
+          <ul><li>Assistants en skills Claude : factures, veille immobilière, tri des e-mails, rappels.</li></ul>
+        </div>
+        <div class="etape">
+          <h3>Stage développeur full-stack et automatisation IA, The Maul</h3>
+          <div class="quand">Février à mai 2026 | startup studio, Mont-Saint-Guibert</div>
+          <ul><li>BeaverCode : front-end, back-end, base de données Supabase.</li><li>Agents IA conversationnels, système multi-agent de n8n vers un VPS.</li></ul>
+        </div>
+        <div class="etape">
+          <h3>Bachelier en Technologies de l'Informatique, EPHEC Louvain-la-Neuve</h3>
+          <div class="quand">2022 à 2026 | diplômé en septembre 2026</div>
+          <ul><li>Cursus orienté développement, réseaux et cybersécurité.</li></ul>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <div class="tete"><h2><small>Ma boîte à outils</small>Compétences</h2></div>
+      <div class="competences">
+        <div class="groupe"><h3>🤖 Développement avec l'IA</h3><div class="tags"><span class="tag">Claude Code</span><span class="tag">Claude</span><span class="tag">ChatGPT</span><span class="tag">Lovable</span></div></div>
+        <div class="groupe"><h3>⚙️ Agents et automatisation</h3><div class="tags"><span class="tag">API Claude</span><span class="tag">n8n</span><span class="tag">E2B</span><span class="tag">Serveurs MCP</span><span class="tag">Skyvern</span></div></div>
+        <div class="groupe"><h3>🧠 Modèles et outils IA</h3><div class="tags"><span class="tag">Anthropic</span><span class="tag">OpenAI</span><span class="tag">Gemini</span><span class="tag">IA d'image</span><span class="tag">ComfyUI en local</span></div></div>
+        <div class="groupe"><h3>🌐 Web et données</h3><div class="tags"><span class="tag">React</span><span class="tag">Next.js</span><span class="tag">Node.js</span><span class="tag">Supabase</span><span class="tag">Firebase</span></div></div>
+        <div class="groupe"><h3>🚀 Mise en ligne</h3><div class="tags"><span class="tag">Vercel</span><span class="tag">Cloudflare</span><span class="tag">DNS et HTTPS</span><span class="tag">VPS</span><span class="tag">Git et GitHub</span><span class="tag">Docker (bases)</span></div></div>
+        <div class="groupe"><h3>🎮 Jeux vidéo et 3D</h3><div class="tags"><span class="tag">Unity</span><span class="tag">Unreal Engine 5 (Blueprints)</span><span class="tag">Blender</span></div></div>
+        <div class="groupe"><h3>✍️ Code écrit à la main (bases)</h3><div class="tags"><span class="tag">HTML</span><span class="tag">CSS</span><span class="tag">JavaScript</span><span class="tag">Python</span></div></div>
+        <div class="groupe"><h3>🗣️ Langues</h3><div class="tags"><span class="tag">Français, langue maternelle</span><span class="tag">Anglais B1</span></div></div>
+      </div>
+    </section>
+
+    <section class="contact">
+      <h2>On en parle ?</h2>
+      <p>Je cherche un premier emploi en développement web ou en automatisation IA, à Bruxelles, en Wallonie ou en télétravail.</p>
+      <div class="boutons">
+        <a class="btn plein" href="mailto:aurlannoye@gmail.com">✉️ aurlannoye@gmail.com</a>
+        <a class="btn" href="tel:+32470422215">📞 0470 42 22 15</a>
+        <a class="btn" href="/docs/CV_Aurelien_Lannoye_Dev_FR.pdf">📄 Mon CV</a>
+      </div>
+    </section>
+  </main>
+
+  <p class="pied">Envie d'en voir plus ? <a href="/">Explore mon portfolio en 3D</a>, une petite planète où chaque zone raconte un projet.</p>
+
+  <!-- Fenêtre de détail d'un projet -->
+  <div class="modale" id="modale" role="dialog" aria-modal="true" aria-labelledby="modaleTitre">
+    <div class="boite">
+      <div class="galerie" id="galerie">
+        <button class="fermer" id="fermer" type="button" aria-label="Fermer">×</button>
+      </div>
+      <div class="contenu">
+        <h3 id="modaleTitre"></h3>
+        <div class="quand" id="modaleQuand"></div>
+        <div id="modaleTexte"></div>
+        <div class="tags" id="modaleTags"></div>
+        <div class="liens" id="modaleLiens"></div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Filtres
+    const filtres = document.querySelectorAll('.filtre');
+    const cartes = document.querySelectorAll('.projet');
+    filtres.forEach((f) => f.addEventListener('click', () => {
+      filtres.forEach((x) => x.classList.toggle('actif', x === f));
+      const cat = f.dataset.filtre;
+      cartes.forEach((c) => { c.style.display = cat === 'tous' || c.dataset.cat.split(' ').includes(cat) ? '' : 'none'; });
+    }));
+
+    // Fenêtre projet avec galerie
+    const modale = document.getElementById('modale');
+    const galerie = document.getElementById('galerie');
+    const fermerBtn = document.getElementById('fermer');
+    let images = [], index = 0, vide = '';
+
+    function afficherImage() {
+      galerie.querySelectorAll('img, .vide, .fleche, .points').forEach((e) => e.remove());
+      if (!images.length) {
+        const v = document.createElement('div');
+        v.className = 'vide'; v.textContent = vide; v.style.background = 'linear-gradient(135deg, #123a46, #0e7490 60%, #5eead4)';
+        galerie.appendChild(v);
+        return;
+      }
+      const img = document.createElement('img');
+      img.src = images[index]; img.alt = document.getElementById('modaleTitre').textContent;
+      galerie.appendChild(img);
+      if (images.length > 1) {
+        const g = document.createElement('button'); g.className = 'fleche g'; g.type = 'button'; g.textContent = '‹'; g.ariaLabel = 'Image précédente';
+        const d = document.createElement('button'); d.className = 'fleche d'; d.type = 'button'; d.textContent = '›'; d.ariaLabel = 'Image suivante';
+        g.onclick = () => changer(-1); d.onclick = () => changer(1);
+        const pts = document.createElement('div'); pts.className = 'points';
+        images.forEach((_, i) => { const p = document.createElement('button'); p.type = 'button'; p.className = 'point' + (i === index ? ' actif' : ''); p.ariaLabel = 'Image ' + (i + 1); p.onclick = () => { index = i; afficherImage(); }; pts.appendChild(p); });
+        galerie.append(g, d, pts);
+      }
+    }
+    function changer(pas) { index = (index + pas + images.length) % images.length; afficherImage(); }
+
+    cartes.forEach((c) => c.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); c.click(); } }));
+    cartes.forEach((c) => c.addEventListener('click', () => {
+      const det = c.querySelector('.details');
+      images = JSON.parse(c.dataset.images || '[]'); index = 0; vide = c.dataset.vide || '✨';
+      document.getElementById('modaleTitre').textContent = c.querySelector('h3').textContent;
+      document.getElementById('modaleQuand').textContent = det.dataset.quand || '';
+      document.getElementById('modaleTexte').innerHTML = det.innerHTML;
+      document.getElementById('modaleTags').innerHTML = c.querySelector('.tags').innerHTML;
+      const liens = JSON.parse(det.dataset.liens || '[]');
+      document.getElementById('modaleLiens').innerHTML = liens.map(([t, u]) => `<a href="${u}" target="_blank" rel="noopener">${t}</a>`).join('');
+      afficherImage();
+      modale.classList.add('ouverte');
+      document.body.style.overflow = 'hidden';
+      fermerBtn.focus();
+    }));
+
+    function fermer() { modale.classList.remove('ouverte'); document.body.style.overflow = ''; }
+    fermerBtn.addEventListener('click', fermer);
+    modale.addEventListener('click', (e) => { if (e.target === modale) fermer(); });
+    addEventListener('keydown', (e) => {
+      if (!modale.classList.contains('ouverte')) return;
+      if (e.key === 'Escape') fermer();
+      if (e.key === 'ArrowRight' && images.length > 1) changer(1);
+      if (e.key === 'ArrowLeft' && images.length > 1) changer(-1);
+    });
+  </script>
+</body>
+</html>
