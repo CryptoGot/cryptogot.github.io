@@ -5,7 +5,13 @@ export default defineConfig({
   base: '/',
   build: {
     outDir: 'dist',
-    assetsInlineLimit: 0
+    assetsInlineLimit: 0,
+    rollupOptions: {
+      input: {
+        main: 'index.html',
+        rapide: 'rapide.html'
+      }
+    }
   },
   server: {
     port: 5173,
